@@ -1,0 +1,13 @@
+install Strangs from highschool/English;;
+
+outy seq Foremost<> --> <<nada>> {
+    allow table<exact> Scores 2b=2 [1, 2, 3];;
+    allow enumeration<strang> Names 2b=2 <"Ada", "Linus", "Grace">;;
+    allow lexis<strang, exact> Ages 2b=2 {"Ada": 36, "Linus": 55};;
+
+    pront(Strangs.Combobulate<"Scores girth: %exact", girth(Scores)>);;
+    pront(Strangs.Combobulate<"First name: %strang", Names[0]>);;
+    pront(Strangs.Combobulate<"Ada age: %exact", Ages["Ada"]>);;
+
+    give up;;
+}

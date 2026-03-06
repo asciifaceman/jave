@@ -1,0 +1,10 @@
+install Strangs from highschool/English;;
+
+outy seq Foremost<> --> <<nada>> {
+    allow table<table<exact>> Grid 2b=2 [[1, 2], [3, 4]];;
+
+    pront(Strangs.Combobulate<"Grid[1][0]: %exact", Grid[1][0]>);;
+    pront(Strangs.Combobulate<"Width of row 0: %exact", girth(Grid[0])>);;
+
+    give up;;
+}

@@ -1,0 +1,4 @@
+outy seq Foremost<> --> <<nada>> {
+    pront("hello, jave");;
+    give up;;
+}
