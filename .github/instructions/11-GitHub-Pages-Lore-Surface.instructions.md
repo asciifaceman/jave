@@ -1,5 +1,5 @@
 ---
-description: "Use when editing the GitHub Pages player-facing surface so lore, governance, and language docs stay coherent with shipped behavior."
+description: "Use when editing the GitHub Pages player-facing surface so governance records, correspondence, and language docs stay coherent with shipped behavior."
 ---
 
 # GitHub Pages Lore Surface Instructions
@@ -38,7 +38,7 @@ Do not publish claims on the site that contradict shipped behavior or ratified g
 
 The site should surface:
 - Governance updates by version.
-- Lore artifacts: minutes, mailing-list snippets, executive commentary, transition briefs.
+- Record artifacts: minutes, mailing-list snippets, executive commentary, transition briefs.
 - Tutorials, examples, and spec links.
 - Forward-looking notes for planned doc systems (for example standard library docs pipeline).
 
@@ -52,5 +52,5 @@ The site should surface:
 
 Before finalizing site changes:
 - Verify links resolve within the site structure.
-- Verify lore entries map to actual version records.
+- Verify record entries map to actual version records.
 - Verify language claims match current specification and examples.

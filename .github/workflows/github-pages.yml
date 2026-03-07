@@ -12,6 +12,15 @@ on:
       - site/**
       - tools/build-pages-content.sh
       - .github/workflows/github-pages.yml
+  pull_request:
+    paths:
+      - governance/**
+      - docs/**
+      - specs/**
+      - examples/**
+      - site/**
+      - tools/build-pages-content.sh
+      - .github/workflows/github-pages.yml
   workflow_dispatch:
 
 permissions:
@@ -24,7 +33,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  validate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build pages content
+        run: bash ./tools/build-pages-content.sh
+
+      - name: Build with Jekyll (validation)
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./site
+          destination: ./_site
+
   build:
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
 
     steps:

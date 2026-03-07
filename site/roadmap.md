@@ -13,7 +13,7 @@ The v0.2 program focuses on practical runtime capability expansion.
 3. Richer Standard Library Surface
 4. Runtime Error and Exit Semantics
 
-Reference: [v0.2 Feature Candidates]({{ '/reference/governance/v0.2/feature-candidates.md' | relative_url }})
+Reference: [v0.2 Feature Candidates]({{ '/content/governance/v0.2/feature-candidates/' | relative_url }})
 
 ## Candidate Work Queue
 
@@ -27,4 +27,4 @@ Additional candidates queued for steering review:
 
 Candidates move to ratified scope when feasibility, governance rationale, and acceptance test expectations are all present.
 
-See: [v0.2 User Stories]({{ '/reference/governance/v0.2/user-stories.md' | relative_url }})
+See: [v0.2 User Stories]({{ '/content/governance/v0.2/user-stories/' | relative_url }})
