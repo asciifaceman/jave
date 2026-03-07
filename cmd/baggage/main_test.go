@@ -1,6 +1,11 @@
 package main
 
-import "testing"
+import (
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+)
 
 func TestArtifactPathFor(t *testing.T) {
 	tests := []struct {
@@ -92,4 +97,161 @@ func TestParseRunArgs(t *testing.T) {
 			t.Fatal("expected error for too many args")
 		}
 	})
+}
+
+func TestParseNewArgs(t *testing.T) {
+	t.Run("project only", func(t *testing.T) {
+		project, force, err := parseNewArgs([]string{"hello-jave"})
+		if err != nil {
+			t.Fatalf("parseNewArgs returned error: %v", err)
+		}
+		if project != "hello-jave" {
+			t.Fatalf("project = %q", project)
+		}
+		if force {
+			t.Fatal("force = true, want false")
+		}
+	})
+
+	t.Run("project with force", func(t *testing.T) {
+		project, force, err := parseNewArgs([]string{"hello-jave", "--force"})
+		if err != nil {
+			t.Fatalf("parseNewArgs returned error: %v", err)
+		}
+		if project != "hello-jave" {
+			t.Fatalf("project = %q", project)
+		}
+		if !force {
+			t.Fatal("force = false, want true")
+		}
+	})
+
+	t.Run("missing project", func(t *testing.T) {
+		_, _, err := parseNewArgs(nil)
+		if err == nil {
+			t.Fatal("expected error for missing project")
+		}
+	})
+
+	t.Run("unknown flag", func(t *testing.T) {
+		_, _, err := parseNewArgs([]string{"--wat"})
+		if err == nil {
+			t.Fatal("expected error for unknown flag")
+		}
+	})
+
+	t.Run("multiple names", func(t *testing.T) {
+		_, _, err := parseNewArgs([]string{"one", "two"})
+		if err == nil {
+			t.Fatal("expected error for multiple names")
+		}
+	})
+}
+
+func TestScaffoldNewProject(t *testing.T) {
+	base := t.TempDir()
+	target := filepath.Join(base, "hello-jave")
+
+	if err := scaffoldNewProject(target, false); err != nil {
+		t.Fatalf("scaffoldNewProject returned error: %v", err)
+	}
+
+	mainPath := filepath.Join(target, "main.jave")
+	manifestPath := filepath.Join(target, "baggage.jave")
+	if _, err := os.Stat(mainPath); err != nil {
+		t.Fatalf("expected %s: %v", mainPath, err)
+	}
+	if _, err := os.Stat(manifestPath); err != nil {
+		t.Fatalf("expected %s: %v", manifestPath, err)
+	}
+
+	if err := scaffoldNewProject(target, false); err == nil {
+		t.Fatal("expected error when target exists without --force")
+	}
+
+	if err := scaffoldNewProject(target, true); err != nil {
+		t.Fatalf("expected force overwrite to succeed: %v", err)
+	}
+}
+
+func TestParseAddArgs(t *testing.T) {
+	t.Run("default manifest", func(t *testing.T) {
+		dep, manifest, err := parseAddArgs([]string{"some/carryon"})
+		if err != nil {
+			t.Fatalf("parseAddArgs returned error: %v", err)
+		}
+		if dep != "some/carryon" {
+			t.Fatalf("dep = %q", dep)
+		}
+		if manifest != "baggage.jave" {
+			t.Fatalf("manifest = %q", manifest)
+		}
+	})
+
+	t.Run("custom manifest", func(t *testing.T) {
+		dep, manifest, err := parseAddArgs([]string{"--manifest", "project/baggage.jave", "dep/pkg"})
+		if err != nil {
+			t.Fatalf("parseAddArgs returned error: %v", err)
+		}
+		if dep != "dep/pkg" {
+			t.Fatalf("dep = %q", dep)
+		}
+		if manifest != "project/baggage.jave" {
+			t.Fatalf("manifest = %q", manifest)
+		}
+	})
+
+	t.Run("missing dep", func(t *testing.T) {
+		_, _, err := parseAddArgs(nil)
+		if err == nil {
+			t.Fatal("expected missing dependency error")
+		}
+	})
+
+	t.Run("unknown flag", func(t *testing.T) {
+		_, _, err := parseAddArgs([]string{"--wat"})
+		if err == nil {
+			t.Fatal("expected unknown flag error")
+		}
+	})
+
+	t.Run("multiple deps", func(t *testing.T) {
+		_, _, err := parseAddArgs([]string{"a", "b"})
+		if err == nil {
+			t.Fatal("expected multiple dependency error")
+		}
+	})
+}
+
+func TestAddDependencyToManifest(t *testing.T) {
+	manifest := filepath.Join(t.TempDir(), "baggage.jave")
+	initial := "carryon \"hello-jave\"\nlang \"v0.1\"\nentry \"main.jave\"\n"
+	if err := os.WriteFile(manifest, []byte(initial), 0o644); err != nil {
+		t.Fatalf("write initial manifest: %v", err)
+	}
+
+	added, err := addDependencyToManifest(manifest, "some/carryon")
+	if err != nil {
+		t.Fatalf("addDependencyToManifest returned error: %v", err)
+	}
+	if !added {
+		t.Fatal("expected dependency to be added")
+	}
+
+	b, err := os.ReadFile(manifest)
+	if err != nil {
+		t.Fatalf("read manifest: %v", err)
+	}
+	content := string(b)
+	if !strings.Contains(content, "dep \"some/carryon\"\n") {
+		t.Fatalf("expected dep line in manifest, got: %q", content)
+	}
+
+	added, err = addDependencyToManifest(manifest, "some/carryon")
+	if err != nil {
+		t.Fatalf("second addDependencyToManifest returned error: %v", err)
+	}
+	if added {
+		t.Fatal("expected duplicate dependency to be ignored")
+	}
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -55,9 +56,15 @@ func main() {
 			os.Exit(1)
 		}
 	case "new":
-		fmt.Println("baggage new: scaffold not implemented yet")
+		if err := runNew(rest); err != nil {
+			fmt.Fprintf(os.Stderr, "baggage new failed: %v\n", err)
+			os.Exit(1)
+		}
 	case "add":
-		fmt.Println("baggage add: dependency workflow not implemented yet")
+		if err := runAdd(rest); err != nil {
+			fmt.Fprintf(os.Stderr, "baggage add failed: %v\n", err)
+			os.Exit(1)
+		}
 	default:
 		fmt.Fprintf(os.Stderr, "baggage: unknown command %q\n", cmd)
 		printUsage()
@@ -67,8 +74,161 @@ func main() {
 
 func printUsage() {
 	fmt.Println("usage: baggage <build|run|check|test|new|add|version>")
+	fmt.Println("  baggage new <project-name> [--force]")
+	fmt.Println("  baggage add <carryon-path> [--manifest baggage.jave]")
 	fmt.Println("  baggage build [input.jave] [-o output.jbin]")
 	fmt.Println("  baggage run [input.jave|program.jbin]")
+}
+
+func runAdd(args []string) error {
+	dep, manifest, err := parseAddArgs(args)
+	if err != nil {
+		return err
+	}
+	added, err := addDependencyToManifest(manifest, dep)
+	if err != nil {
+		return err
+	}
+	if added {
+		fmt.Printf("baggage: added dependency %q to %s\n", dep, manifest)
+		return nil
+	}
+	fmt.Printf("baggage: dependency %q already present in %s\n", dep, manifest)
+	return nil
+}
+
+func parseAddArgs(args []string) (dep string, manifest string, err error) {
+	manifest = "baggage.jave"
+
+	for i := 0; i < len(args); i++ {
+		a := args[i]
+		switch a {
+		case "--manifest":
+			if i+1 >= len(args) {
+				return "", "", fmt.Errorf("missing value for --manifest")
+			}
+			i++
+			manifest = args[i]
+		default:
+			if strings.HasPrefix(a, "-") {
+				return "", "", fmt.Errorf("unknown flag %s", a)
+			}
+			if dep != "" {
+				return "", "", fmt.Errorf("add accepts exactly one dependency path")
+			}
+			dep = a
+		}
+	}
+
+	if dep == "" {
+		return "", "", fmt.Errorf("missing dependency path")
+	}
+
+	if strings.ContainsAny(dep, "\r\n") {
+		return "", "", fmt.Errorf("dependency path may not contain newlines")
+	}
+
+	return dep, manifest, nil
+}
+
+func addDependencyToManifest(path, dep string) (bool, error) {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return false, err
+	}
+
+	content := string(b)
+	line := fmt.Sprintf("dep %q", dep)
+	if strings.Contains(content, line) {
+		return false, nil
+	}
+
+	if content != "" && !strings.HasSuffix(content, "\n") {
+		content += "\n"
+	}
+	content += line + "\n"
+
+	if err := os.WriteFile(path, []byte(content), fs.FileMode(0o644)); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func runNew(args []string) error {
+	project, force, err := parseNewArgs(args)
+	if err != nil {
+		return err
+	}
+	if err := scaffoldNewProject(project, force); err != nil {
+		return err
+	}
+	fmt.Printf("baggage: created project %q\n", project)
+	fmt.Printf("next: go run ./cmd/javec %s\n", filepath.ToSlash(filepath.Join(project, "main.jave")))
+	return nil
+}
+
+func parseNewArgs(args []string) (project string, force bool, err error) {
+	for _, a := range args {
+		switch a {
+		case "--force":
+			force = true
+		default:
+			if strings.HasPrefix(a, "-") {
+				return "", false, fmt.Errorf("unknown flag %s", a)
+			}
+			if project != "" {
+				return "", false, fmt.Errorf("new accepts exactly one project name")
+			}
+			project = a
+		}
+	}
+
+	if project == "" {
+		return "", false, fmt.Errorf("missing project name")
+	}
+
+	if project == "." || project == ".." {
+		return "", false, fmt.Errorf("invalid project name %q", project)
+	}
+
+	clean := filepath.Clean(project)
+	if clean != project && clean != filepath.FromSlash(project) {
+		return "", false, fmt.Errorf("project path must be a clean relative path")
+	}
+
+	return project, force, nil
+}
+
+func scaffoldNewProject(project string, force bool) error {
+	if st, err := os.Stat(project); err == nil {
+		if !st.IsDir() {
+			return fmt.Errorf("%q exists and is not a directory", project)
+		}
+		if !force {
+			return fmt.Errorf("%q already exists (use --force to overwrite scaffold files)", project)
+		}
+	} else if !os.IsNotExist(err) {
+		return err
+	}
+
+	if err := os.MkdirAll(project, fs.FileMode(0o755)); err != nil {
+		return err
+	}
+
+	mainPath := filepath.Join(project, "main.jave")
+	manifestPath := filepath.Join(project, "baggage.jave")
+
+	manifestName := filepath.Base(project)
+	manifest := fmt.Sprintf("carryon %q\nlang %q\nentry %q\n", manifestName, "v0.1", "main.jave")
+	mainProgram := "outy seq Foremost<> --> <<nada>> {\n    pront(\"hello, jave\");;\n    give up;;\n}\n"
+
+	if err := os.WriteFile(mainPath, []byte(mainProgram), fs.FileMode(0o644)); err != nil {
+		return err
+	}
+	if err := os.WriteFile(manifestPath, []byte(manifest), fs.FileMode(0o644)); err != nil {
+		return err
+	}
+	return nil
 }
 
 func parseBuildArgs(args []string) (input string, out string, err error) {

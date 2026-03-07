@@ -1,0 +1,78 @@
+name: Issue Copilot Routing
+
+on:
+  issues:
+    types:
+      - opened
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  route:
+    if: github.event.issue.pull_request == null
+    runs-on: ubuntu-latest
+    env:
+      COPILOT_ASSIGNEE: ${{ vars.COPILOT_ASSIGNEE }}
+    steps:
+      - name: Label and optionally assign for Copilot first-pass
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue = context.payload.issue;
+            const issue_number = issue.number;
+
+            const label = "copilot-first-pass";
+
+            try {
+              await github.rest.issues.getLabel({ owner, repo, name: label });
+            } catch (err) {
+              if (err.status === 404) {
+                await github.rest.issues.createLabel({
+                  owner,
+                  repo,
+                  name: label,
+                  color: "5319e7",
+                  description: "Issue intended for Copilot/agent first-pass",
+                });
+              }
+            }
+
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number,
+              labels: [label],
+            });
+
+            if (process.env.COPILOT_ASSIGNEE) {
+              try {
+                await github.rest.issues.addAssignees({
+                  owner,
+                  repo,
+                  issue_number,
+                  assignees: [process.env.COPILOT_ASSIGNEE],
+                });
+              } catch (err) {
+                core.warning(`unable to assign issue to ${process.env.COPILOT_ASSIGNEE}: ${err.message}`);
+              }
+            } else {
+              core.notice("COPILOT_ASSIGNEE is not configured; skipping assignment.");
+            }
+
+            const body = [
+              "Governance CI routing:",
+              "",
+              "This issue has been marked for Copilot/agent first-pass triage.",
+              "If automation opens a PR, include `Fixes #" + issue_number + "` so issue linkback updates can attach correctly.",
+            ].join("\n");
+
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number,
+              body,
+            });

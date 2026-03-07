@@ -77,8 +77,26 @@ Run a source file (compile then execute):
 go run ./cmd/baggage run examples/conditions/main.jave
 ```
 
+Scaffold a new project:
+
+```bash
+go run ./cmd/baggage new hello-jave
+```
+
 Run an existing artifact directly:
 
 ```bash
 go run ./cmd/baggage run examples/hello_world/main.jbin
+```
+
+Add a carryon dependency to a project manifest:
+
+```bash
+go run ./cmd/baggage add some/carryon
+```
+
+Use a custom manifest path:
+
+```bash
+go run ./cmd/baggage add --manifest path/to/baggage.jave some/carryon
 ```
