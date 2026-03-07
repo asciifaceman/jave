@@ -1,0 +1,12 @@
+install Algebra from highschool/Algebra;;
+
+outy seq Foremost<> --> <<nada>> {
+    allow exact DebtDrift 2b=2 0 - 42;;
+    allow exact Momentum 2b=2 9;;
+    allow vag Delta 2b=2 0.5 - 1.25;;
+
+    pront(Algebra.PosiExact<DebtDrift>);;
+    pront(Algebra.PosiExact<Momentum>);;
+    pront(Algebra.PosiVag<Delta>);;
+    give up;;
+}

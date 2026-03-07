@@ -37,7 +37,7 @@ Recorder: Priya Sol
 - Bruce "White Hacker" Chase (CSO)
 - Cattarine Ling pai nuren (VP Engineering, Jave Platform)
 - Rosaby Vergle (VP, People and Human Systems)
-- Linked canonical origin record: `governance/v0.1/lore/2024-11-18-jave-inception-kickoff-minutes.md`.
+- Linked canonical origin record archive: `governance/v0.1/lore/2024-11-18-jave-inception-kickoff-minutes.md`.
 
 ## Rationale Notes
 
@@ -48,7 +48,7 @@ Recorder: Priya Sol
 ## Action Items
 
 - A1: Publish v0.1 feature ledger and user stories.
-- A2: Seed `governance/v0.1/lore/` with foundational meeting record set.
+- A2: Seed `governance/v0.1/lore/` with foundational governance record set.
 - A3: Use `governance/vX.Y/` structure for every future release.
 
 ## Closing Statement

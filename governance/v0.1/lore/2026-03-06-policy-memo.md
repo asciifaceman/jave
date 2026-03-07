@@ -31,7 +31,7 @@ Implementation may not be marked release-ready until both tracks are complete:
 A release candidate is compliant when:
 - `go test ./...` passes
 - Version feature ledger exists
-- Governance artifacts exist under `governance/vX.Y/lore/`
+- Governance record artifacts exist under `governance/vX.Y/lore/`
 - Major shipped behavior is reflected in user stories
 
 ## Exceptions

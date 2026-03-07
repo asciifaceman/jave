@@ -1,0 +1,116 @@
+install Strangs from highschool/English;;
+install Pronts from highschool/Communications;;
+
+outy seq RiskScore<exact TrafficDelta, exact ErrorRate, exact LatencyP95, exact OpenIncidents, truther ExternalDependency> --> <<exact>> {
+    allow exact Score 2b=2 (TrafficDelta * 2);;
+    Score 2b=2 Score + (ErrorRate * 6);;
+    Score 2b=2 Score + (LatencyP95 / 10);;
+    Score 2b=2 Score + (OpenIncidents * 5);;
+
+    maybe (<ExternalDependency samewise yee>) -> {
+        Score 2b=2 Score + 9;;
+    }
+
+    give Score up;;
+}
+
+outy seq SeverityLane<exact Score, truther HasPII, truther ExternalDependency> --> <<strang>> {
+    maybe (<HasPII samewise yee plusalso Score biglysame 75>) -> {
+        give "EXEC-COUNCIL" up;;
+    } furthermore (<ExternalDependency samewise yee plusalso Score biglysame 68>) -> {
+        give "VENDOR-WARROOM" up;;
+    } furthermore (<Score biglysame 55>) -> {
+        give "P0-EXPEDITE" up;;
+    } furthermore (<Score biglysame 40>) -> {
+        give "P1-TRACK" up;;
+    } otherwise -> {
+        give "P2-OBSERVE" up;;
+    }
+}
+
+outy seq EmitServiceReport<strang Service, exact Score, strang Lane, exact Owners, vag BudgetBurn, exact EdgeCount> --> <<nada>> {
+    Pronts.Prontulate<"service=%strang score=%exact lane=%strang owners=%exact edges=%exact burn=%vag", Service, Score, Lane, Owners, EdgeCount, BudgetBurn>;;
+    give up;;
+}
+
+outy seq Foremost<> --> <<nada>> {
+    allow enumeration<strang> Services 2b=2 <"Checkout", "Identity", "Catalog", "Pricing", "Notifications", "Recommendations">;;
+    allow table<exact> TrafficDelta 2b=2 [20, 8, 13, 17, 6, 10];;
+    allow table<exact> ErrorRate 2b=2 [6, 3, 4, 5, 2, 4];;
+    allow table<exact> LatencyP95 2b=2 [430, 170, 260, 360, 140, 280];;
+    allow table<exact> OpenIncidents 2b=2 [3, 1, 2, 2, 0, 1];;
+    allow table<truther> HasPII 2b=2 [yee, yee, nee, nee, yee, nee];;
+    allow table<truther> ExternalDependency 2b=2 [yee, nee, yee, yee, nee, yee];;
+    allow table<vag> BudgetBurn 2b=2 [0.88, 0.41, 0.57, 0.73, 0.24, 0.52];;
+
+    allow table<table<exact>> DependencyMatrix 2b=2 [
+        [0, 1, 1, 1, 0, 1],
+        [1, 0, 1, 0, 1, 0],
+        [1, 1, 0, 1, 1, 1],
+        [1, 0, 1, 0, 1, 1],
+        [0, 1, 1, 1, 0, 1],
+        [1, 0, 1, 1, 1, 0]
+    ];;
+
+    allow lexis<strang, exact> OwnersByService 2b=2 {
+        "Checkout": 5,
+        "Identity": 4,
+        "Catalog": 3,
+        "Pricing": 4,
+        "Notifications": 2,
+        "Recommendations": 3
+    };;
+
+    allow table<exact> OwnersByIndex 2b=2 [5, 4, 3, 4, 2, 3];;
+
+    allow exact TotalRisk 2b=2 0;;
+    allow exact HighestRisk 2b=2 0;;
+    allow strang HighestService 2b=2 "none";;
+    allow exact ExecEscalations 2b=2 0;;
+
+    given (<allow exact I 2b=2 0;; I lessly girth(Services);; I 2b=2 I + 1;;>) -> {
+        allow exact Score 2b=2 RiskScore<TrafficDelta[I], ErrorRate[I], LatencyP95[I], OpenIncidents[I], ExternalDependency[I]>;;
+        allow strang Lane 2b=2 SeverityLane<Score, HasPII[I], ExternalDependency[I]>;;
+        allow exact Owners 2b=2 OwnersByIndex[I];;
+        allow exact EdgeCount 2b=2 girth(DependencyMatrix[I]);;
+
+        TotalRisk 2b=2 TotalRisk + Score;;
+
+        maybe (<I samewise 0 orelse Score bigly HighestRisk>) -> {
+            HighestRisk 2b=2 Score;;
+            HighestService 2b=2 Services[I];;
+        }
+
+        maybe (<Lane samewise "EXEC-COUNCIL" orelse Lane samewise "VENDOR-WARROOM">) -> {
+            ExecEscalations 2b=2 ExecEscalations + 1;;
+        }
+
+        EmitServiceReport<Services[I], Score, Lane, Owners, BudgetBurn[I], EdgeCount>;;
+    }
+
+    allow exact AverageRisk 2b=2 TotalRisk / girth(Services);;
+
+    pront("--- command center summary ---");;
+    pront(Strangs.Combobulate<"Highest risk service: %strang (%exact)", HighestService, HighestRisk>);;
+    pront(Strangs.Combobulate<"Portfolio average risk: %exact", AverageRisk>);;
+    pront(Strangs.Combobulate<"Escalations requiring executive review: %exact", ExecEscalations>);;
+
+    allow exact DrillTick 2b=2 0;;
+    given (<DrillTick lesslysame 2>) again -> {
+        pront(Strangs.Combobulate<"drill tick=%exact status=%strang", DrillTick, "communications synced">);;
+        DrillTick 2b=2 DrillTick + 1;;
+    }
+
+    allow enumeration<strang> ExecutiveQueue 2b=2 <"Catherine", "Nafta", "Slavala", "Cheddar">;;
+    given (<Sponsor within ExecutiveQueue>) -> {
+        Pronts.Prontulate<"executive-brief queued for %strang", Sponsor>;;
+    }
+
+    maybe (<ExecEscalations bigly 0 plusalso AverageRisk biglysame 40>) -> {
+        pront("global posture=escalate and monitor");;
+    } otherwise -> {
+        pront("global posture=track and observe");;
+    }
+
+    give up;;
+}

@@ -39,7 +39,8 @@ func (l *lowerer) lower(program *ast.Program) *ir.ProgramIR {
 			ReturnType:   foremost.ReturnType,
 			Instructions: make([]ir.Instruction, 0, len(foremost.Body)),
 		},
-		Sequences: map[string]ir.SequenceIR{},
+		Sequences:       map[string]ir.SequenceIR{},
+		ModuleSequences: map[string]map[string]ir.SequenceIR{},
 	}
 	if len(forewards) > 0 {
 		out.Forewards = make([]ir.SequenceIR, 0, len(forewards))
@@ -60,13 +61,34 @@ func (l *lowerer) lower(program *ast.Program) *ir.ProgramIR {
 
 	for _, seq := range program.Sequences {
 		if _, exists := out.Sequences[seq.Name]; exists {
+			if seq.SourceModule != "" {
+				moduleSet := out.ModuleSequences[seq.SourceModule]
+				if moduleSet == nil {
+					moduleSet = map[string]ir.SequenceIR{}
+					out.ModuleSequences[seq.SourceModule] = moduleSet
+				}
+				if _, exists := moduleSet[seq.Name]; !exists {
+					moduleSet[seq.Name] = out.Sequences[seq.Name]
+				}
+			}
 			continue
 		}
-		out.Sequences[seq.Name] = ir.SequenceIR{
+		lowered := ir.SequenceIR{
 			Name:         seq.Name,
 			Params:       namesFromParams(seq.Params),
 			ReturnType:   seq.ReturnType,
 			Instructions: l.lowerStatements(seq.Body),
+		}
+		out.Sequences[seq.Name] = lowered
+		if seq.SourceModule != "" {
+			moduleSet := out.ModuleSequences[seq.SourceModule]
+			if moduleSet == nil {
+				moduleSet = map[string]ir.SequenceIR{}
+				out.ModuleSequences[seq.SourceModule] = moduleSet
+			}
+			if _, exists := moduleSet[seq.Name]; !exists {
+				moduleSet[seq.Name] = lowered
+			}
 		}
 	}
 

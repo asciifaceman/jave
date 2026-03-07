@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/asciifaceman/jave/internal/ast"
 	"github.com/asciifaceman/jave/internal/diagnostics"
 	"github.com/asciifaceman/jave/internal/lexer"
 	"github.com/asciifaceman/jave/internal/parser"
@@ -146,7 +147,6 @@ func TestAnalyze_SequenceCallArityMismatch(t *testing.T) {
 	src := `outy seq Add<exact A, exact B> --> <<exact>> {
     give A + B up;;
 }
-
 outy seq Foremost<> --> <<nada>> {
     allow exact Sum 2b=2 Add<2>;;
     pront(Sum);;
@@ -162,6 +162,88 @@ outy seq Foremost<> --> <<nada>> {
 	}
 	if !found {
 		t.Fatal("expected sequence call arity mismatch diagnostic")
+	}
+}
+
+func TestAnalyze_ProntulateBuiltinIdentifier(t *testing.T) {
+	src := `outy seq Foremost<> --> <<nada>> {
+    Prontulate<"Count=%exact", 2>;;
+    give up;;
+}`
+
+	diags := analyzeSrcDetailed(t, src)
+	for _, d := range diags {
+		if d.Severity == diagnostics.SeverityError {
+			t.Fatalf("unexpected semantic error: %s", d.Message)
+		}
+	}
+}
+
+func TestAnalyze_ModuleMemberCallArityMismatch_PosiExact(t *testing.T) {
+	program := &ast.Program{
+		Imports: []ast.ImportDecl{{Name: "Algebra", From: "highschool/Algebra"}},
+		Sequences: []ast.SequenceDecl{
+			{
+				SourceModule: "Algebra",
+				Name:         "PosiExact",
+				Params:       []ast.SequenceParam{{TypeName: "exact", Name: "Value"}},
+				ReturnType:   "exact",
+				Body:         []ast.Stmt{ast.GiveStmt{Value: ast.NumberExpr{Value: "1"}}},
+			},
+			{
+				Name:       "Foremost",
+				ReturnType: "nada",
+				Body: []ast.Stmt{
+					ast.ExprStmt{Expr: ast.CallExpr{Callee: ast.MemberExpr{Target: ast.IdentifierExpr{Name: "Algebra"}, Name: "PosiExact"}, Args: []ast.Expr{}}},
+					ast.GiveStmt{},
+				},
+			},
+		},
+	}
+
+	diags := sema.Analyze(program)
+	found := false
+	for _, d := range diags {
+		if d.Severity == diagnostics.SeverityError && strings.Contains(d.Message, "sequence call arity mismatch for Algebra.PosiExact") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("expected module member arity mismatch diagnostic")
+	}
+}
+
+func TestAnalyze_ModuleMemberMissingDiagnostic(t *testing.T) {
+	program := &ast.Program{
+		Imports: []ast.ImportDecl{{Name: "Algebra", From: "highschool/Algebra"}},
+		Sequences: []ast.SequenceDecl{
+			{
+				SourceModule: "Algebra",
+				Name:         "PosiExact",
+				Params:       []ast.SequenceParam{{TypeName: "exact", Name: "Value"}},
+				ReturnType:   "exact",
+				Body:         []ast.Stmt{ast.GiveStmt{Value: ast.NumberExpr{Value: "1"}}},
+			},
+			{
+				Name:       "Foremost",
+				ReturnType: "nada",
+				Body: []ast.Stmt{
+					ast.ExprStmt{Expr: ast.CallExpr{Callee: ast.MemberExpr{Target: ast.IdentifierExpr{Name: "Algebra"}, Name: "Nope"}, Args: []ast.Expr{ast.NumberExpr{Value: "1"}}}},
+					ast.GiveStmt{},
+				},
+			},
+		},
+	}
+
+	diags := sema.Analyze(program)
+	found := false
+	for _, d := range diags {
+		if d.Severity == diagnostics.SeverityError && strings.Contains(d.Message, "undefined module sequence: Algebra.Nope") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("expected undefined module sequence diagnostic")
 	}
 }
 

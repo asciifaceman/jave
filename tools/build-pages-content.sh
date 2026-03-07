@@ -43,9 +43,18 @@ render_markdown_document() {
   local permalink_path="/content/${rel_path%.md}/"
   local title
   local summary
+  local doc_class="Governance or technical archive record"
+  local body_class="doc-body"
 
   title="$(infer_title_from_file "${src}")"
   summary="$(infer_summary_from_file "${src}")"
+  title="${title//Lore/Records}"
+  title="${title//lore/records}"
+
+  if [[ "${rel_path}" == governance/*/lore/* ]]; then
+    doc_class="Governance correspondence record"
+    body_class="doc-body doc-body--correspondence"
+  fi
 
   mkdir -p "$(dirname "${out_path}")"
   {
@@ -56,13 +65,15 @@ render_markdown_document() {
     echo "---"
     echo
     echo "<div class=\"doc-meta\">"
-    echo "  <p><strong>Document Class:</strong> Governance or technical archive record</p>"
+    echo "  <p><strong>Document Class:</strong> ${doc_class}</p>"
     if [[ -n "${summary}" ]]; then
       echo "  <p><strong>Summary:</strong> ${summary}</p>"
     fi
     echo "</div>"
     echo
+    echo "<div class=\"${body_class}\">"
     awk 'NR==1 && /^# / {next} {print}' "${src}"
+    echo "</div>"
     echo
   } > "${out_path}"
 }
@@ -145,11 +156,15 @@ append_record_section() {
     local display_path="${rel_path%.md}"
     local title
     title="$(infer_title_from_file "${file}")"
+    title="${title//Lore/Records}"
+    title="${title//lore/records}"
     echo "- [${title}]({{ '/content/${display_path}/' | relative_url }})" >> "${RECORDS_FEED_FILE}"
   done
 
   echo >> "${RECORDS_FEED_FILE}"
 }
 
-append_record_section "${ROOT_DIR}/governance/v0.1/lore" "v0.1 Governance Records"
-append_record_section "${ROOT_DIR}/governance/v0.2/lore" "v0.2 Governance Records"
+append_record_section "${ROOT_DIR}/governance/v0.1" "v0.1 Governance Core Records"
+append_record_section "${ROOT_DIR}/governance/v0.1/lore" "v0.1 Steering and Correspondence Records"
+append_record_section "${ROOT_DIR}/governance/v0.2" "v0.2 Governance Core Records"
+append_record_section "${ROOT_DIR}/governance/v0.2/lore" "v0.2 Steering and Correspondence Records"

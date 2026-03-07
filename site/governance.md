@@ -6,6 +6,10 @@ permalink: /governance/
 
 Governance records are published by version and include feature ledgers, user stories, and policy-context artifacts.
 
+<div class="hero-note">
+	<p><strong>Governance Signal:</strong> Ratification state and publication records are synchronized with executable repository behavior.</p>
+</div>
+
 ## Version Packs (Rendered)
 
 - [v0.1 Governance Pack]({{ '/content/governance/v0.1/README/' | relative_url }})

@@ -69,3 +69,63 @@ So that cross-platform scripts do not drift between Windows, Linux, and macOS be
 Mapped candidates:
 - Path and Working Directory Utilities
 - File System Operations
+
+## Story 7: Platform Operations Engineer
+
+As a platform operations engineer,
+I want environment variable access and structured logging,
+So that Jave services can run in managed environments with auditable operational output.
+
+Mapped candidates:
+- Environment Variable Reads
+- Structured Logging Basic Pass
+
+## Story 8: Performance Diagnostics Lead
+
+As a diagnostics lead,
+I want runtime timing and profiling helpers,
+So that performance regressions can be investigated without invasive one-off instrumentation.
+
+Mapped candidates:
+- Runtime Timing/Profiling Helpers
+- Structured Logging Basic Pass
+
+## Story 9: Integration Service Owner
+
+As an integration service owner,
+I want a basic networking stack,
+So that Jave programs can communicate with external services without external wrapper executables.
+
+Mapped candidates:
+- Networking Stack Basic Pass
+- Runtime Error and Exit Semantics
+
+## Story 10: Developer Documentation Lead
+
+As a documentation lead,
+I want a standard docstring format and a first-party documentation generator,
+So that Jave API and sequence behavior can be published consistently without manual drift.
+
+Mapped candidates:
+- Comment and Docstring Documentation Standard + Generator
+- Richer Standard Library Surface
+
+## Story 11: Community Library Consumer
+
+As a library consumer,
+I want to import community carryons from GitHub/VCS-style sources,
+So that I can reuse shared Jave libraries without waiting for centralized Orcal infrastructure.
+
+Mapped candidates:
+- Community Carryon Import and Distribution Model
+- Runtime Error and Exit Semantics
+
+## Story 12: Build Reproducibility Owner
+
+As a reproducibility owner,
+I want dependency resolution and locking behavior for external carryons,
+So that builds remain deterministic across machines and CI runs.
+
+Mapped candidates:
+- Community Carryon Import and Distribution Model
+- Deterministic Program Exit Contract

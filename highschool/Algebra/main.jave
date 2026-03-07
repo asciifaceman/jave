@@ -1,0 +1,13 @@
+outy seq PosiExact<exact Value> --> <<exact>> {
+    maybe (<Value lessly 0>) -> {
+        give 0 - Value up;;
+    }
+    give Value up;;
+}
+
+outy seq PosiVag<vag Value> --> <<vag>> {
+    maybe (<Value lessly 0>) -> {
+        give 0 - Value up;;
+    }
+    give Value up;;
+}

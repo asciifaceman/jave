@@ -246,13 +246,20 @@ func loadProgramWithImports(entryPath string, opts loadOptions) (*ast.Program, m
 	diags := make([]fileDiagnostic, 0)
 	trace := importTrace{LoadOrder: make([]string, 0), Resolutions: make([]importResolution, 0)}
 
-	var visit func(path string, isRoot bool) error
-	visit = func(path string, isRoot bool) error {
+	sequenceModule := map[string]string{}
+
+	var visit func(path string, isRoot bool, moduleAlias string) error
+	visit = func(path string, isRoot bool, moduleAlias string) error {
 		abs, err := filepath.Abs(path)
 		if err != nil {
 			return err
 		}
 		abs = filepath.Clean(abs)
+		if moduleAlias != "" {
+			if _, exists := sequenceModule[abs]; !exists {
+				sequenceModule[abs] = moduleAlias
+			}
+		}
 		sources.register(abs)
 		if cycleStart, ok := active[abs]; ok {
 			return fmt.Errorf("import cycle detected: %s", formatImportCycle(stack, cycleStart, abs))
@@ -300,7 +307,7 @@ func loadProgramWithImports(entryPath string, opts loadOptions) (*ast.Program, m
 				return err
 			}
 			trace.Resolutions = append(trace.Resolutions, importResolution{Importer: abs, From: imp.From, Resolved: resolved})
-			if err := visit(resolved, false); err != nil {
+			if err := visit(resolved, false, imp.Name); err != nil {
 				return err
 			}
 		}
@@ -308,11 +315,16 @@ func loadProgramWithImports(entryPath string, opts loadOptions) (*ast.Program, m
 		if isRoot {
 			rootImports = append(rootImports, program.Imports...)
 		}
-		sequences = append(sequences, program.Sequences...)
+		for _, seq := range program.Sequences {
+			if module, exists := sequenceModule[abs]; exists {
+				seq.SourceModule = module
+			}
+			sequences = append(sequences, seq)
+		}
 		return nil
 	}
 
-	if err := visit(entryPath, true); err != nil {
+	if err := visit(entryPath, true, ""); err != nil {
 		return nil, nil, importTrace{}, nil, sourceIndex{}, err
 	}
 

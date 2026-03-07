@@ -8,17 +8,21 @@ These records are official Orcal publication artifacts for the Jave language pro
 
 They are archived by version and displayed as first-class pages generated from governance sources.
 
+<div class="hero-note">
+  <p><strong>Publication Standard:</strong> Records map to real steering decisions, approved candidate scope, and shipped behavior.</p>
+</div>
+
 ## Program Record Streams
 
 <div class="record-grid">
   <div>
     <h3>v0.1 Records</h3>
-    <p>Program inception through release governance, policy memos, and steering records.</p>
+    <p>Program inception through release governance, policy memoranda, and steering correspondence.</p>
     <p><a href="{{ '/records/feed/' | relative_url }}">Open records feed</a></p>
   </div>
   <div>
     <h3>v0.2 Records</h3>
-    <p>Transition briefs, executive commentary, and internal correspondence tied to approved candidates.</p>
+    <p>Transition briefs, executive commentary, and internal correspondence tied to approved and proposed candidates.</p>
     <p><a href="{{ '/records/feed/' | relative_url }}">Open records feed</a></p>
   </div>
 </div>

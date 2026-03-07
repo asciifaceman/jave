@@ -2,6 +2,18 @@
 ---
 @import "minima";
 
+.hero-note {
+  border: 1px solid #c9d8ff;
+  background: linear-gradient(135deg, #f5f8ff 0%, #edf6ff 100%);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  margin: 0.75rem 0 1rem;
+}
+
+.hero-note p {
+  margin: 0.35rem 0;
+}
+
 .record-grid {
   display: grid;
   gap: 1rem;
@@ -25,4 +37,19 @@
   background: #f6fff8;
   padding: 0.5rem 0.75rem;
   margin-bottom: 1rem;
+}
+
+.doc-body {
+  margin-top: 1rem;
+}
+
+.doc-body--correspondence h2 {
+  border: 1px solid #d8dbe1;
+  border-radius: 8px;
+  background: #f8f9fb;
+  padding: 0.45rem 0.65rem;
+}
+
+.doc-body--correspondence p {
+  line-height: 1.55;
 }

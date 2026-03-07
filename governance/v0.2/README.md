@@ -7,9 +7,9 @@ This folder captures proposed v0.2 scope, governance records, and supporting rel
 Contents:
 - `feature-candidates.md`: Candidate feature slate for v0.2.
 - `user-stories.md`: Business and developer stories motivating v0.2.
-- `lore/`: Steering records, transition briefs, and narrative planning artifacts for v0.2.
+- `lore/`: Steering records, transition briefs, and correspondence artifacts for v0.2.
 
-Lore highlights:
+Record highlights:
 - Discovery minutes establishing candidate direction.
 - Post-v0.1 transition brief documenting practical capability gaps.
 - Mailing-list style technical discussion records tied to approved candidates.

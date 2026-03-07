@@ -188,6 +188,83 @@ outy seq Foremost<> --> <<nada>> {
 	}
 }
 
+func TestLoadProgramWithImports_HighschoolAlgebraPosiExactAndPosiVag(t *testing.T) {
+	base := t.TempDir()
+
+	if err := os.WriteFile(filepath.Join(base, "go.mod"), []byte("module example.com/test\n\ngo 1.26\n"), 0o644); err != nil {
+		t.Fatalf("write go.mod: %v", err)
+	}
+
+	algebraDir := filepath.Join(base, "highschool", "Algebra")
+	if err := os.MkdirAll(algebraDir, 0o755); err != nil {
+		t.Fatalf("mkdir algebra dir: %v", err)
+	}
+	algebraPath := filepath.Join(algebraDir, "main.jave")
+	if err := os.WriteFile(algebraPath, []byte(`outy seq PosiExact<exact Value> --> <<exact>> {
+	maybe (<Value lessly 0>) -> {
+		give 0 - Value up;;
+	}
+	give Value up;;
+}
+
+outy seq PosiVag<vag Value> --> <<vag>> {
+    maybe (<Value lessly 0>) -> {
+        give 0 - Value up;;
+    }
+    give Value up;;
+}`), 0o644); err != nil {
+		t.Fatalf("write algebra carryon: %v", err)
+	}
+
+	appDir := filepath.Join(base, "apps", "demo")
+	if err := os.MkdirAll(appDir, 0o755); err != nil {
+		t.Fatalf("mkdir app dir: %v", err)
+	}
+	rootPath := filepath.Join(appDir, "main.jave")
+	if err := os.WriteFile(rootPath, []byte(`install Algebra from highschool/Algebra;;
+outy seq Foremost<> --> <<nada>> {
+	pront(Algebra.PosiExact<0 - 12>);;
+    pront(Algebra.PosiExact<7>);;
+	pront(Algebra.PosiVag<0.5 - 1.25>);;
+    give up;;
+}`), 0o644); err != nil {
+		t.Fatalf("write root: %v", err)
+	}
+
+	program, _, trace, loadDiags, _, err := loadProgramWithImports(rootPath, loadOptions{})
+	if err != nil {
+		t.Fatalf("loadProgramWithImports error: %v", err)
+	}
+	if len(loadDiags) != 0 {
+		t.Fatalf("expected no load diagnostics, got %d", len(loadDiags))
+	}
+	if got := len(trace.Resolutions); got != 1 {
+		t.Fatalf("expected 1 import resolution, got %d", got)
+	}
+
+	semaDiags := sema.Analyze(program)
+	for _, d := range semaDiags {
+		if d.Severity == "error" {
+			t.Fatalf("unexpected sema error: %s", d.Message)
+		}
+	}
+
+	irProgram, lowerDiags := lowering.Lower(program)
+	if len(lowerDiags) != 0 {
+		t.Fatalf("unexpected lowering diagnostics: %d", len(lowerDiags))
+	}
+
+	buf := &bytes.Buffer{}
+	if err := runtime.Execute(irProgram, buf); err != nil {
+		t.Fatalf("runtime execute failed: %v", err)
+	}
+	got := strings.TrimSpace(buf.String())
+	want := "12\n7\n0.75"
+	if got != want {
+		t.Fatalf("unexpected output:\n%s\nwant:\n%s", got, want)
+	}
+}
+
 func TestLoadProgramWithImports_SemaDiagnosticResolvesImportedFile(t *testing.T) {
 	base := t.TempDir()
 

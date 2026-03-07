@@ -8,9 +8,10 @@ permalink: /
   <img src="{{ '/docs/static/logo-trnsprnt.png' | relative_url }}" alt="Orcal Jave logo" width="260" />
 </p>
 
-Welcome to the official Orcal public bulletin for the Jave language initiative.
-
-This surface publishes governance updates, records, and implementation-aligned planning artifacts tied to each version cycle.
+<div class="hero-note">
+  <p><strong>Official Orcal Public Bulletin</strong></p>
+  <p>Jave language program updates, governance records, and implementation-aligned correspondence by version cycle.</p>
+</div>
 
 ## Current Program Status
 
@@ -23,6 +24,7 @@ This surface publishes governance updates, records, and implementation-aligned p
 - [Governance Updates]({{ '/governance/' | relative_url }})
 - [Records and Correspondence]({{ '/records/' | relative_url }})
 - [Language Tutorials, Spec, and Examples]({{ '/language/' | relative_url }})
+- [Our Team]({{ '/team/' | relative_url }})
 - [v0.2 Program Roadmap]({{ '/roadmap/' | relative_url }})
 
 ## Operational Notice

@@ -20,12 +20,14 @@ type analyzer struct {
 	globalSequences map[string]struct{}
 	sequenceArity   map[string]int
 	imports         map[string]struct{}
+	moduleArity     map[string]map[string]int
 }
 
 func (a *analyzer) analyzeProgram(program *ast.Program) {
 	a.globalSequences = map[string]struct{}{}
 	a.sequenceArity = map[string]int{}
 	a.imports = map[string]struct{}{}
+	a.moduleArity = map[string]map[string]int{}
 
 	for _, imp := range program.Imports {
 		if _, exists := a.imports[imp.Name]; exists {
@@ -48,6 +50,17 @@ func (a *analyzer) analyzeProgram(program *ast.Program) {
 	foremostCount := 0
 
 	for _, seq := range program.Sequences {
+		if seq.SourceModule != "" {
+			moduleSet := a.moduleArity[seq.SourceModule]
+			if moduleSet == nil {
+				moduleSet = map[string]int{}
+				a.moduleArity[seq.SourceModule] = moduleSet
+			}
+			if _, exists := moduleSet[seq.Name]; !exists {
+				moduleSet[seq.Name] = len(seq.Params)
+			}
+		}
+
 		if seq.Name != "Foreward" && seen[seq.Name] {
 			a.errorAt(seq.Pos, "duplicate sequence declaration: "+seq.Name)
 		}
@@ -161,6 +174,18 @@ func (a *analyzer) checkExpr(expr ast.Expr, scope *scope) {
 				a.errorAt(exprPos(e), "sequence call arity mismatch for "+callee.Name)
 			}
 		}
+		if callee, ok := e.Callee.(ast.MemberExpr); ok {
+			if module, ok := callee.Target.(ast.IdentifierExpr); ok {
+				if moduleSet, exists := a.moduleArity[module.Name]; exists {
+					expected, memberExists := moduleSet[callee.Name]
+					if !memberExists {
+						a.errorAt(exprPos(e), "undefined module sequence: "+module.Name+"."+callee.Name)
+					} else if expected != len(e.Args) {
+						a.errorAt(exprPos(e), "sequence call arity mismatch for "+module.Name+"."+callee.Name)
+					}
+				}
+			}
+		}
 		a.checkExpr(e.Callee, scope)
 		for _, arg := range e.Args {
 			a.checkExpr(arg, scope)
@@ -178,7 +203,7 @@ func (a *analyzer) checkExpr(expr ast.Expr, scope *scope) {
 
 func (a *analyzer) newSequenceScope() *scope {
 	s := newScope(nil)
-	for _, builtin := range []string{"pront", "girth", "Strangs", "Pronts"} {
+	for _, builtin := range []string{"pront", "girth", "Prontulate", "Strangs", "Pronts"} {
 		s.define(builtin)
 	}
 	for name := range a.imports {

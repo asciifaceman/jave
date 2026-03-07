@@ -234,16 +234,26 @@ func (r *runner) eval(expr ast.Expr) (any, error) {
 		if err != nil {
 			return nil, err
 		}
-		idxInt, ok := toInt64(idxAny)
-		if !ok {
-			return nil, fmt.Errorf("index is not an integer")
-		}
 		switch t := target.(type) {
 		case []any:
+			idxInt, ok := toInt64(idxAny)
+			if !ok {
+				return nil, fmt.Errorf("index is not an integer")
+			}
 			if idxInt < 0 || int(idxInt) >= len(t) {
 				return nil, fmt.Errorf("index out of range")
 			}
 			return t[idxInt], nil
+		case map[string]any:
+			idxStr, ok := idxAny.(string)
+			if !ok {
+				return nil, fmt.Errorf("lexis index key is not a strang")
+			}
+			v, exists := t[idxStr]
+			if !exists {
+				return nil, fmt.Errorf("lexis key not found: %s", idxStr)
+			}
+			return v, nil
 		default:
 			return nil, fmt.Errorf("value is not indexable")
 		}
@@ -322,39 +332,35 @@ func (r *runner) evalCall(e ast.CallExpr) (any, error) {
 			default:
 				return nil, fmt.Errorf("girth unsupported for value")
 			}
-		}
-
-		if seq, exists := r.program.Sequences[ident.Name]; exists {
-			if len(e.Args) != len(seq.Params) {
-				return nil, fmt.Errorf("sequence call arity mismatch for %s", ident.Name)
-			}
-			args := make([]any, 0, len(e.Args))
-			for _, argExpr := range e.Args {
-				v, err := r.eval(argExpr)
-				if err != nil {
-					return nil, err
-				}
-				args = append(args, v)
-			}
-
-			frame := map[string]any{}
-			for i, name := range seq.Params {
-				frame[name] = args[i]
-			}
-			r.frames = append(r.frames, frame)
-			returned, value, err := r.executeInstructions(seq.Instructions)
-			r.frames = r.frames[:len(r.frames)-1]
+		case "Prontulate":
+			comb, err := r.evalCall(ast.CallExpr{
+				Callee: ast.MemberExpr{Target: ast.IdentifierExpr{Name: "Strangs"}, Name: "Combobulate"},
+				Args:   e.Args,
+				Style:  e.Style,
+			})
 			if err != nil {
 				return nil, err
 			}
-			if returned {
-				return value, nil
-			}
+			_, _ = fmt.Fprintln(r.out, toDisplay(comb))
 			return nil, nil
+		}
+
+		if seq, exists := r.program.Sequences[ident.Name]; exists {
+			return r.invokeSequence(seq, e.Args, ident.Name)
 		}
 	}
 
 	if member, ok := e.Callee.(ast.MemberExpr); ok {
+		if target, ok := member.Target.(ast.IdentifierExpr); ok {
+			if moduleSet, exists := r.program.ModuleSequences[target.Name]; exists {
+				seq, seqExists := moduleSet[member.Name]
+				if !seqExists {
+					return nil, fmt.Errorf("undefined module sequence: %s.%s", target.Name, member.Name)
+				}
+				return r.invokeSequence(seq, e.Args, target.Name+"."+member.Name)
+			}
+		}
+
 		if target, ok := member.Target.(ast.IdentifierExpr); ok && (target.Name == "Strangs" || target.Name == "Srangs") && member.Name == "Combobulate" {
 			if len(e.Args) == 0 {
 				return "", nil
@@ -392,6 +398,35 @@ func (r *runner) evalCall(e ast.CallExpr) (any, error) {
 	}
 
 	return nil, fmt.Errorf("unsupported call expression")
+}
+
+func (r *runner) invokeSequence(seq ir.SequenceIR, argExprs []ast.Expr, displayName string) (any, error) {
+	if len(argExprs) != len(seq.Params) {
+		return nil, fmt.Errorf("sequence call arity mismatch for %s", displayName)
+	}
+	args := make([]any, 0, len(argExprs))
+	for _, argExpr := range argExprs {
+		v, err := r.eval(argExpr)
+		if err != nil {
+			return nil, err
+		}
+		args = append(args, v)
+	}
+
+	frame := map[string]any{}
+	for i, name := range seq.Params {
+		frame[name] = args[i]
+	}
+	r.frames = append(r.frames, frame)
+	returned, value, err := r.executeInstructions(seq.Instructions)
+	r.frames = r.frames[:len(r.frames)-1]
+	if err != nil {
+		return nil, err
+	}
+	if returned {
+		return value, nil
+	}
+	return nil, nil
 }
 
 func (r *runner) evalBinary(e ast.BinaryExpr) (any, error) {
@@ -493,6 +528,8 @@ func toDisplay(v any) string {
 func toFloat64(v any) (float64, bool) {
 	switch x := v.(type) {
 	case int64:
+		// TODO(v0.2+): extend exact runtime representation to include additional widths/sign modes.
+		// Candidate families: exactly8/exactly32 and unsigned forms such as exactlyposi8/exactlyposi32.
 		return float64(x), true
 	case float64:
 		return x, true

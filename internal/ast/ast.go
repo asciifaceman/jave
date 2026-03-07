@@ -17,12 +17,13 @@ type ImportDecl struct {
 
 // SequenceDecl represents a top-level sequence declaration.
 type SequenceDecl struct {
-	Pos        token.Position
-	Visibility string
-	Name       string
-	Params     []SequenceParam
-	ReturnType string
-	Body       []Stmt
+	Pos          token.Position
+	Visibility   string
+	SourceModule string
+	Name         string
+	Params       []SequenceParam
+	ReturnType   string
+	Body         []Stmt
 }
 
 // SequenceParam represents one typed parameter in a sequence signature.

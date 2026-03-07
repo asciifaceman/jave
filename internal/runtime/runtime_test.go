@@ -44,6 +44,51 @@ outy seq Foremost<> --> <<nada>> {
 	}
 }
 
+func TestExecute_LexisIndexing(t *testing.T) {
+	src := `outy seq Foremost<> --> <<nada>> {
+    allow lexis<strang, exact> Ages 2b=2 {"Ada": 36, "Linus": 55};;
+    pront(Ages["Ada"]);;
+    give up;;
+}`
+	buf := &bytes.Buffer{}
+	if err := runSource(src, buf); err != nil {
+		t.Fatalf("execute failed: %v", err)
+	}
+	if got := strings.TrimSpace(buf.String()); got != "36" {
+		t.Fatalf("unexpected output: %q", got)
+	}
+}
+
+func TestExecute_LexisMissingKeyErrors(t *testing.T) {
+	src := `outy seq Foremost<> --> <<nada>> {
+    allow lexis<strang, exact> Ages 2b=2 {"Ada": 36};;
+    pront(Ages["Grace"]);;
+    give up;;
+}`
+	buf := &bytes.Buffer{}
+	err := runSource(src, buf)
+	if err == nil {
+		t.Fatal("expected runtime error for missing lexis key")
+	}
+	if !strings.Contains(err.Error(), "lexis key not found") {
+		t.Fatalf("expected lexis key not found error, got: %v", err)
+	}
+}
+
+func TestExecute_ProntulateBuiltin(t *testing.T) {
+	src := `outy seq Foremost<> --> <<nada>> {
+    Prontulate<"Count=%exact", 2>;;
+    give up;;
+}`
+	buf := &bytes.Buffer{}
+	if err := runSource(src, buf); err != nil {
+		t.Fatalf("execute failed: %v", err)
+	}
+	if got := strings.TrimSpace(buf.String()); got != "Count=2" {
+		t.Fatalf("unexpected output: %q", got)
+	}
+}
+
 func TestExecute_ConditionsBranching(t *testing.T) {
 	src := `outy seq Foremost<> --> <<nada>> {
     allow vag Foo 2b=2 0.6;;
@@ -253,6 +298,24 @@ func TestExecute_ServiceCapacityPlanningExample(t *testing.T) {
 	}
 	if !strings.Contains(got, "Average portfolio signal: 72.8") {
 		t.Fatalf("expected average summary, got: %q", got)
+	}
+}
+
+func TestExecute_CollectionsExample(t *testing.T) {
+	srcBytes, err := os.ReadFile("../../examples/collections/main.jave")
+	if err != nil {
+		t.Fatalf("read collections example: %v", err)
+	}
+	buf := &bytes.Buffer{}
+	if err := runSource(string(srcBytes), buf); err != nil {
+		t.Fatalf("execute failed: %v", err)
+	}
+	got := strings.TrimSpace(buf.String())
+	if !strings.Contains(got, "Scores girth: 3") {
+		t.Fatalf("expected scores output, got: %q", got)
+	}
+	if !strings.Contains(got, "Ada age: 36") {
+		t.Fatalf("expected lexis output, got: %q", got)
 	}
 }
 

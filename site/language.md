@@ -6,6 +6,10 @@ permalink: /language/
 
 This section publishes language-facing materials for operators and implementation teams.
 
+<div class="hero-note">
+	<p><strong>Display Model:</strong> Tutorials, specs, and examples are rendered into first-class pages during site build.</p>
+</div>
+
 ## Tutorials
 
 - [How To Write Jave]({{ '/content/docs/how-to-write-jave/' | relative_url }})

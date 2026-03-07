@@ -6,6 +6,10 @@ permalink: /roadmap/
 
 The v0.2 program focuses on practical runtime capability expansion.
 
+<div class="hero-note">
+	<p><strong>Steering Posture:</strong> capability-first delivery, with ratification gates tied to diagnostics, tests, and operational clarity.</p>
+</div>
+
 ## Major Approved Candidates
 
 1. I/O Foundation

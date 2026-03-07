@@ -5,7 +5,7 @@ This folder explains how Jave reached v0.1 through governance records and releas
 Contents:
 - `feature-ledger.md`: Feature set ratified for v0.1.
 - `user-stories.md`: Representative enterprise user stories tied to shipped behavior.
-- `lore/`: Meeting minutes and supporting governance artifacts.
+- `lore/`: Meeting and correspondence records archive.
 - `lore/2024-11-18-jave-inception-kickoff-minutes.md`: Canonical inception record with executive sponsorship.
 
 Intent:
