@@ -37,6 +37,8 @@ func (l *lexer) lex() ([]token.Token, []diagnostics.Diagnostic) {
 		ch := l.peek()
 
 		switch {
+		case ch == '2' && l.wouldMatch("2b=2"):
+			l.lexSymbol(start)
 		case isIdentifierStart(ch):
 			l.lexIdentifier(start)
 		case unicode.IsDigit(ch):
@@ -108,7 +110,7 @@ func (l *lexer) lexSymbol(start token.Position) {
 	}
 
 	switch ch {
-	case '(': 
+	case '(':
 		l.advance()
 		l.emit(token.LParen, "(", start)
 	case ')':
@@ -187,7 +189,7 @@ func (l *lexer) lexString(start token.Position) {
 			l.diagnostics = append(l.diagnostics, diagnostics.Diagnostic{
 				Severity: diagnostics.SeverityError,
 				Message:  "unterminated string literal",
-				Pos: diagnostics.Position{Line: start.Line, Column: start.Column},
+				Pos:      diagnostics.Position{Line: start.Line, Column: start.Column},
 			})
 			l.emit(token.Illegal, "", start)
 			return
@@ -205,7 +207,7 @@ func (l *lexer) lexString(start token.Position) {
 	l.diagnostics = append(l.diagnostics, diagnostics.Diagnostic{
 		Severity: diagnostics.SeverityError,
 		Message:  "unterminated string literal",
-		Pos: diagnostics.Position{Line: start.Line, Column: start.Column},
+		Pos:      diagnostics.Position{Line: start.Line, Column: start.Column},
 	})
 	l.emit(token.Illegal, "", start)
 }
@@ -241,6 +243,19 @@ func (l *lexer) matchString(s string) bool {
 	}
 	for range runes {
 		l.advance()
+	}
+	return true
+}
+
+func (l *lexer) wouldMatch(s string) bool {
+	runes := []rune(s)
+	if l.idx+len(runes) > len(l.src) {
+		return false
+	}
+	for i := range runes {
+		if l.src[l.idx+i] != runes[i] {
+			return false
+		}
 	}
 	return true
 }

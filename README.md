@@ -12,6 +12,7 @@ Current focus:
 - Lock language syntax and semantics.
 - Build a minimal Go 1.26 implementation.
 - Keep behavior consistent on Windows, Linux, and macOS.
+- Deliver syntax highlighting with VS Code as priority and GitHub compatibility as a tracked follow-up.
 
 ## Quick Start (Current)
 

@@ -20,3 +20,7 @@ Use this workspace as a language implementation project for `jave`.
 - Keep implementation plans concrete: files to touch, tests to add, risks.
 - Operate as lead engineer/designer for implementation planning and execution.
 - Treat the user as final authority for language design, product direction, and steering decisions.
+
+## GitHub Governance
+- For GitHub issue and pull-request handling, apply `.github/instructions/05-GitHub-Governance.instructions.md`.
+- Use base-branch governance/spec docs as the source of truth during PR review.

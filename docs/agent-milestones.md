@@ -29,10 +29,26 @@ Scope:
 - `Pronts.Prontulate`
 - `javec`, `baggage`, `javevm` CLI command growth
 - `.jbin` format defined
+- syntax highlighting support with VS Code priority and GitHub compatibility
 
 Acceptance criteria:
 - Examples in `examples/imports` and `examples/combobulate` run.
 - Legacy alias `Srangs` emits warning and still resolves.
+- VS Code highlighting is available via a Jave grammar extension in-repo.
+- GitHub highlighting path is documented and tracked (Linguist strategy and fallback docs).
+
+## Milestone 2.1: Syntax Highlighting (Priority Track)
+
+Scope:
+- implement a VS Code TextMate grammar for `.jave`
+- ship a minimal VS Code extension scaffold under repo tooling
+- document install/test workflow for local highlighting development
+- define GitHub highlighting plan (Linguist grammar upstream path and interim fallback)
+
+Acceptance criteria:
+- Opening `.jave` files in VS Code highlights keywords, types, literals, operators, and comments.
+- A contributor can install and test the highlighting extension from this repo in under 5 minutes.
+- GitHub strategy is recorded with next actions and ownership.
 
 ## Milestone 3: Sponsor Messaging and Polish
 

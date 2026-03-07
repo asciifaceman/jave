@@ -6,11 +6,16 @@ import (
 	"os"
 
 	"github.com/asciifaceman/jave/internal/lexer"
+	"github.com/asciifaceman/jave/internal/lowering"
+	"github.com/asciifaceman/jave/internal/parser"
+	"github.com/asciifaceman/jave/internal/runtime"
+	"github.com/asciifaceman/jave/internal/sema"
 )
 
 func main() {
 	showVersion := flag.Bool("version", false, "print javec version")
 	showTokens := flag.Bool("tokens", false, "print lexer tokens")
+	runProgram := flag.Bool("run", false, "run Foremost after successful analysis")
 	flag.Parse()
 
 	if *showVersion {
@@ -39,12 +44,45 @@ func main() {
 		os.Exit(1)
 	}
 
+	program, parseDiags := parser.Parse(tokens)
+	if len(parseDiags) > 0 {
+		for _, d := range parseDiags {
+			fmt.Fprintf(os.Stderr, "%s:%d:%d: %s: %s\n", path, d.Pos.Line, d.Pos.Column, d.Severity, d.Message)
+		}
+		os.Exit(1)
+	}
+
+	semaDiags := sema.Analyze(program)
+	if len(semaDiags) > 0 {
+		for _, d := range semaDiags {
+			fmt.Fprintf(os.Stderr, "%s:%d:%d: %s: %s\n", path, d.Pos.Line, d.Pos.Column, d.Severity, d.Message)
+		}
+		os.Exit(1)
+	}
+
+	irProgram, lowerDiags := lowering.Lower(program)
+	if len(lowerDiags) > 0 {
+		for _, d := range lowerDiags {
+			fmt.Fprintf(os.Stderr, "%s:%d:%d: %s: %s\n", path, d.Pos.Line, d.Pos.Column, d.Severity, d.Message)
+		}
+		os.Exit(1)
+	}
+
 	if *showTokens {
 		for _, tok := range tokens {
 			fmt.Printf("%d:%d %-14s %q\n", tok.Pos.Line, tok.Pos.Column, tok.Kind, tok.Lexeme)
 		}
 	}
 
-	fmt.Printf("javec: lexical analysis succeeded (%d tokens)\n", len(tokens))
-	fmt.Println("next: parser + ast + diagnostics pipeline")
+	fmt.Printf("javec: lowering succeeded (%d tokens, %d sequences)\n", len(tokens), len(program.Sequences))
+
+	if *runProgram {
+		if err := runtime.Execute(irProgram, os.Stdout); err != nil {
+			fmt.Fprintf(os.Stderr, "javec: runtime error: %v\n", err)
+			os.Exit(1)
+		}
+		return
+	}
+
+	fmt.Println("next: jbin emission + javevm execution pipeline")
 }

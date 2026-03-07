@@ -638,7 +638,7 @@ Do not implement yet:
 
 The goal is a working, cursed, teachable v0.1.
 
-## Further instruction from the design agent
+## Further instruction from the original design agent
 
  What I’d do next, in order:
 

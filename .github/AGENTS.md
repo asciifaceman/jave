@@ -7,6 +7,8 @@ This repository is building a new programming language implementation in Go 1.26
 2. Follow applicable `*.instructions.md` files in `.github/instructions/`.
 3. Follow this file for repo-wide defaults.
 
+For GitHub issue/PR workflows, always apply `.github/instructions/05-GitHub-Governance.instructions.md`.
+
 ## Repo-Wide Defaults
 - Target platforms: Windows, Linux, and macOS.
 - Prefer cross-platform path handling and avoid OS-specific assumptions.
