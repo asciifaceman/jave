@@ -10,7 +10,37 @@
   "categories": [
     "Programming Languages"
   ],
+  "main": "./extension.js",
+  "activationEvents": [
+    "onLanguage:jave"
+  ],
   "contributes": {
+    "configuration": {
+      "title": "Jave",
+      "properties": {
+        "jave.languageServer.useBundled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Prefer bundled javels binary from the extension package when available."
+        },
+        "jave.languageServer.command": {
+          "type": "string",
+          "default": "javels",
+          "description": "Fallback command used to launch javels when bundled binaries are disabled or unavailable."
+        },
+        "jave.languageServer.args": {
+          "type": "array",
+          "default": [],
+          "items": { "type": "string" },
+          "description": "Fallback arguments passed to the language server command."
+        },
+        "jave.languageServer.cwd": {
+          "type": "string",
+          "default": "",
+          "description": "Working directory for the language server process. Empty uses the first workspace folder."
+        }
+      }
+    },
     "languages": [
       {
         "id": "jave",

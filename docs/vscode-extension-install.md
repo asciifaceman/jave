@@ -1,6 +1,6 @@
 # VS Code Extension Installation
 
-This document describes how to install the Jave VS Code extension for syntax highlighting.
+This document describes how to install the Jave VS Code extension for syntax highlighting and bundled IntelliSense.
 
 ## Cross-Platform Installation (Recommended)
 
@@ -98,11 +98,13 @@ After installation:
 1. **Reload VS Code**: `Ctrl+Shift+P` → `Developer: Reload Window`
 2. **Open a `.jave` file** from `examples/`
 3. **Check language mode** in bottom-right status bar (should show "Jave")
-4. **Verify highlighting**:
+4. **Verify highlighting and IntelliSense**:
    - Keywords: `outy`, `seq`, `maybe`, `give`, `up`
    - Types: `exact`, `vag`, `truther`, `strang`
    - Operators: `2b=2`, `bigly`, `samewise`
-   - Builtins: `pront`, `girth`, `Strangs`, `Pronts`, `Combobulate`, `Prontulate`
+   - Builtins: `pront`, `prontulate`, `girth`, `slotify`, `Strangs`, `Combobulate`
+
+Hover and signature help are served by bundled `javels` binaries included in release extension packages, so Go is not required for end users.
 
 `Strangs.Combobulate<...>` and `Pronts.Prontulate<...>` are part of Jave v0.1 and should be recognized/highlighted.
 

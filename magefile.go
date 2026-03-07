@@ -35,6 +35,7 @@ func Help() {
 	fmt.Println("Tool Stubs:")
 	fmt.Println("  mage runBaggage    # run baggage CLI")
 	fmt.Println("  mage runJavevm     # run javevm for JBIN_FILE or examples/hello_world/main.jbin")
+	fmt.Println("  mage runJavels     # run javels LSP server over stdio")
 	fmt.Println("")
 	fmt.Println("Tip: use `mage -l` to see all generated targets.")
 }
@@ -102,6 +103,11 @@ func RunJavevm() error {
 		}
 	}
 	return sh.RunV("go", "run", "./cmd/javevm", input)
+}
+
+// RunJavels runs the javels language server over stdio.
+func RunJavels() error {
+	return sh.RunV("go", "run", "./cmd/javels")
 }
 
 // RunExampleConditions executes the conditions example through javec runtime mode.

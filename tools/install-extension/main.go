@@ -28,6 +28,13 @@ func run() error {
 		return fmt.Errorf("vscode-jave directory not found at %s\nPlease run this tool from the repository root", extensionSource)
 	}
 
+	// Ensure javels binary is present for this host platform when possible.
+	if msg, err := ensureJavelsForHost(workspaceRoot, extensionSource); err != nil {
+		fmt.Printf("Warning: %v\n", err)
+	} else if msg != "" {
+		fmt.Println(msg)
+	}
+
 	// Get VS Code extensions directory
 	extensionsDir, err := getVSCodeExtensionsDir()
 	if err != nil {
@@ -72,6 +79,7 @@ func run() error {
 	fmt.Println("Next steps:")
 	fmt.Println("1. Reload VS Code: Ctrl+Shift+P → 'Developer: Reload Window'")
 	fmt.Println("2. Open a .jave file to verify syntax highlighting")
+	fmt.Println("3. Verify hover/signature help (javels) in a .jave file")
 
 	// Check if Jave toolchain is installed
 	if !isToolchainInstalled() {
@@ -83,6 +91,79 @@ func run() error {
 	}
 
 	return nil
+}
+
+func ensureJavelsForHost(workspaceRoot, extensionSource string) (string, error) {
+	osName, ok := extensionOSName(runtime.GOOS)
+	if !ok {
+		return "", nil
+	}
+	archName, ok := extensionArchName(runtime.GOARCH)
+	if !ok {
+		return "", nil
+	}
+
+	binDir := filepath.Join(extensionSource, "bin")
+	if err := os.MkdirAll(binDir, 0755); err != nil {
+		return "", fmt.Errorf("failed to create extension bin dir: %w", err)
+	}
+
+	binName := bundledJavelsBinaryName(osName, archName)
+	outPath := filepath.Join(binDir, binName)
+	if _, err := os.Stat(outPath); err == nil {
+		return fmt.Sprintf("✓ javels already bundled for host: %s", outPath), nil
+	}
+
+	if !toolExists("go") {
+		return "", fmt.Errorf("javels binary missing for host (%s/%s) and Go is not installed", osName, archName)
+	}
+
+	cmd := exec.Command("go", "build", "-trimpath", "-ldflags=-s -w", "-o", outPath, "./cmd/javels")
+	cmd.Dir = workspaceRoot
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return "", fmt.Errorf("failed to build javels for host: %w", err)
+	}
+
+	if runtime.GOOS != "windows" {
+		_ = os.Chmod(outPath, 0755)
+	}
+	return fmt.Sprintf("✓ built javels for host: %s", outPath), nil
+}
+
+func extensionOSName(goos string) (string, bool) {
+	switch goos {
+	case "windows":
+		return "windows", true
+	case "darwin":
+		return "darwin", true
+	case "linux":
+		return "linux", true
+	default:
+		return "", false
+	}
+}
+
+func extensionArchName(goarch string) (string, bool) {
+	switch goarch {
+	case "amd64", "arm64":
+		return goarch, true
+	default:
+		return "", false
+	}
+}
+
+func bundledJavelsBinaryName(osName, archName string) string {
+	if osName == "windows" {
+		return fmt.Sprintf("javels-%s-%s.exe", osName, archName)
+	}
+	return fmt.Sprintf("javels-%s-%s", osName, archName)
+}
+
+func toolExists(name string) bool {
+	_, err := exec.LookPath(name)
+	return err == nil
 }
 
 func getVSCodeExtensionsDir() (string, error) {

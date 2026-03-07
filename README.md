@@ -31,9 +31,9 @@ License model: custom parody-forward project license, see [LICENSE](LICENSE).
 | Area | Current State |
 | --- | --- |
 | Language Spec | v0.1 locked and implemented |
-| Toolchain | `javec`, `baggage`, `javevm` |
+| Toolchain | `javec`, `baggage`, `javevm`, `javels` |
 | Platforms | Windows, Linux, macOS |
-| Editor Support | VS Code syntax highlighting available |
+| Editor Support | VS Code syntax + bundled LSP hover/signature preview |
 | Governance | v0.1 records complete, v0.2 candidates drafted |
 
 Current focus:
@@ -49,6 +49,7 @@ Current focus:
 go install github.com/asciifaceman/jave/cmd/javec@latest
 go install github.com/asciifaceman/jave/cmd/baggage@latest
 go install github.com/asciifaceman/jave/cmd/javevm@latest
+go install github.com/asciifaceman/jave/cmd/javels@latest
 ```
 
 ### Verify toolchain
@@ -57,6 +58,7 @@ go install github.com/asciifaceman/jave/cmd/javevm@latest
 javec --version
 baggage --version
 javevm --version
+javels --version
 ```
 
 ### Compile and run

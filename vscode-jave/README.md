@@ -349,18 +349,66 @@ To modify the syntax highlighting:
 2. Edit `language-configuration.json` - Bracket matching and comment configuration
 3. Reload VS Code to test changes
 
+## IntelliSense (LSP Preview)
+
+The extension now includes a lightweight LSP client and can launch `javels` for:
+
+- hover docs from source docstrings/manifests
+- signature help for sequence/builtin calls
+
+By default, the extension prefers bundled `javels` binaries included in release extension packages, so end users do not need Go installed.
+
+Default launch strategy:
+
+- `jave.languageServer.useBundled = true`
+- bundled binary path: `vscode-jave/bin/javels-<os>-amd64[.exe]`
+- fallback command: `javels`
+- development fallback: `go run ./cmd/javels` when working in a Jave source workspace
+- fallback args: `[]`
+- cwd: first workspace folder
+
+This works best when you open the Jave repository (or another workspace that has `cmd/javels`).
+
+You can override launch settings in VS Code:
+
+```json
+{
+    "jave.languageServer.useBundled": true,
+    "jave.languageServer.command": "go",
+    "jave.languageServer.args": ["run", "./cmd/javels"],
+    "jave.languageServer.cwd": ""
+}
+```
+
+Developer note: set `jave.languageServer.useBundled` to `false` when testing source changes to `cmd/javels` with `go run`.
+
+Install command for local CLI usage:
+
+```bash
+go install github.com/asciifaceman/jave/cmd/javels@latest
+```
+
+If installed globally, you can switch to:
+
+```json
+{
+    "jave.languageServer.command": "javels",
+    "jave.languageServer.args": [],
+    "jave.languageServer.cwd": ""
+}
+```
+
 ## IntelliSense Roadmap
 
-Current extension scope is syntax + language configuration only. For type hints, hovers, and richer completion, build a Jave language server and keep this syntax extension as the lexical layer.
+Current preview covers hover/signature help. For richer completion, diagnostics, and semantic navigation, continue expanding the language server while keeping this syntax extension as the lexical layer.
 
 Recommended next steps:
 
-1. Add an LSP server package (Go) that reuses existing lexer/parser/sema for diagnostics.
-2. Implement `textDocument/hover` using attached `doc<...>` sections (`Title`, `About`, `Param`, `Return`) and YAML manifests for builtins/language features.
-3. Implement `textDocument/completion` from scope-aware identifiers + known stdlib carryon exports.
-4. Implement `textDocument/signatureHelp` from sequence params (including variadics) and docstring parameter descriptions.
-5. Implement semantic tokens for declaration/reference role coloring beyond TextMate regex highlighting.
-6. Add quick docs indexing for generated `site/reference` pages to support “open docs” commands from symbol hover.
+1. Add `textDocument/completion` from scope-aware identifiers + known stdlib carryon exports.
+2. Add `textDocument/publishDiagnostics` by reusing parser/sema diagnostics incrementally.
+3. Add `definition/references` for sequences and imports.
+4. Add semantic tokens for declaration/reference role coloring beyond TextMate regex highlighting.
+5. Add quick docs indexing for generated `site/reference` pages to support "open docs" commands from symbol hover.
 
 Because docstrings are now first-class in the AST, they can directly feed hover/signature help without duplicate annotation formats.
 
@@ -380,6 +428,11 @@ Because docstrings are now first-class in the AST, they can directly feed hover/
 - After editing grammar files, reload VS Code
 - You may need to close and reopen `.jave` files
 - For persistent issues, restart VS Code completely
+
+**LSP timeout on initialize:**
+- This usually means no bundled binary and no `javels` available on PATH.
+- In Jave source workspaces, the extension will now automatically attempt `go run ./cmd/javels`.
+- Outside source workspaces, either install `javels` or use release extension bundles that include `vscode-jave/bin/javels-*` binaries.
 
 ## License
 

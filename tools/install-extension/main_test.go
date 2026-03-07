@@ -8,6 +8,52 @@ import (
 	"testing"
 )
 
+func TestExtensionOSName(t *testing.T) {
+	tests := []struct {
+		in   string
+		want string
+		ok   bool
+	}{
+		{in: "windows", want: "windows", ok: true},
+		{in: "linux", want: "linux", ok: true},
+		{in: "darwin", want: "darwin", ok: true},
+		{in: "freebsd", want: "", ok: false},
+	}
+	for _, tt := range tests {
+		got, ok := extensionOSName(tt.in)
+		if got != tt.want || ok != tt.ok {
+			t.Fatalf("extensionOSName(%q) = (%q,%v), want (%q,%v)", tt.in, got, ok, tt.want, tt.ok)
+		}
+	}
+}
+
+func TestExtensionArchName(t *testing.T) {
+	tests := []struct {
+		in   string
+		want string
+		ok   bool
+	}{
+		{in: "amd64", want: "amd64", ok: true},
+		{in: "arm64", want: "arm64", ok: true},
+		{in: "386", want: "", ok: false},
+	}
+	for _, tt := range tests {
+		got, ok := extensionArchName(tt.in)
+		if got != tt.want || ok != tt.ok {
+			t.Fatalf("extensionArchName(%q) = (%q,%v), want (%q,%v)", tt.in, got, ok, tt.want, tt.ok)
+		}
+	}
+}
+
+func TestBundledJavelsBinaryName(t *testing.T) {
+	if got := bundledJavelsBinaryName("windows", "amd64"); got != "javels-windows-amd64.exe" {
+		t.Fatalf("unexpected windows name: %s", got)
+	}
+	if got := bundledJavelsBinaryName("linux", "arm64"); got != "javels-linux-arm64" {
+		t.Fatalf("unexpected linux name: %s", got)
+	}
+}
+
 func TestGetVSCodeExtensionsDir(t *testing.T) {
 	dir, err := getVSCodeExtensionsDir()
 	if err != nil {

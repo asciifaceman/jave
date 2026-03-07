@@ -47,7 +47,7 @@ jobs:
           fi
           GOARCH="amd64"
 
-          for bin in javec baggage javevm; do
+          for bin in javec baggage javevm javels; do
             OUT="dist/${bin}-${TAG_NAME}-${{ matrix.goos }}-${GOARCH}${{ matrix.ext }}"
             GOOS="${{ matrix.goos }}" GOARCH="${GOARCH}" go build -trimpath -ldflags="-s -w" -o "${OUT}" "./cmd/${bin}"
           done
@@ -88,6 +88,13 @@ jobs:
 
           mkdir -p "${PACKAGE_ROOT}"
           cp -R vscode-jave "${PACKAGE_ROOT}/"
+          mkdir -p "${PACKAGE_ROOT}/vscode-jave/bin"
+
+          cp "dist/javels-${TAG_NAME}-linux-amd64" "${PACKAGE_ROOT}/vscode-jave/bin/javels-linux-amd64"
+          cp "dist/javels-${TAG_NAME}-darwin-amd64" "${PACKAGE_ROOT}/vscode-jave/bin/javels-darwin-amd64"
+          cp "dist/javels-${TAG_NAME}-windows-amd64.exe" "${PACKAGE_ROOT}/vscode-jave/bin/javels-windows-amd64.exe"
+
+          chmod +x "${PACKAGE_ROOT}/vscode-jave/bin/javels-linux-amd64" "${PACKAGE_ROOT}/vscode-jave/bin/javels-darwin-amd64" || true
           cp install-vscode-extension.ps1 "${PACKAGE_ROOT}/"
           cp install-vscode-extension.sh "${PACKAGE_ROOT}/"
           cp docs/vscode-extension-install.md "${PACKAGE_ROOT}/"
@@ -144,6 +151,8 @@ jobs:
           - `jave-vscode-install-__TAG_NAME__-windows-amd64.exe`
           - `jave-vscode-install-__TAG_NAME__-linux-amd64`
           - `jave-vscode-install-__TAG_NAME__-darwin-amd64`
+
+          The packaged VS Code extension includes bundled `javels` binaries for Linux, macOS, and Windows so IntelliSense works without a local Go installation.
 
           Quick install options:
 
