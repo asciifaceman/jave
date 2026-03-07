@@ -2,11 +2,13 @@
 
 [![Go Version](https://img.shields.io/badge/Go-1.26-00ADD8?logo=go&logoColor=white)](https://go.dev/)
 [![Release](https://img.shields.io/badge/Release-v0.1.0-2ea44f)](https://github.com/asciifaceman/jave/releases)
-[![License](https://img.shields.io/badge/License-Project%20Defined-555)](LICENSE)
+[![License](https://img.shields.io/badge/License-JFOUL%20v0.1-555)](LICENSE)
 
 Jave is a deliberately committee-damaged programming language.
 
 It is a joke language with real behavior: the syntax is cursed on purpose, but programs produce deterministic, testable outcomes.
+
+License model: custom parody-forward project license, see [LICENSE](LICENSE).
 
 ## Table Of Contents
 
