@@ -135,27 +135,27 @@ jobs:
             exit 0
           fi
 
-          APPEND="$(cat <<EOF
+          APPEND="$(cat <<'EOF'
           ## VS Code Plugin Installation
 
           This release includes packaged VS Code plugin assets:
 
-          - `jave-vscode-extension-${TAG_NAME}.tar.gz` (and `.zip` when available)
-          - `jave-vscode-install-${TAG_NAME}-windows-amd64.exe`
-          - `jave-vscode-install-${TAG_NAME}-linux-amd64`
-          - `jave-vscode-install-${TAG_NAME}-darwin-amd64`
+          - `jave-vscode-extension-__TAG_NAME__.tar.gz` (and `.zip` when available)
+          - `jave-vscode-install-__TAG_NAME__-windows-amd64.exe`
+          - `jave-vscode-install-__TAG_NAME__-linux-amd64`
+          - `jave-vscode-install-__TAG_NAME__-darwin-amd64`
 
           Quick install options:
 
           ```bash
           # Standalone installer binary from this release
-          ./jave-vscode-install-${TAG_NAME}-linux-amd64
+          ./jave-vscode-install-__TAG_NAME__-linux-amd64
           ```
 
           Windows example:
 
           ```powershell
-          .\jave-vscode-install-${TAG_NAME}-windows-amd64.exe
+          .\jave-vscode-install-__TAG_NAME__-windows-amd64.exe
           ```
 
           or
@@ -182,10 +182,11 @@ jobs:
           Verify on Windows PowerShell:
 
           ```powershell
-          Get-FileHash .\javec-${TAG_NAME}-windows-amd64.exe -Algorithm SHA256
+          Get-FileHash .\javec-__TAG_NAME__-windows-amd64.exe -Algorithm SHA256
           ```
           EOF
           )"
+          APPEND="${APPEND//__TAG_NAME__/${TAG_NAME}}"
 
           if [ -n "${BODY}" ]; then
             NEW_BODY="${BODY}\n\n${APPEND}"
