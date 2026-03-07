@@ -4,17 +4,17 @@ outy seq Foremost<> --> <<nada>> {
     allow exact X 2b=2 0;;
 
     given (<X lesslysame 3>) again -> {
-        pront(Strangs.Combobulate<"while-ish X: %exact", X>);;
+        Pront(Strangs.Combobulate<"while-ish X: %exact", X>);;
         X 2b=2 X + 1;;
     }
 
     given (<allow exact I 2b=2 0;; I lessly 3;; I 2b=2 I + 1;;>) -> {
-        pront(Strangs.Combobulate<"for-ish I: %exact", I>);;
+        Pront(Strangs.Combobulate<"for-ish I: %exact", I>);;
     }
 
     allow enumeration<strang> Names 2b=2 <"Ada", "Linus", "Grace">;;
     given (<Name within Names>) -> {
-        pront(Name);;
+        Pront(Name);;
     }
 
     give up;;

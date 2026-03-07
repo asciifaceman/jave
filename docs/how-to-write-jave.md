@@ -6,7 +6,7 @@ Jave looks odd on purpose, but it follows rules and can be learned quickly.
 
 ```jave
 outy seq Foremost<> --> <<nada>> {
-    pront("hello, jave");;
+    Pront("hello, jave");;
     give up;;
 }
 ```
@@ -22,9 +22,9 @@ allow strang Name 2b=2 "Ada";;
 
 ```jave
 maybe (<Count bigly 3>) -> {
-    pront("big enough");;
+    Pront("big enough");;
 } otherwise -> {
-    pront("too small");;
+    Pront("too small");;
 }
 ```
 
@@ -32,18 +32,18 @@ maybe (<Count bigly 3>) -> {
 
 ```jave
 given (<allow exact I 2b=2 0;; I lessly 3;; I 2b=2 I + 1;;>) -> {
-    pront(I);;
+    Pront(I);;
 }
 ```
 
 ## 5. Build text with combobulation
 
 Infix plus-style text joining (`"a" + "b"`) is not available in v0.1.
-Use `Strangs.Combobulate<...>` for direct text assembly, or builtin `prontulate<...>` for formatted print.
+Use `Strangs.Combobulate<...>` for direct text assembly, or builtin `Prontulate<...>` for formatted print.
 
 ```jave
 install Strangs from highschool/English;;
-pront(Strangs.Combobulate<"Hello, %strang", Name>);;
+Pront(Strangs.Combobulate<"Hello, %strang", Name>);;
 ```
 
 `Strangs.Combobulate` is a core v0.1 feature, not a post-v0.1 addition.

@@ -8,7 +8,7 @@ Status: Ratified and implemented
 - Primitive types: `exact`, `vag`, `truther`, `strang`, `nada`, `naw`
 - Control flow: `maybe`/`furthermore`/`otherwise`, `given` loop modes
 - Collections: `table`, `enumeration`, `lexis` (including nested tables)
-- String assembly: `Strangs.Combobulate`, `Pronts.Prontulate`, `pront`
+- String assembly: `Strangs.Combobulate`, `Pronts.Prontulate`, `Pront`
 - Imports: `install ... from ...`, highschool stdlib paths, cycle detection
 - Diagnostics: Multi-file source attribution and deterministic formatting
 - Runtime: Deterministic execution for lowered IR and `.jbin` artifacts

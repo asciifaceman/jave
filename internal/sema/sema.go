@@ -2,6 +2,7 @@ package sema
 
 import (
 	"strings"
+	"unicode"
 
 	"github.com/asciifaceman/jave/internal/ast"
 	"github.com/asciifaceman/jave/internal/diagnostics"
@@ -56,6 +57,10 @@ func (a *analyzer) analyzeProgram(program *ast.Program) {
 	foremostCount := 0
 
 	for _, seq := range program.Sequences {
+		if seq.Visibility == "outy" && !isPascalCaseName(seq.Name) {
+			a.errorAt(seq.Pos, "outy sequence names must use PascalCase: "+seq.Name)
+		}
+
 		if seq.SourceModule != "" {
 			moduleSet := a.moduleArities[seq.SourceModule]
 			if moduleSet == nil {
@@ -151,6 +156,22 @@ func (a *analyzer) analyzeProgram(program *ast.Program) {
 		}
 		a.checkStatements(seq.ReturnType, seq.Body, seqScope, seq.SourceModule)
 	}
+}
+
+func isPascalCaseName(name string) bool {
+	if strings.TrimSpace(name) == "" {
+		return false
+	}
+	runes := []rune(name)
+	if !unicode.IsUpper(runes[0]) {
+		return false
+	}
+	for _, r := range runes[1:] {
+		if !unicode.IsLetter(r) && !unicode.IsDigit(r) {
+			return false
+		}
+	}
+	return true
 }
 
 func (a *analyzer) checkStatements(returnType string, statements []ast.Stmt, scope *scope, currentModule string) {
@@ -310,7 +331,12 @@ func (a *analyzer) checkExpr(expr ast.Expr, scope *scope, currentModule string) 
 
 func (a *analyzer) newSequenceScope(currentModule string) *scope {
 	s := newScope(nil)
-	for _, builtin := range []string{"pront", "prontulate", "girth", "slotify", "Strangs"} {
+	for _, builtin := range []string{
+		"Pront", "Prontulate", "Girth", "Slotify", "Strangs",
+		"ProntOops", "FeudGirth", "FeudAt", "Exeunt",
+		"TrailJunction", "TrailNormify", "HomeStead",
+		"DossierPeruseStrang", "DossierJotStrang", "DossierAffixStrang", "DossierPresent",
+	} {
 		s.define(builtin)
 	}
 	if currentModule != "" {

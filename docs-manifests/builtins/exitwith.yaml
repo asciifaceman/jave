@@ -1,0 +1,5 @@
+kind: builtin
+name: Exeunt
+signature: Exeunt(Code)
+title: Explicit runtime program exit
+about: Ends program execution with the requested exit code. Code must be exact in the range 0 through 255.

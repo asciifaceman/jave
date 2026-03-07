@@ -12,7 +12,7 @@ import (
 
 func TestParse_HelloWorldSequence(t *testing.T) {
 	src := `outy seq Foremost<> --> <<nada>> {
-    pront("hello, jave");;
+    Pront("hello, jave");;
     give up;;
 }`
 	toks, lexDiags := lexer.Lex(src)
@@ -75,7 +75,7 @@ func TestParse_SequenceParams(t *testing.T) {
 
 outy seq Foremost<> --> <<nada>> {
     allow exact Sum 2b=2 Add<2, 3>;;
-    pront(Sum);;
+    Pront(Sum);;
     give up;;
 }`
 	toks, lexDiags := lexer.Lex(src)
@@ -104,7 +104,7 @@ func TestParse_SequenceParamsVariadicLast(t *testing.T) {
 }
 
 outy seq Foremost<> --> <<nada>> {
-    pront(Combobulate<"x=%exact", 1>);;
+    Pront(Combobulate<"x=%exact", 1>);;
     give up;;
 }`
 	toks, lexDiags := lexer.Lex(src)
@@ -233,7 +233,7 @@ outy seq Hello<> --> <<nada>> {
 
 func TestParse_MissingStatementEndDiagnostic(t *testing.T) {
 	src := `outy seq Foremost<> --> <<nada>> {
-    pront("oops")
+    Pront("oops")
     give up;;
 }`
 	toks, _ := lexer.Lex(src)
@@ -309,8 +309,8 @@ func TestParse_MultiDimensionalTablesExample(t *testing.T) {
 	}
 }
 
-func TestParse_PortfolioReviewExample(t *testing.T) {
-	srcBytes, err := os.ReadFile("../../examples/portfolio_review/main.jave")
+func TestParse_AdvLogAnomalyTriageExample(t *testing.T) {
+	srcBytes, err := os.ReadFile("../../examples/adv-log-anomaly-triage/main.jave")
 	if err != nil {
 		t.Fatalf("read example: %v", err)
 	}
@@ -353,8 +353,8 @@ func TestParse_IncidentTriageExample(t *testing.T) {
 	}
 }
 
-func TestParse_BudgetPlanningExample(t *testing.T) {
-	srcBytes, err := os.ReadFile("../../examples/budget_planning/main.jave")
+func TestParse_AdvGameLobbyBalancerExample(t *testing.T) {
+	srcBytes, err := os.ReadFile("../../examples/adv-game-lobby-balancer/main.jave")
 	if err != nil {
 		t.Fatalf("read example: %v", err)
 	}
@@ -367,16 +367,16 @@ func TestParse_BudgetPlanningExample(t *testing.T) {
 	if len(parseDiags) != 0 {
 		t.Fatalf("unexpected parser diagnostics: %d", len(parseDiags))
 	}
-	if len(prog.Imports) != 1 {
-		t.Fatalf("expected 1 import, got %d", len(prog.Imports))
+	if len(prog.Imports) != 2 {
+		t.Fatalf("expected 2 imports, got %d", len(prog.Imports))
 	}
 	if len(prog.Sequences) != 1 {
 		t.Fatalf("expected 1 sequence, got %d", len(prog.Sequences))
 	}
 }
 
-func TestParse_ServiceCapacityPlanningExample(t *testing.T) {
-	srcBytes, err := os.ReadFile("../../examples/service_capacity_planning/main.jave")
+func TestParse_AdvMapSpawnSelectorExample(t *testing.T) {
+	srcBytes, err := os.ReadFile("../../examples/adv-map-spawn-selector/main.jave")
 	if err != nil {
 		t.Fatalf("read example: %v", err)
 	}
@@ -389,10 +389,10 @@ func TestParse_ServiceCapacityPlanningExample(t *testing.T) {
 	if len(parseDiags) != 0 {
 		t.Fatalf("unexpected parser diagnostics: %d", len(parseDiags))
 	}
-	if len(prog.Imports) != 1 {
-		t.Fatalf("expected 1 import, got %d", len(prog.Imports))
+	if len(prog.Imports) != 2 {
+		t.Fatalf("expected 2 imports, got %d", len(prog.Imports))
 	}
-	if len(prog.Sequences) != 3 {
-		t.Fatalf("expected 3 sequences, got %d", len(prog.Sequences))
+	if len(prog.Sequences) != 1 {
+		t.Fatalf("expected 1 sequence, got %d", len(prog.Sequences))
 	}
 }

@@ -1,0 +1,5 @@
+kind: builtin
+name: DossierPresent
+signature: DossierPresent(Trail)
+title: Check dossier presence
+about: Returns truther indicating whether dossier Trail exists.

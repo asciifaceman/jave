@@ -33,9 +33,23 @@ This section publishes language-facing materials for operators and implementatio
 
 ## Examples
 
-- [Service Capacity Planning Example]({{ '/content/examples/service_capacity_planning/main/' | relative_url }})
-- [Imports Example]({{ '/content/examples/imports/main/' | relative_url }})
-- [Conditions Example]({{ '/content/examples/conditions/main/' | relative_url }})
+### Core Examples
+
+- [Hello World]({{ '/content/examples/hello_world/main/' | relative_url }})
+- [Imports]({{ '/content/examples/imports/main/' | relative_url }})
+- [Conditions]({{ '/content/examples/conditions/main/' | relative_url }})
+- [Loops (Dual Syntax)]({{ '/content/examples/loops/main/' | relative_url }})
+- [Collections]({{ '/content/examples/collections/main/' | relative_url }})
+- [Multi-Dimensional Tables]({{ '/content/examples/multi_dimensional_tables/main/' | relative_url }})
+
+### Really Advanced Examples (`adv-`)
+
+- [Advanced Log Anomaly Triage]({{ '/content/examples/adv-log-anomaly-triage/main/' | relative_url }})
+- [Advanced Game Lobby Balancer]({{ '/content/examples/adv-game-lobby-balancer/main/' | relative_url }})
+- [Advanced Map Spawn Selector]({{ '/content/examples/adv-map-spawn-selector/main/' | relative_url }})
+- [Advanced CLI Runtime Contract]({{ '/content/examples/adv-cli-runtime-contract/main/' | relative_url }})
+- [Advanced Dossier Journal (Path and Filesystem)]({{ '/content/examples/adv-dossier-journal/main/' | relative_url }})
+- [Advanced Embellishments Incident Board]({{ '/content/examples/adv-embellishments-incident-board/main/' | relative_url }})
 
 ## Language Operations Snapshot
 

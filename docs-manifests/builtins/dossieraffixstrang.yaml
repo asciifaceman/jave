@@ -1,0 +1,5 @@
+kind: builtin
+name: DossierAffixStrang
+signature: DossierAffixStrang(Trail, Content)
+title: Append dossier text as strang
+about: Appends Content to dossier Trail and creates the dossier when absent.

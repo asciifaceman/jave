@@ -149,11 +149,11 @@
       "patterns": [
         {
           "name": "support.function.builtin.jave",
-          "match": "\\b(pront|prontulate|girth|slotify)\\b"
+          "match": "\\b(Pront|Prontulate|Girth|Slotify|ProntOops|FeudGirth|FeudAt|Exeunt|TrailJunction|TrailNormify|HomeStead|DossierPeruseStrang|DossierJotStrang|DossierAffixStrang|DossierPresent)\\b"
         },
         {
           "name": "support.class.builtin.jave",
-          "match": "\\b(Strangs|Srangs|Pronts)\\b"
+          "match": "\\b(Strangs|Srangs|Embellishments)\\b"
         },
         {
           "name": "support.function.method.jave",

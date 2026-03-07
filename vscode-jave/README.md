@@ -9,7 +9,7 @@ Syntax highlighting extension for the Jave programming language.
 - Comment highlighting (line and block)
 - Docstring highlighting (`doc< ... >`)
 - String literal highlighting with escape sequences
-- Builtin and carryon symbol highlighting (`pront`, `prontulate`, `girth`, `slotify`, `Strangs.Combobulate`)
+- Builtin and carryon symbol highlighting (`Pront`, `Prontulate`, `Girth`, `Slotify`, `Strangs.Combobulate`)
 - Bracket matching and auto-closing pairs
 
 ## Installation (Local Development)
@@ -171,19 +171,18 @@ You can also add these settings to your VS Code workspace for additional configu
 ### Builtin Functions and Modules
 
 **Functions:**
-- `pront(...)` - Output function
-- `prontulate<...>` - Builtin formatted output
-- `girth(...)` - Size/length function
-- `slotify(...)` - Replace first formatting directive in template text
+- `Pront(...)` - Output function
+- `Prontulate<...>` - Builtin formatted output
+- `Girth(...)` - Size/length function
+- `Slotify(...)` - Replace first formatting directive in template text
 
 **Standard Library Modules:**
 - `Strangs` - String utilities module (canonical)
 - `Srangs` - Legacy alias for Strangs (warns)
-- `Pronts` - Legacy communications alias (no longer required for formatted output)
+- `Embellishments` - Pretty display helpers for structured output
 
 **Module Methods:**
 - `Strangs.Combobulate<template, ...>` - String assembly with interpolation
-- `Pronts.Prontulate<...>` - Legacy wrapper surface
 
 **Comments and Docstrings:**
 - `>>|` - Line comment
@@ -257,18 +256,18 @@ You can also add these settings to your VS Code workspace for additional configu
 **Conditionals:**
 ```jave
 maybe (<X bigly 5>) -> {
-    pront("large");;
+    Pront("large");;
 } furthermore (<X lessly 5>) -> {
-    pront("small");;
+    Pront("small");;
 } otherwise -> {
-    pront("middle");;
+    Pront("middle");;
 }
 ```
 
 **While-style Loop:**
 ```jave
 given (<X lesslysame 10>) again -> {
-    pront(X);;
+    Pront(X);;
     X 2b=2 X + 1;;
 }
 ```
@@ -276,14 +275,14 @@ given (<X lesslysame 10>) again -> {
 **For-style Loop:**
 ```jave
 given (<allow exact I 2b=2 0;; I lessly 10;; I 2b=2 I + 1;;>) -> {
-    pront(I);;
+    Pront(I);;
 }
 ```
 
 **For-each Iteration:**
 ```jave
 given (<Name within Names>) -> {
-    pront(Name);;
+    Pront(Name);;
 }
 ```
 
@@ -292,7 +291,7 @@ given (<Name within Names>) -> {
 ```jave
 >>| Hello World
 outy seq Foremost<> --> <<nada>> {
-    pront("hello, jave");;
+    Pront("hello, jave");;
     give up;;
 }
 ```
@@ -303,9 +302,9 @@ outy seq Foremost<> --> <<nada>> {
     allow vag Score 2b=2 0.85;;
     
     maybe (<Score biglysame 0.6>) -> {
-        pront("Pass!");;
+        Pront("Pass!");;
     } otherwise -> {
-        pront("Fail!");;
+        Pront("Fail!");;
     }
     
     give up;;
@@ -319,7 +318,7 @@ install Strangs from highschool/English;;
 outy seq Foremost<> --> <<nada>> {
     allow exact Count 2b=2 42;;
     allow strang Message 2b=2 Strangs.Combobulate<"Answer: %exact", Count>;;
-    prontulate<"Answer: %exact", Count>;;
+    Prontulate<"Answer: %exact", Count>;;
     give up;;
 }
 ```
@@ -336,7 +335,7 @@ outy seq Foremost<> --> <<nada>> {
         Sum 2b=2 Sum + Value;;
     }
     
-    pront(Strangs.Combobulate<"Sum: %exact", Sum>);;
+    Pront(Strangs.Combobulate<"Sum: %exact", Sum>);;
     give up;;
 }
 ```

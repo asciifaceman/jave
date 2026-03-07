@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -185,5 +186,27 @@ func TestIsToolchainInstalled(t *testing.T) {
 	// Function should return a boolean value
 	if result != true && result != false {
 		t.Error("isToolchainInstalled should return a boolean")
+	}
+}
+
+func TestIsWindowsAccessDenied(t *testing.T) {
+	tests := []struct {
+		name string
+		err  error
+		want bool
+	}{
+		{name: "nil", err: nil, want: false},
+		{name: "windows access denied", err: errors.New("unlinkat C:\\x: Access is denied."), want: true},
+		{name: "permission denied", err: errors.New("permission denied"), want: true},
+		{name: "used by another process", err: errors.New("file is being used by another process"), want: true},
+		{name: "other error", err: errors.New("no such file or directory"), want: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := isWindowsAccessDenied(tt.err); got != tt.want {
+				t.Fatalf("isWindowsAccessDenied(%v) = %v, want %v", tt.err, got, tt.want)
+			}
+		})
 	}
 }

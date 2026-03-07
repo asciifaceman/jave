@@ -5,9 +5,9 @@ outy seq Foremost<> --> <<nada>> {
     allow enumeration<strang> Names 2b=2 <"Ada", "Linus", "Grace">;;
     allow lexis<strang, exact> Ages 2b=2 {"Ada": 36, "Linus": 55};;
 
-    pront(Strangs.Combobulate<"Scores girth: %exact", girth(Scores)>);;
-    pront(Strangs.Combobulate<"First name: %strang", Names[0]>);;
-    pront(Strangs.Combobulate<"Ada age: %exact", Ages["Ada"]>);;
+    Pront(Strangs.Combobulate<"Scores Girth: %exact", Girth(Scores)>);;
+    Pront(Strangs.Combobulate<"First name: %strang", Names[0]>);;
+    Pront(Strangs.Combobulate<"Ada age: %exact", Ages["Ada"]>);;
 
     give up;;
 }

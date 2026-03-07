@@ -38,7 +38,7 @@ func main() {
 	}
 
 	if flag.NArg() == 0 {
-		fmt.Println("usage: javec [--version] [--tokens] [--trace-imports] [--project-root dir] [--sponsor-notice mode] [--sponsor-redacted] [--sponsor-quiet] [--run] [--out file.jbin] <input.jave>")
+		fmt.Println("usage: javec [--version] [--tokens] [--trace-imports] [--project-root dir] [--sponsor-notice mode] [--sponsor-redacted] [--sponsor-quiet] [--run] [--out file.jbin] <input.jave> [program args...]")
 		return
 	}
 
@@ -49,6 +49,10 @@ func main() {
 	}
 
 	path := flag.Arg(0)
+	runtimeArgs := []string{}
+	if flag.NArg() > 1 {
+		runtimeArgs = append(runtimeArgs, flag.Args()[1:]...)
+	}
 	for _, line := range sponsor.RenderLines(mode, path) {
 		fmt.Fprintln(os.Stderr, line)
 	}
@@ -127,9 +131,10 @@ func main() {
 	fmt.Printf("javec: emitted %s\n", emitPath)
 
 	if *runProgram {
-		if err := runtime.Execute(irProgram, os.Stdout); err != nil {
+		runOpts := runtime.ExecuteOptions{Stdout: os.Stdout, Stderr: os.Stderr, Args: runtimeArgs}
+		if err := runtime.ExecuteWithOptions(irProgram, runOpts); err != nil {
 			fmt.Fprintf(os.Stderr, "javec: runtime error: %v\n", err)
-			os.Exit(1)
+			os.Exit(runtime.ExitCodeForError(err))
 		}
 		return
 	}

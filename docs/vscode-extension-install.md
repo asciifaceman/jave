@@ -102,11 +102,11 @@ After installation:
    - Keywords: `outy`, `seq`, `maybe`, `give`, `up`
    - Types: `exact`, `vag`, `truther`, `strang`
    - Operators: `2b=2`, `bigly`, `samewise`
-   - Builtins: `pront`, `prontulate`, `girth`, `slotify`, `Strangs`, `Combobulate`
+   - Builtins: `Pront`, `Prontulate`, `Girth`, `Slotify`, `Strangs`, `Combobulate`
 
 Hover and signature help are served by bundled `javels` binaries included in release extension packages, so Go is not required for end users.
 
-`Strangs.Combobulate<...>` and `Pronts.Prontulate<...>` are part of Jave v0.1 and should be recognized/highlighted.
+`Strangs.Combobulate<...>` and `Embellishments.*` helpers are recognized/highlighted alongside PascalCase runtime builtins in v0.2.
 
 ### Troubleshooting
 

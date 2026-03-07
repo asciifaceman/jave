@@ -16,7 +16,7 @@ Example:
 outy seq Combobulate<strang Template, ...strang Args> --> <<strang>> {
 	allow strang Out 2b=2 Template;;
 	given (<Arg within Args>) -> {
-		Out 2b=2 slotify(Out, Arg);;
+		Out 2b=2 Slotify(Out, Arg);;
 	}
 	give Out up;;
 }

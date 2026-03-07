@@ -1,0 +1,5 @@
+kind: builtin
+name: DossierJotStrang
+signature: DossierJotStrang(Trail, Content)
+title: Write dossier text as strang
+about: Writes Content to dossier Trail, replacing existing text when present.

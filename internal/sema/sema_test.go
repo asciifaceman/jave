@@ -47,7 +47,7 @@ outy seq Add<> --> <<exact>> {
 
 func TestAnalyze_UndefinedIdentifier(t *testing.T) {
 	src := `outy seq Foremost<> --> <<nada>> {
-    pront(UnknownName);;
+    Pront(UnknownName);;
     give up;;
 }`
 	diags := analyzeSrc(t, src)
@@ -71,7 +71,7 @@ func TestAnalyze_DuplicateLocalDeclaration(t *testing.T) {
 func TestAnalyze_SrangsLegacyAliasWarning(t *testing.T) {
 	src := `install Srangs from highschool/English;;
 outy seq Foremost<> --> <<nada>> {
-    pront(Srangs.Combobulate<"Legacy %exact", 1>);;
+    Pront(Srangs.Combobulate<"Legacy %exact", 1>);;
     give up;;
 }`
 	diags := analyzeSrcDetailed(t, src)
@@ -131,7 +131,7 @@ func TestAnalyze_SequenceParamsAreInScope(t *testing.T) {
 
 outy seq Foremost<> --> <<nada>> {
     allow exact Sum 2b=2 Add<2, 3>;;
-    pront(Sum);;
+    Pront(Sum);;
     give up;;
 }`
 
@@ -150,7 +150,7 @@ func TestAnalyze_SequenceCallArityMismatch(t *testing.T) {
 
 outy seq Foremost<> --> <<nada>> {
     allow exact Sum 2b=2 Add<2>;;
-    pront(Sum);;
+    Pront(Sum);;
     give up;;
 }`
 
@@ -172,7 +172,7 @@ func TestAnalyze_VariadicSequenceCallTooFewArgs(t *testing.T) {
 }
 outy seq Foremost<> --> <<nada>> {
     allow strang S 2b=2 Combobulate<>;;
-    pront(S);;
+    Pront(S);;
     give up;;
 }`
 
@@ -190,7 +190,7 @@ outy seq Foremost<> --> <<nada>> {
 
 func TestAnalyze_ProntulateBuiltinIdentifier(t *testing.T) {
 	src := `outy seq Foremost<> --> <<nada>> {
-	prontulate<"Count=%exact", 2>;;
+	Prontulate<"Count=%exact", 2>;;
     give up;;
 }`
 
@@ -199,6 +199,27 @@ func TestAnalyze_ProntulateBuiltinIdentifier(t *testing.T) {
 		if d.Severity == diagnostics.SeverityError {
 			t.Fatalf("unexpected semantic error: %s", d.Message)
 		}
+	}
+}
+
+func TestAnalyze_OutySequenceMustUsePascalCase(t *testing.T) {
+	src := `outy seq Foremost<> --> <<nada>> {
+    give up;;
+}
+
+outy seq notPascal<exact Value> --> <<exact>> {
+    give Value up;;
+}`
+
+	diags := analyzeSrcDetailed(t, src)
+	found := false
+	for _, d := range diags {
+		if d.Severity == diagnostics.SeverityError && strings.Contains(d.Message, "must use PascalCase") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("expected PascalCase naming diagnostic for outy sequence")
 	}
 }
 

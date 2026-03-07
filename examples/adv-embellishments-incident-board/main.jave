@@ -1,0 +1,22 @@
+install Embellishments from highschool/Embellishments;;
+install Strangs from highschool/English;;
+
+outy seq Foremost<> --> <<nada>> {
+    allow enumeration<strang> Services 2b=2 <"Gateway", "Realtime", "Profiles">;;
+    allow table<exact> Scores 2b=2 [45, 113, 16];;
+    allow table<strang> Lanes 2b=2 ["investigate", "page-now", "observe"];;
+
+    Pront(Embellishments.Banner<"Incident Board">);;
+    Pront(Embellishments.TwoCol<"Service", "Score/Lane">);;
+    Pront(Embellishments.Divider<>);;
+
+    given (<allow exact I 2b=2 0;; I lessly Girth(Services);; I 2b=2 I + 1;;>) -> {
+        allow strang Right 2b=2 Strangs.Combobulate<"%exact / %strang", Scores[I], Lanes[I]>;;
+        Pront(Embellishments.TwoCol<Services[I], Right>);;
+    }
+
+    Pront(Embellishments.Divider<>);;
+    Pront(Embellishments.KeyVal<"Top Service", "Realtime">);;
+    Pront(Embellishments.KeyVal<"Escalation", "P0">);;
+    give up;;
+}

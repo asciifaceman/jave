@@ -1,0 +1,59 @@
+install Strangs from highschool/English;;
+
+doc<
+Title:
+    Framed banner line for console sections.
+About:
+    Produces a readable section banner for CLI and runtime logs.
+Param:
+    Title: Primary section label.
+Return:
+    Banner strang wrapped in governance-approved framing.
+>
+outy seq Banner<strang Title> --> <<strang>> {
+    give Strangs.Combobulate<"=== %strang ===", Title> up;;
+}
+
+doc<
+Title:
+    Two-column key/value display line.
+About:
+    Formats one key/value row for structured text output.
+Param:
+    Key: Row label.
+Param:
+    Value: Row value.
+Return:
+    Structured row strang.
+>
+outy seq KeyVal<strang Key, strang Value> --> <<strang>> {
+    give Strangs.Combobulate<"%strang : %strang", Key, Value> up;;
+}
+
+doc<
+Title:
+    Simple two-column row for summary tables.
+About:
+    Formats left/right values with visual separator for compact table-like output.
+Param:
+    Left: Left column value.
+Param:
+    Right: Right column value.
+Return:
+    Rendered row strang.
+>
+outy seq TwoCol<strang Left, strang Right> --> <<strang>> {
+    give Strangs.Combobulate<"%strang | %strang", Left, Right> up;;
+}
+
+doc<
+Title:
+    Horizontal divider line.
+About:
+    Returns a static divider suitable for separating table blocks.
+Return:
+    Divider strang.
+>
+outy seq Divider<> --> <<strang>> {
+    give "------------------------------" up;;
+}

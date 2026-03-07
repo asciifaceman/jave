@@ -1,6 +1,12 @@
-# Jave Syntax Quick Reference (v0.1)
+# Jave Syntax Quick Reference
 
-This is a practical reference for writing valid Jave v0.1.
+This is a practical reference for writing modern Jave syntax.
+
+## v0.2 Naming Policy
+
+- Exported sequence names (`outy seq`) use PascalCase (for example: `Foremost`, `AddNumbers`, `ReadConfig`).
+- Builtin/runtime surface names are PascalCase (for example: `Pront`, `Prontulate`, `Girth`, `Slotify`, `ProntOops`, `FeudGirth`).
+- Lowercase builtin spellings and legacy `Pronts.*` forms are not part of the canonical v0.2 surface.
 
 ## Declarations
 
@@ -29,11 +35,11 @@ outy seq Foremost<> --> <<nada>> {
 
 ```jave
 maybe (<X bigly 5>) -> {
-    pront("large");;
+    Pront("large");;
 } furthermore (<X lessly 5>) -> {
-    pront("small");;
+    Pront("small");;
 } otherwise -> {
-    pront("middle");;
+    Pront("middle");;
 }
 ```
 
@@ -51,7 +57,7 @@ For-ish:
 
 ```jave
 given (<allow exact I 2b=2 0;; I lessly 3;; I 2b=2 I + 1;;>) -> {
-    pront(I);;
+    Pront(I);;
 }
 ```
 
@@ -59,7 +65,7 @@ Collection iteration:
 
 ```jave
 given (<Name within Names>) -> {
-    pront(Name);;
+    Pront(Name);;
 }
 ```
 
@@ -80,10 +86,10 @@ These collection literal forms are exact in v0.1 with no alternates.
 install Strangs from highschool/English;;
 
 allow strang Message 2b=2 Strangs.Combobulate<"Hello, %strang", Name>;;
-pront(Message);;
+Pront(Message);;
 ```
 
-Formatted output uses builtin `prontulate<Template, Args...>`.
+Formatted output uses builtin `Prontulate<Template, Args...>`.
 
 ## Imports
 

@@ -72,11 +72,11 @@ Example:
 
 ```jave
 maybe (<X bigly 5>) -> {
-    pront("large");;
+    Pront("large");;
 } furthermore (<X lessly 5>) -> {
-    pront("small");;
+    Pront("small");;
 } otherwise -> {
-    pront("middle");;
+    Pront("middle");;
 }
 ```
 
@@ -97,10 +97,10 @@ Logical operators:
 
 ## Output
 
-- `pront(...)` is built-in output.
-- `prontulate<...>` is built-in formatted output.
+- `Pront(...)` is built-in output.
+- `Prontulate<...>` is built-in formatted output.
 - `Strangs.Combobulate<...>` is canonical text assembly.
-- `prontulate<...>` formats by way of `Strangs.Combobulate` behavior.
+- `Prontulate<...>` formats by way of `Strangs.Combobulate` behavior.
 
 ## Text Assembly
 
@@ -203,13 +203,13 @@ No alternate literal syntax is supported in v0.1.
 
 ## Sizing
 
-Use built-in `girth(...)`.
+Use built-in `Girth(...)`.
 
 Examples:
 
 ```jave
-allow exact Count 2b=2 girth(Scores);;
-allow exact Width 2b=2 girth(Grid[0]);;
+allow exact Count 2b=2 Girth(Scores);;
+allow exact Width 2b=2 Girth(Grid[0]);;
 ```
 
 ## Looping (Dual Syntax is Required)
@@ -226,7 +226,7 @@ For-ish form:
 
 ```jave
 given (<allow exact I 2b=2 0;; I lessly 5;; I 2b=2 I + 1;;>) -> {
-    pront(I);;
+    Pront(I);;
 }
 ```
 
@@ -234,7 +234,7 @@ Collection iteration:
 
 ```jave
 given (<Name within Names>) -> {
-    pront(Name);;
+    Pront(Name);;
 }
 ```
 

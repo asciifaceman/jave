@@ -2,6 +2,8 @@
 
 This is the implementation plan for Jave v0.1.
 
+Note: This document is historical planning context; use v0.2 governance/docs for current canonical naming.
+
 ## Milestone 1: Vertical Slice
 
 Scope:
@@ -10,7 +12,7 @@ Scope:
 - AST
 - diagnostics
 - execution path sufficient for core examples
-- built-ins: `pront`, `girth`
+- built-ins: `Pront`, `Girth`
 - control flow and both `given` loop forms
 - base types and core collections
 
@@ -26,7 +28,7 @@ Scope:
 - import resolution for `highschool/...`
 - `Foreward` semantics
 - `Strangs.Combobulate`
-- `Pronts.Prontulate`
+- `Prontulate` (historically documented as `Pronts.Prontulate` in early v0.1 planning)
 - `javec`, `baggage`, `javevm` CLI command growth
 - `.jbin` format defined
 - syntax highlighting support with VS Code priority and GitHub compatibility

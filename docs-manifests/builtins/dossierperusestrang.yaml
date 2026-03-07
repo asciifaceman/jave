@@ -1,0 +1,5 @@
+kind: builtin
+name: DossierPeruseStrang
+signature: DossierPeruseStrang(Trail)
+title: Read dossier text as strang
+about: Reads a dossier at Trail and returns full text as strang.

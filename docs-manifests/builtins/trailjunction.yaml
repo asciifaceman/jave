@@ -1,0 +1,5 @@
+kind: builtin
+name: TrailJunction
+signature: TrailJunction(Parts...)
+title: Join path trail segments
+about: Joins one or more trail segments using host platform separators.

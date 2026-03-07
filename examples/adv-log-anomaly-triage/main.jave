@@ -1,0 +1,60 @@
+install Strangs from highschool/English;;
+
+outy seq Foremost<> --> <<nada>> {
+    allow enumeration<strang> Services 2b=2 <"Gateway", "Search", "Realtime", "Profiles", "Media">;;
+    allow table<vag> ErrorRates 2b=2 [2.4, 0.9, 3.1, 1.2, 0.4];;
+    allow table<exact> P95Millis 2b=2 [380, 220, 640, 300, 180];;
+    allow table<exact> RestartCount 2b=2 [1, 0, 4, 1, 0];;
+    allow table<truther> IncidentPages 2b=2 [nee, nee, yee, nee, nee];;
+
+    allow exact HighestScore 2b=2 0;;
+    allow strang HighestService 2b=2 "none";;
+
+    given (<allow exact I 2b=2 0;; I lessly Girth(Services);; I 2b=2 I + 1;;>) -> {
+        allow exact Score 2b=2 0;;
+
+        maybe (<ErrorRates[I] bigly 3.0>) -> {
+            Score 2b=2 Score + 45;;
+        } furthermore (<ErrorRates[I] bigly 1.5>) -> {
+            Score 2b=2 Score + 25;;
+        } furthermore (<ErrorRates[I] bigly 0.7>) -> {
+            Score 2b=2 Score + 12;;
+        }
+
+        maybe (<P95Millis[I] bigly 550>) -> {
+            Score 2b=2 Score + 28;;
+        } furthermore (<P95Millis[I] bigly 320>) -> {
+            Score 2b=2 Score + 16;;
+        }
+
+        maybe (<RestartCount[I] biglysame 3>) -> {
+            Score 2b=2 Score + 18;;
+        } furthermore (<RestartCount[I] samewise 2>) -> {
+            Score 2b=2 Score + 10;;
+        } furthermore (<RestartCount[I] samewise 1>) -> {
+            Score 2b=2 Score + 4;;
+        }
+
+        maybe (<IncidentPages[I] samewise yee>) -> {
+            Score 2b=2 Score + 22;;
+        }
+
+        allow strang Lane 2b=2 "observe";;
+        maybe (<Score biglysame 70>) -> {
+            Lane 2b=2 "page-now";;
+        } furthermore (<Score biglysame 45>) -> {
+            Lane 2b=2 "investigate";;
+        }
+
+        maybe (<I samewise 0 orelse Score bigly HighestScore>) -> {
+            HighestScore 2b=2 Score;;
+            HighestService 2b=2 Services[I];;
+        }
+
+        Prontulate<"service=%strang score=%exact lane=%strang", Services[I], Score, Lane>;;
+    }
+
+    Pront("--- anomaly focus ---");;
+    Prontulate<"top suspect=%strang score=%exact", HighestService, HighestScore>;;
+    give up;;
+}

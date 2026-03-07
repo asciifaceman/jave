@@ -1,9 +1,9 @@
 kind: builtin
-name: pront
-signature: pront(Value)
+name: Pront
+signature: Pront(Value)
 title: Print a single value to stdout
 about: Emits one display-converted value and appends a newline.
 examples:
   - |
-    pront("hello, jave");;
+    Pront("hello, jave");;
 status: stable

@@ -1,0 +1,5 @@
+kind: builtin
+name: HomeStead
+signature: HomeStead()
+title: Current working stead trail
+about: Returns the runtime current working directory trail.

@@ -1,0 +1,5 @@
+kind: builtin
+name: FeudGirth
+signature: FeudGirth()
+title: Count CLI program arguments
+about: Returns the number of runtime program arguments passed after the input source or jbin path.

@@ -1,0 +1,26 @@
+outy seq Foremost<> --> <<nada>> {
+    allow exact Count 2b=2 FeudGirth();;
+
+    maybe (<Count lessly 1>) -> {
+        ProntOops("usage: adv-dossier-journal <root-trail>");;
+        Exeunt(64);;
+    }
+
+    allow strang Root 2b=2 FeudAt(0);;
+    allow strang Journal 2b=2 TrailJunction<Root, "journal.log">;;
+
+    DossierJotStrang(Journal, "session=start | ");;
+    DossierAffixStrang(Journal, "status=ok");;
+
+    maybe (<DossierPresent(Journal) samewise yee>) -> {
+        Pront("--- dossier ---");;
+        Pront(DossierPeruseStrang(Journal));;
+    } otherwise -> {
+        ProntOops("journal dossier missing");;
+        Exeunt(66);;
+    }
+
+    Prontulate<"stead=%strang", HomeStead()>;;
+    Prontulate<"norm=%strang", TrailNormify("alpha/../beta")>;;
+    give up;;
+}

@@ -49,7 +49,7 @@ Supports while-ish, for-ish, and within iteration forms.
 
 ```jave
 given (<allow exact I 2b=2 0;; I lessly 3;; I 2b=2 I + 1;;>) -> {
-    pront(I);;
+    Pront(I);;
 }
 
 ```
@@ -72,9 +72,9 @@ Evaluates branch conditions top-to-bottom and executes the first matching branch
 
 ```jave
 maybe (<X bigly 5>) -> {
-    pront("large");;
+    Pront("large");;
 } otherwise -> {
-    pront("small-or-equal");;
+    Pront("small-or-equal");;
 }
 
 ```

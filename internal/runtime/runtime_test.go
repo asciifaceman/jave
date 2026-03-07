@@ -19,7 +19,7 @@ import (
 
 func TestExecute_PrintsHelloWorld(t *testing.T) {
 	src := `outy seq Foremost<> --> <<nada>> {
-    pront("hello, jave");;
+    Pront("hello, jave");;
     give up;;
 }`
 	buf := &bytes.Buffer{}
@@ -35,14 +35,14 @@ func TestExecute_CombobulateAndGirth(t *testing.T) {
 	src := `install Strangs from highschool/English;;
 outy seq Foremost<> --> <<nada>> {
     allow table<exact> Scores 2b=2 [1, 2, 3];;
-    pront(Strangs.Combobulate<"Scores girth: %exact", girth(Scores)>);;
+    Pront(Strangs.Combobulate<"Scores Girth: %exact", Girth(Scores)>);;
     give up;;
 }`
 	buf := &bytes.Buffer{}
 	if err := runSource(src, buf); err != nil {
 		t.Fatalf("execute failed: %v", err)
 	}
-	if got := strings.TrimSpace(buf.String()); got != "Scores girth: 3" {
+	if got := strings.TrimSpace(buf.String()); got != "Scores Girth: 3" {
 		t.Fatalf("unexpected output: %q", got)
 	}
 }
@@ -50,7 +50,7 @@ outy seq Foremost<> --> <<nada>> {
 func TestExecute_LexisIndexing(t *testing.T) {
 	src := `outy seq Foremost<> --> <<nada>> {
     allow lexis<strang, exact> Ages 2b=2 {"Ada": 36, "Linus": 55};;
-    pront(Ages["Ada"]);;
+    Pront(Ages["Ada"]);;
     give up;;
 }`
 	buf := &bytes.Buffer{}
@@ -65,7 +65,7 @@ func TestExecute_LexisIndexing(t *testing.T) {
 func TestExecute_LexisMissingKeyErrors(t *testing.T) {
 	src := `outy seq Foremost<> --> <<nada>> {
     allow lexis<strang, exact> Ages 2b=2 {"Ada": 36};;
-    pront(Ages["Grace"]);;
+    Pront(Ages["Grace"]);;
     give up;;
 }`
 	buf := &bytes.Buffer{}
@@ -80,7 +80,7 @@ func TestExecute_LexisMissingKeyErrors(t *testing.T) {
 
 func TestExecute_ProntulateBuiltin(t *testing.T) {
 	src := `outy seq Foremost<> --> <<nada>> {
-	prontulate<"Count=%exact", 2>;;
+	Prontulate<"Count=%exact", 2>;;
     give up;;
 }`
 	buf := &bytes.Buffer{}
@@ -94,8 +94,8 @@ func TestExecute_ProntulateBuiltin(t *testing.T) {
 
 func TestExecute_SlotifyBuiltin(t *testing.T) {
 	src := `outy seq Foremost<> --> <<nada>> {
-    pront(slotify("A=%exact B=%strang", 7));;
-    pront(slotify(slotify("A=%exact B=%strang", 7), "yee"));;
+    Pront(Slotify("A=%exact B=%strang", 7));;
+    Pront(Slotify(Slotify("A=%exact B=%strang", 7), "yee"));;
     give up;;
 }`
 	buf := &bytes.Buffer{}
@@ -109,16 +109,119 @@ func TestExecute_SlotifyBuiltin(t *testing.T) {
 	}
 }
 
+func TestExecute_ProntOopsBuiltin(t *testing.T) {
+	src := `outy seq Foremost<> --> <<nada>> {
+	ProntOops("runtime-issue");;
+    give up;;
+}`
+	stdout := &bytes.Buffer{}
+	stderr := &bytes.Buffer{}
+	if err := runSourceWithOptions(src, runtime.ExecuteOptions{Stdout: stdout, Stderr: stderr}); err != nil {
+		t.Fatalf("execute failed: %v", err)
+	}
+	if got := strings.TrimSpace(stdout.String()); got != "" {
+		t.Fatalf("expected empty stdout, got: %q", got)
+	}
+	if got := strings.TrimSpace(stderr.String()); got != "runtime-issue" {
+		t.Fatalf("unexpected stderr output: %q", got)
+	}
+}
+
+func TestExecute_FeudGirthAndFeudAtBuiltins(t *testing.T) {
+	src := `outy seq Foremost<> --> <<nada>> {
+	Prontulate<"argc=%exact", FeudGirth()>;;
+	Prontulate<"arg0=%strang", FeudAt(0)>;;
+	Prontulate<"arg1=%strang", FeudAt(1)>;;
+    give up;;
+}`
+	stdout := &bytes.Buffer{}
+	opts := runtime.ExecuteOptions{Stdout: stdout, Args: []string{"deploy", "prod"}}
+	if err := runSourceWithOptions(src, opts); err != nil {
+		t.Fatalf("execute failed: %v", err)
+	}
+	if got := strings.TrimSpace(stdout.String()); got != "argc=2\narg0=deploy\narg1=prod" {
+		t.Fatalf("unexpected output: %q", got)
+	}
+}
+
+func TestExecute_ExeuntBuiltin(t *testing.T) {
+	src := `outy seq Foremost<> --> <<nada>> {
+	Exeunt(65);;
+    give up;;
+}`
+	err := runSourceWithOptions(src, runtime.ExecuteOptions{Stdout: &bytes.Buffer{}, Stderr: &bytes.Buffer{}})
+	if err == nil {
+		t.Fatal("expected explicit program exit error")
+	}
+	if code := runtime.ExitCodeForError(err); code != 65 {
+		t.Fatalf("ExitCodeForError = %d, want 65", code)
+	}
+}
+
+func TestExecute_FeudAtOutOfRangeErrors(t *testing.T) {
+	src := `outy seq Foremost<> --> <<nada>> {
+    Pront(FeudAt(3));;
+    give up;;
+}`
+	err := runSourceWithOptions(src, runtime.ExecuteOptions{Stdout: &bytes.Buffer{}, Args: []string{"a"}})
+	if err == nil {
+		t.Fatal("expected FeudAt out-of-range error")
+	}
+	if !strings.Contains(err.Error(), "FeudAt index out of range") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestExecute_TrailAndDossierBuiltins(t *testing.T) {
+	base := t.TempDir()
+	src := `outy seq Foremost<> --> <<nada>> {
+    allow strang Root 2b=2 FeudAt(0);;
+    allow strang FileTrail 2b=2 TrailJunction<Root, "notes.txt">;;
+
+	DossierJotStrang(FileTrail, "line1|");;
+	DossierAffixStrang(FileTrail, "line2");;
+
+    maybe (<DossierPresent(FileTrail) samewise yee>) -> {
+        Pront(DossierPeruseStrang(FileTrail));;
+    } otherwise -> {
+        Pront("missing");;
+    }
+
+    Pront(TrailNormify("alpha/../beta"));;
+    maybe (<HomeStead() samewise "">) -> {
+        Pront("bad-homestead");;
+    } otherwise -> {
+        Pront("homestead-ok");;
+    }
+    give up;;
+}`
+	stdout := &bytes.Buffer{}
+	opts := runtime.ExecuteOptions{Stdout: stdout, Stderr: &bytes.Buffer{}, Args: []string{base}}
+	if err := runSourceWithOptions(src, opts); err != nil {
+		t.Fatalf("execute failed: %v", err)
+	}
+	got := strings.TrimSpace(stdout.String())
+	if !strings.Contains(got, "line1|line2") {
+		t.Fatalf("expected dossier content output, got: %q", got)
+	}
+	if !strings.Contains(got, "beta") {
+		t.Fatalf("expected TrailNormify output to contain beta, got: %q", got)
+	}
+	if !strings.Contains(got, "homestead-ok") {
+		t.Fatalf("expected HomeStead check output, got: %q", got)
+	}
+}
+
 func TestExecute_ConditionsBranching(t *testing.T) {
 	src := `outy seq Foremost<> --> <<nada>> {
     allow vag Foo 2b=2 0.6;;
 
     maybe (<Foo bigly 0.5>) -> {
-        pront("Over half");;
+        Pront("Over half");;
     } furthermore (<Foo lessly 0.5>) -> {
-        pront("Under half");;
+        Pront("Under half");;
     } otherwise -> {
-        pront("Exactly half");;
+        Pront("Exactly half");;
     }
 
     give up;;
@@ -136,7 +239,7 @@ func TestExecute_WhileGivenLoop(t *testing.T) {
 	src := `outy seq Foremost<> --> <<nada>> {
     allow exact X 2b=2 0;;
     given (<X lesslysame 3>) again -> {
-        pront(X);;
+        Pront(X);;
         X 2b=2 X + 1;;
     }
     give up;;
@@ -196,9 +299,9 @@ func TestExecute_ImportsExample(t *testing.T) {
 	}
 	got := strings.TrimSpace(buf.String())
 	if !strings.Contains(got, "Imported systems online. Count=2") {
-		t.Fatalf("expected prontulate output, got: %q", got)
+		t.Fatalf("expected Prontulate output, got: %q", got)
 	}
-	if !strings.Contains(got, "Direct pront via Strangs too: 2") {
+	if !strings.Contains(got, "Direct Pront via Strangs too: 2") {
 		t.Fatalf("expected combobulate output, got: %q", got)
 	}
 }
@@ -206,7 +309,7 @@ func TestExecute_ImportsExample(t *testing.T) {
 func TestExecute_SrangsLegacyAlias(t *testing.T) {
 	src := `install Srangs from highschool/English;;
 outy seq Foremost<> --> <<nada>> {
-    pront(Srangs.Combobulate<"Legacy alias says: %exact", 7>);;
+    Pront(Srangs.Combobulate<"Legacy alias says: %exact", 7>);;
     give up;;
 }`
 	buf := &bytes.Buffer{}
@@ -230,7 +333,7 @@ outy seq Scale<exact Base, exact Multiplier> --> <<exact>> {
 outy seq Foremost<> --> <<nada>> {
     allow exact Sum 2b=2 Add<7, 5>;;
     allow exact Product 2b=2 Scale<Sum, 3>;;
-    pront(Product);;
+    Pront(Product);;
     give up;;
 }`
 
@@ -243,24 +346,21 @@ outy seq Foremost<> --> <<nada>> {
 	}
 }
 
-func TestExecute_PortfolioReviewExample(t *testing.T) {
-	srcBytes, err := os.ReadFile("../../examples/portfolio_review/main.jave")
+func TestExecute_AdvLogAnomalyTriageExample(t *testing.T) {
+	srcBytes, err := os.ReadFile("../../examples/adv-log-anomaly-triage/main.jave")
 	if err != nil {
-		t.Fatalf("read portfolio review example: %v", err)
+		t.Fatalf("read advanced log anomaly example: %v", err)
 	}
 	buf := &bytes.Buffer{}
 	if err := runSource(string(srcBytes), buf); err != nil {
 		t.Fatalf("execute failed: %v", err)
 	}
 	got := strings.TrimSpace(buf.String())
-	if !strings.Contains(got, "Initiative=Payments") {
-		t.Fatalf("expected initiative output, got: %q", got)
+	if !strings.Contains(got, "service=Realtime score=113 lane=page-now") {
+		t.Fatalf("expected realtime escalation output, got: %q", got)
 	}
-	if !strings.Contains(got, "Best initiative: Mobile (63)") {
-		t.Fatalf("expected best initiative summary, got: %q", got)
-	}
-	if !strings.Contains(got, "Average signal: 32.8") {
-		t.Fatalf("expected average summary, got: %q", got)
+	if !strings.Contains(got, "top suspect=Realtime score=113") {
+		t.Fatalf("expected top suspect summary, got: %q", got)
 	}
 }
 
@@ -282,42 +382,39 @@ func TestExecute_IncidentTriageExample(t *testing.T) {
 	}
 }
 
-func TestExecute_BudgetPlanningExample(t *testing.T) {
-	srcBytes, err := os.ReadFile("../../examples/budget_planning/main.jave")
+func TestExecute_AdvGameLobbyBalancerExample(t *testing.T) {
+	srcBytes, err := os.ReadFile("../../examples/adv-game-lobby-balancer/main.jave")
 	if err != nil {
-		t.Fatalf("read budget planning example: %v", err)
+		t.Fatalf("read advanced game lobby balancer example: %v", err)
 	}
 	buf := &bytes.Buffer{}
 	if err := runSource(string(srcBytes), buf); err != nil {
 		t.Fatalf("execute failed: %v", err)
 	}
 	got := strings.TrimSpace(buf.String())
-	if !strings.Contains(got, "Department=Platform annual=570") {
-		t.Fatalf("expected department annual output, got: %q", got)
+	if !strings.Contains(got, "player=Hex skill=88 ping=22 lobby=B") {
+		t.Fatalf("expected player assignment output, got: %q", got)
 	}
-	if !strings.Contains(got, "Annual portfolio budget=1797") {
-		t.Fatalf("expected annual budget summary, got: %q", got)
+	if !strings.Contains(got, "absolute skill delta=58") {
+		t.Fatalf("expected skill delta summary, got: %q", got)
 	}
 }
 
-func TestExecute_ServiceCapacityPlanningExample(t *testing.T) {
-	srcBytes, err := os.ReadFile("../../examples/service_capacity_planning/main.jave")
+func TestExecute_AdvMapSpawnSelectorExample(t *testing.T) {
+	srcBytes, err := os.ReadFile("../../examples/adv-map-spawn-selector/main.jave")
 	if err != nil {
-		t.Fatalf("read service capacity example: %v", err)
+		t.Fatalf("read advanced map spawn selector example: %v", err)
 	}
 	buf := &bytes.Buffer{}
 	if err := runSource(string(srcBytes), buf); err != nil {
 		t.Fatalf("execute failed: %v", err)
 	}
 	got := strings.TrimSpace(buf.String())
-	if !strings.Contains(got, "service=Checkout signal=114 lane=EXEC-SPONSOR") {
-		t.Fatalf("expected checkout line, got: %q", got)
+	if !strings.Contains(got, "row=1 risk=22 peak=7 score=36") {
+		t.Fatalf("expected row scoring line, got: %q", got)
 	}
-	if !strings.Contains(got, "Top priority service: Checkout (114)") {
-		t.Fatalf("expected top priority summary, got: %q", got)
-	}
-	if !strings.Contains(got, "Average portfolio signal: 72.8") {
-		t.Fatalf("expected average summary, got: %q", got)
+	if !strings.Contains(got, "recommended row=1 score=36") {
+		t.Fatalf("expected recommended row summary, got: %q", got)
 	}
 }
 
@@ -331,7 +428,7 @@ func TestExecute_CollectionsExample(t *testing.T) {
 		t.Fatalf("execute failed: %v", err)
 	}
 	got := strings.TrimSpace(buf.String())
-	if !strings.Contains(got, "Scores girth: 3") {
+	if !strings.Contains(got, "Scores Girth: 3") {
 		t.Fatalf("expected scores output, got: %q", got)
 	}
 	if !strings.Contains(got, "Ada age: 36") {
@@ -399,19 +496,19 @@ outy seq Stretch<vag Start, vag End, vag Progress> --> <<vag>> {
 }
 
 outy seq Foremost<> --> <<nada>> {
-	pront(MostExact<3, 9>);;
-	pront(LeastExact<3, 9>);;
-	pront(MostVag<1.25, 1.2>);;
-	pront(LeastVag<1.25, 1.2>);;
+	Pront(MostExact<3, 9>);;
+	Pront(LeastExact<3, 9>);;
+	Pront(MostVag<1.25, 1.2>);;
+	Pront(LeastVag<1.25, 1.2>);;
 
-	pront(PosidirExact<0 - 5>);;
-	pront(PosidirExact<0>);;
-	pront(PosidirVag<2.5>);;
+	Pront(PosidirExact<0 - 5>);;
+	Pront(PosidirExact<0>);;
+	Pront(PosidirVag<2.5>);;
 
-	pront(Nearlydont<0.0000004>);;
-	pront(Nearlydont<0.01>);;
+	Pront(Nearlydont<0.0000004>);;
+	Pront(Nearlydont<0.01>);;
 
-	pront(Stretch<10.0, 20.0, 0.25>);;
+	Pront(Stretch<10.0, 20.0, 0.25>);;
 	give up;;
 }`
 	buf := &bytes.Buffer{}
@@ -448,6 +545,31 @@ func runSource(src string, out *bytes.Buffer) error {
 		return lowerErr(lowerDiags)
 	}
 	return runtime.Execute(irProg, out)
+}
+
+func runSourceWithOptions(src string, opts runtime.ExecuteOptions) error {
+	toks, lexDiags := lexer.Lex(src)
+	if len(lexDiags) != 0 {
+		return lexErr(lexDiags)
+	}
+	prog, parseDiags := parser.Parse(toks)
+	if len(parseDiags) != 0 {
+		return parseErr(parseDiags)
+	}
+	if err := appendImportedSequences(prog); err != nil {
+		return err
+	}
+	semaDiags := sema.Analyze(prog)
+	for _, d := range semaDiags {
+		if d.Severity == diagnostics.SeverityError {
+			return semaErr(semaDiags)
+		}
+	}
+	irProg, lowerDiags := lowering.Lower(prog)
+	if len(lowerDiags) != 0 {
+		return lowerErr(lowerDiags)
+	}
+	return runtime.ExecuteWithOptions(irProg, opts)
 }
 
 func appendImportedSequences(prog *ast.Program) error {

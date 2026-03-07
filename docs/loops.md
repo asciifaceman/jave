@@ -14,7 +14,7 @@ given (<X lesslysame 3>) again -> {
 
 ```jave
 given (<allow exact I 2b=2 0;; I lessly 3;; I 2b=2 I + 1;;>) -> {
-    pront(I);;
+    Pront(I);;
 }
 ```
 
@@ -22,7 +22,7 @@ given (<allow exact I 2b=2 0;; I lessly 3;; I 2b=2 I + 1;;>) -> {
 
 ```jave
 given (<Name within Names>) -> {
-    pront(Name);;
+    Pront(Name);;
 }
 ```
 

@@ -1,11 +1,11 @@
 kind: builtin
-name: prontulate
-signature: prontulate<Template, Args...>
+name: Prontulate
+signature: Prontulate<Template, Args...>
 title: Builtin formatted output
 about: Formats the template by replacing directives with provided values and prints the result.
 notes:
   - Builtin behavior is self-sufficient and does not require importing Strangs.
 examples:
   - |
-    prontulate<"Count=%exact", 2>;;
+    Prontulate<"Count=%exact", 2>;;
 status: stable

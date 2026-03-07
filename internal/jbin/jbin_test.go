@@ -14,7 +14,7 @@ import (
 
 func TestRoundTrip(t *testing.T) {
 	src := `outy seq Foremost<> --> <<nada>> {
-    pront("hello, jave");;
+    Pront("hello, jave");;
     give up;;
 }`
 	toks, lexDiags := lexer.Lex(src)

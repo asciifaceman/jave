@@ -43,9 +43,9 @@ func TestBuildIndexFromManifests_Builtin(t *testing.T) {
 	root := t.TempDir()
 	manifestDir := filepath.Join(root, "docs-manifests", "builtins")
 	mustMkdirAll(t, manifestDir)
-	mustWriteFile(t, filepath.Join(manifestDir, "pront.yaml"), `kind: builtin
-name: pront
-signature: pront(Value)
+	mustWriteFile(t, filepath.Join(manifestDir, "Pront.yaml"), `kind: builtin
+name: Pront
+signature: Pront(Value)
 title: Print value
 about: Writes one value.`)
 
@@ -53,9 +53,9 @@ about: Writes one value.`)
 	if err != nil {
 		t.Fatalf("BuildIndexFromManifests error: %v", err)
 	}
-	doc, ok := idx.Symbols["pront"]
+	doc, ok := idx.Symbols["Pront"]
 	if !ok {
-		t.Fatal("expected pront in index")
+		t.Fatal("expected Pront in index")
 	}
 	if doc.Kind != "builtin" {
 		t.Fatalf("kind = %q", doc.Kind)

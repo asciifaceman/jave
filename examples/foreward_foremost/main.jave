@@ -1,9 +1,9 @@
 outy seq Foreward<> --> <<nada>> {
-    pront("warming carryon");;
+    Pront("warming carryon");;
     give up;;
 }
 
 outy seq Foremost<> --> <<nada>> {
-    pront("running foremost");;
+    Pront("running foremost");;
     give up;;
 }

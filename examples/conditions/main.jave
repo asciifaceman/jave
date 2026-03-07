@@ -2,11 +2,11 @@ outy seq Foremost<> --> <<nada>> {
     allow vag Foo 2b=2 0.6;;
 
     maybe (<Foo bigly 0.5>) -> {
-        pront("Over half");;
+        Pront("Over half");;
     } furthermore (<Foo lessly 0.5>) -> {
-        pront("Under half");;
+        Pront("Under half");;
     } otherwise -> {
-        pront("Exactly half");;
+        Pront("Exactly half");;
     }
 
     give up;;

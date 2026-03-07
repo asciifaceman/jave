@@ -1,8 +1,11 @@
 package runtime
 
 import (
+	"errors"
 	"fmt"
 	"io"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -10,14 +13,54 @@ import (
 	"github.com/asciifaceman/jave/internal/ir"
 )
 
+// ExecuteOptions configures runtime IO and argument behavior.
+type ExecuteOptions struct {
+	Stdout io.Writer
+	Stderr io.Writer
+	Args   []string
+}
+
+// ProgramExitError carries an explicit program-requested exit code.
+type ProgramExitError struct {
+	Code int
+}
+
+func (e *ProgramExitError) Error() string {
+	return fmt.Sprintf("program requested exit with code %d", e.Code)
+}
+
+// ExitCodeForError returns deterministic process exit codes for runtime failures.
+func ExitCodeForError(err error) int {
+	var pe *ProgramExitError
+	if errors.As(err, &pe) {
+		return pe.Code
+	}
+	return 1
+}
+
 // Execute runs a lowered IR program.
 func Execute(program *ir.ProgramIR, out io.Writer) error {
-	r := &runner{out: out, program: program, frames: []map[string]any{{}}, modules: []string{""}}
+	return ExecuteWithOptions(program, ExecuteOptions{Stdout: out})
+}
+
+// ExecuteWithOptions runs a lowered IR program with explicit IO/argv configuration.
+func ExecuteWithOptions(program *ir.ProgramIR, opts ExecuteOptions) error {
+	stdout := opts.Stdout
+	if stdout == nil {
+		stdout = io.Discard
+	}
+	stderr := opts.Stderr
+	if stderr == nil {
+		stderr = io.Discard
+	}
+	r := &runner{out: stdout, err: stderr, args: append([]string(nil), opts.Args...), program: program, frames: []map[string]any{{}}, modules: []string{""}}
 	return r.execute(program)
 }
 
 type runner struct {
 	out     io.Writer
+	err     io.Writer
+	args    []string
 	program *ir.ProgramIR
 	frames  []map[string]any
 	modules []string
@@ -312,9 +355,9 @@ func (r *runner) evalCollection(e ast.CollectionLiteralExpr) (any, error) {
 func (r *runner) evalCall(e ast.CallExpr) (any, error) {
 	if ident, ok := e.Callee.(ast.IdentifierExpr); ok {
 		switch ident.Name {
-		case "pront":
+		case "Pront":
 			if len(e.Args) != 1 {
-				return nil, fmt.Errorf("pront expects one argument")
+				return nil, fmt.Errorf("Pront expects one argument")
 			}
 			v, err := r.eval(e.Args[0])
 			if err != nil {
@@ -322,9 +365,184 @@ func (r *runner) evalCall(e ast.CallExpr) (any, error) {
 			}
 			_, _ = fmt.Fprintln(r.out, toDisplay(v))
 			return nil, nil
-		case "girth":
+		case "ProntOops":
 			if len(e.Args) != 1 {
-				return nil, fmt.Errorf("girth expects one argument")
+				return nil, fmt.Errorf("ProntOops expects one argument")
+			}
+			v, err := r.eval(e.Args[0])
+			if err != nil {
+				return nil, err
+			}
+			_, _ = fmt.Fprintln(r.err, toDisplay(v))
+			return nil, nil
+		case "FeudGirth":
+			if len(e.Args) != 0 {
+				return nil, fmt.Errorf("FeudGirth expects no arguments")
+			}
+			return int64(len(r.args)), nil
+		case "FeudAt":
+			if len(e.Args) != 1 {
+				return nil, fmt.Errorf("FeudAt expects one argument")
+			}
+			idxAny, err := r.eval(e.Args[0])
+			if err != nil {
+				return nil, err
+			}
+			idx, ok := toInt64(idxAny)
+			if !ok {
+				return nil, fmt.Errorf("FeudAt index must be exact")
+			}
+			if idx < 0 || idx >= len(r.args) {
+				return nil, fmt.Errorf("FeudAt index out of range")
+			}
+			return r.args[idx], nil
+		case "Exeunt":
+			if len(e.Args) != 1 {
+				return nil, fmt.Errorf("Exeunt expects one argument")
+			}
+			codeAny, err := r.eval(e.Args[0])
+			if err != nil {
+				return nil, err
+			}
+			code, ok := toInt64(codeAny)
+			if !ok {
+				return nil, fmt.Errorf("Exeunt code must be exact")
+			}
+			if code < 0 || code > 255 {
+				return nil, fmt.Errorf("Exeunt code must be between 0 and 255")
+			}
+			return nil, &ProgramExitError{Code: code}
+		case "TrailJunction":
+			if len(e.Args) == 0 {
+				return nil, fmt.Errorf("TrailJunction expects at least one argument")
+			}
+			parts := make([]string, 0, len(e.Args))
+			for i := range e.Args {
+				pAny, err := r.eval(e.Args[i])
+				if err != nil {
+					return nil, err
+				}
+				p, ok := pAny.(string)
+				if !ok {
+					return nil, fmt.Errorf("TrailJunction arguments must be strang")
+				}
+				parts = append(parts, p)
+			}
+			return filepath.Join(parts...), nil
+		case "TrailNormify":
+			if len(e.Args) != 1 {
+				return nil, fmt.Errorf("TrailNormify expects one argument")
+			}
+			pAny, err := r.eval(e.Args[0])
+			if err != nil {
+				return nil, err
+			}
+			p, ok := pAny.(string)
+			if !ok {
+				return nil, fmt.Errorf("TrailNormify argument must be strang")
+			}
+			return filepath.Clean(filepath.FromSlash(p)), nil
+		case "HomeStead":
+			if len(e.Args) != 0 {
+				return nil, fmt.Errorf("HomeStead expects no arguments")
+			}
+			cwd, err := os.Getwd()
+			if err != nil {
+				return nil, fmt.Errorf("HomeStead failed: %w", err)
+			}
+			return cwd, nil
+		case "DossierPresent":
+			if len(e.Args) != 1 {
+				return nil, fmt.Errorf("DossierPresent expects one argument")
+			}
+			pAny, err := r.eval(e.Args[0])
+			if err != nil {
+				return nil, err
+			}
+			p, ok := pAny.(string)
+			if !ok {
+				return nil, fmt.Errorf("DossierPresent path must be strang")
+			}
+			if _, err := os.Stat(p); err != nil {
+				if os.IsNotExist(err) {
+					return false, nil
+				}
+				return nil, fmt.Errorf("DossierPresent failed: %w", err)
+			}
+			return true, nil
+		case "DossierPeruseStrang":
+			if len(e.Args) != 1 {
+				return nil, fmt.Errorf("DossierPeruseStrang expects one argument")
+			}
+			pAny, err := r.eval(e.Args[0])
+			if err != nil {
+				return nil, err
+			}
+			p, ok := pAny.(string)
+			if !ok {
+				return nil, fmt.Errorf("DossierPeruseStrang path must be strang")
+			}
+			b, err := os.ReadFile(p)
+			if err != nil {
+				return nil, fmt.Errorf("DossierPeruseStrang failed: %w", err)
+			}
+			return string(b), nil
+		case "DossierJotStrang":
+			if len(e.Args) != 2 {
+				return nil, fmt.Errorf("DossierJotStrang expects two arguments")
+			}
+			pAny, err := r.eval(e.Args[0])
+			if err != nil {
+				return nil, err
+			}
+			p, ok := pAny.(string)
+			if !ok {
+				return nil, fmt.Errorf("DossierJotStrang path must be strang")
+			}
+			cAny, err := r.eval(e.Args[1])
+			if err != nil {
+				return nil, err
+			}
+			content, ok := cAny.(string)
+			if !ok {
+				return nil, fmt.Errorf("DossierJotStrang content must be strang")
+			}
+			if err := os.WriteFile(p, []byte(content), 0o644); err != nil {
+				return nil, fmt.Errorf("DossierJotStrang failed: %w", err)
+			}
+			return true, nil
+		case "DossierAffixStrang":
+			if len(e.Args) != 2 {
+				return nil, fmt.Errorf("DossierAffixStrang expects two arguments")
+			}
+			pAny, err := r.eval(e.Args[0])
+			if err != nil {
+				return nil, err
+			}
+			p, ok := pAny.(string)
+			if !ok {
+				return nil, fmt.Errorf("DossierAffixStrang path must be strang")
+			}
+			cAny, err := r.eval(e.Args[1])
+			if err != nil {
+				return nil, err
+			}
+			content, ok := cAny.(string)
+			if !ok {
+				return nil, fmt.Errorf("DossierAffixStrang content must be strang")
+			}
+			f, err := os.OpenFile(p, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+			if err != nil {
+				return nil, fmt.Errorf("DossierAffixStrang failed: %w", err)
+			}
+			defer f.Close()
+			if _, err := f.WriteString(content); err != nil {
+				return nil, fmt.Errorf("DossierAffixStrang failed: %w", err)
+			}
+			return true, nil
+		case "Girth":
+			if len(e.Args) != 1 {
+				return nil, fmt.Errorf("Girth expects one argument")
 			}
 			v, err := r.eval(e.Args[0])
 			if err != nil {
@@ -338,11 +556,11 @@ func (r *runner) evalCall(e ast.CallExpr) (any, error) {
 			case map[string]any:
 				return int64(len(x)), nil
 			default:
-				return nil, fmt.Errorf("girth unsupported for value")
+				return nil, fmt.Errorf("Girth unsupported for value")
 			}
-		case "slotify":
+		case "Slotify":
 			if len(e.Args) != 2 {
-				return nil, fmt.Errorf("slotify expects two arguments")
+				return nil, fmt.Errorf("Slotify expects two arguments")
 			}
 			tmplAny, err := r.eval(e.Args[0])
 			if err != nil {
@@ -350,15 +568,15 @@ func (r *runner) evalCall(e ast.CallExpr) (any, error) {
 			}
 			tmpl, ok := tmplAny.(string)
 			if !ok {
-				return nil, fmt.Errorf("slotify template must be string")
+				return nil, fmt.Errorf("Slotify template must be string")
 			}
 			v, err := r.eval(e.Args[1])
 			if err != nil {
 				return nil, err
 			}
 			return replaceFirstDirective(tmpl, toDisplay(v)), nil
-		case "prontulate":
-			comb, err := r.formatCallTemplate(e.Args, "prontulate")
+		case "Prontulate":
+			comb, err := r.formatCallTemplate(e.Args, "Prontulate")
 			if err != nil {
 				return nil, err
 			}

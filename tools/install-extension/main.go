@@ -6,6 +6,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
+	"time"
 )
 
 func main() {
@@ -53,12 +55,8 @@ func run() error {
 		return fmt.Errorf("failed to create extensions directory: %w", err)
 	}
 
-	// Remove existing installation
-	if _, err := os.Stat(extensionTarget); err == nil {
-		fmt.Println("Removing existing installation...")
-		if err := os.RemoveAll(extensionTarget); err != nil {
-			return fmt.Errorf("failed to remove existing installation: %w", err)
-		}
+	if err := removeExistingInstallation(extensionTarget); err != nil {
+		return err
 	}
 
 	// Try to create symlink first (preferred)
@@ -255,4 +253,33 @@ func isToolchainInstalled() bool {
 		}
 	}
 	return true
+}
+
+func removeExistingInstallation(extensionTarget string) error {
+	if _, err := os.Stat(extensionTarget); os.IsNotExist(err) {
+		return nil
+	}
+
+	fmt.Println("Removing existing installation...")
+	if err := os.RemoveAll(extensionTarget); err == nil {
+		return nil
+	} else {
+		if runtime.GOOS == "windows" && isWindowsAccessDenied(err) {
+			staleTarget := extensionTarget + ".stale-" + time.Now().Format("20060102-150405")
+			if renameErr := os.Rename(extensionTarget, staleTarget); renameErr == nil {
+				fmt.Printf("Warning: existing installation appears locked; moved old copy to %s\n", staleTarget)
+				return nil
+			}
+			return fmt.Errorf("failed to replace existing installation because files are in use (%v). Close VS Code windows using Jave, stop any javels processes, then rerun install", err)
+		}
+		return fmt.Errorf("failed to remove existing installation: %w", err)
+	}
+}
+
+func isWindowsAccessDenied(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := strings.ToLower(err.Error())
+	return strings.Contains(msg, "access is denied") || strings.Contains(msg, "permission denied") || strings.Contains(msg, "used by another process")
 }

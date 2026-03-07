@@ -94,11 +94,11 @@ Example:
 
 ```jave
 maybe (<X bigly 5>) -> {
-    pront("large");;
+    Pront("large");;
 } furthermore (<X lessly 5>) -> {
-    pront("small");;
+    Pront("small");;
 } otherwise -> {
-    pront("middle");;
+    Pront("middle");;
 }
 ```
 
@@ -119,7 +119,7 @@ maybe (<X bigly 5>) -> {
 
 ### Built-in output
 
-* `pront(...)` is built-in
+* `Pront(...)` is built-in
 * advanced formatted output may use `Strangs.Combobulate` or `Pronts.Prontulate`
 
 ## Text assembly
@@ -144,7 +144,7 @@ Examples:
 
 ```jave
 allow strang Message 2b=2 Strangs.Combobulate<"Hello, %strang", Name>;;
-pront(Strangs.Combobulate<"Count: %exact", Count>);;
+Pront(Strangs.Combobulate<"Count: %exact", Count>);;
 ```
 
 ### Combobulation directives
@@ -160,8 +160,8 @@ pront(Strangs.Combobulate<"Count: %exact", Count>);;
 
 ### Pronts
 
-* `pront(...)` = built-in simple print
-* `Pronts.Prontulate<...>` = wrapper around `Strangs.Combobulate(...)` + `pront(...)`
+* `Pront(...)` = built-in simple print
+* `Pronts.Prontulate<...>` = wrapper around `Strangs.Combobulate(...)` + `Pront(...)`
 * richer output comes later through separate helpers like `PrettyPront` or `BetterPront`
 
 Imports:
@@ -253,14 +253,14 @@ allow lexis<strang, exact> Ages 2b=2 {"Ada": 36, "Linus": 55};;
 
 ## Collection sizing
 
-Use built-in `girth(...)`.
+Use built-in `Girth(...)`.
 
 Examples:
 
 ```jave
-allow exact Count 2b=2 girth(Scores);;
-allow exact NameCount 2b=2 girth(Names);;
-allow exact Width 2b=2 girth(Grid[0]);;
+allow exact Count 2b=2 Girth(Scores);;
+allow exact NameCount 2b=2 Girth(Names);;
+allow exact Width 2b=2 Girth(Grid[0]);;
 ```
 
 ## Looping
@@ -279,7 +279,7 @@ given (<X lesslysame 5>) again -> {
 
 ```jave
 given (<allow exact I 2b=2 0;; I lessly 5;; I 2b=2 I + 1;;>) -> {
-    pront(I);;
+    Pront(I);;
 }
 ```
 
@@ -287,7 +287,7 @@ given (<allow exact I 2b=2 0;; I lessly 5;; I 2b=2 I + 1;;>) -> {
 
 ```jave
 given (<Name within Names>) -> {
-    pront(Name);;
+    Pront(Name);;
 }
 ```
 
@@ -445,7 +445,7 @@ jave/
 
 ```jave
 outy seq Foremost<> --> <<nada>> {
-    pront("hello, jave");;
+    Pront("hello, jave");;
     give up;;
 }
 ```
@@ -454,12 +454,12 @@ outy seq Foremost<> --> <<nada>> {
 
 ```jave
 outy seq Foreward<> --> <<nada>> {
-    pront("warming carryon");;
+    Pront("warming carryon");;
     give up;;
 }
 
 outy seq Foremost<> --> <<nada>> {
-    pront("running foremost");;
+    Pront("running foremost");;
     give up;;
 }
 ```
@@ -471,18 +471,18 @@ outy seq Foremost<> --> <<nada>> {
     allow vag Foo 2b=2 0.6;;
 
     maybe (<Foo bigly 0.5>) -> {
-        pront("Over half");;
+        Pront("Over half");;
     } furthermore (<Foo lessly 0.5>) -> {
-        pront("Under half");;
+        Pront("Under half");;
     } otherwise -> {
-        pront("Exactly half");;
+        Pront("Exactly half");;
     }
 
     give up;;
 }
 ```
 
-### 4. combobulate and prontulate
+### 4. combobulate and Prontulate
 
 ```jave
 install Strangs from highschool/English;;
@@ -490,7 +490,7 @@ install Pronts from highschool/Communications;;
 
 outy seq Foremost<> --> <<nada>> {
     allow strang Name 2b=2 "Jave";;
-    pront(Strangs.Combobulate<"Hello, %strang", Name>);;
+    Pront(Strangs.Combobulate<"Hello, %strang", Name>);;
     Pronts.Prontulate<"Still hello, %strang", Name>;;
     give up;;
 }
@@ -507,10 +507,10 @@ outy seq Foremost<> --> <<nada>> {
     allow enumeration<strang> Names 2b=2 <"Ada", "Linus">;;
     allow lexis<strang, exact> Ages 2b=2 {"Ada": 36, "Linus": 55};;
 
-    pront(Strangs.Combobulate<"Scores girth: %exact", girth(Scores)>);;
-    pront(Strangs.Combobulate<"Grid[1][0]: %exact", Grid[1][0]>);;
-    pront(Strangs.Combobulate<"First name: %strang", Names[0]>);;
-    pront(Strangs.Combobulate<"Ada age: %exact", Ages["Ada"]>);;
+    Pront(Strangs.Combobulate<"Scores Girth: %exact", Girth(Scores)>);;
+    Pront(Strangs.Combobulate<"Grid[1][0]: %exact", Grid[1][0]>);;
+    Pront(Strangs.Combobulate<"First name: %strang", Names[0]>);;
+    Pront(Strangs.Combobulate<"Ada age: %exact", Ages["Ada"]>);;
 
     give up;;
 }
@@ -525,12 +525,12 @@ outy seq Foremost<> --> <<nada>> {
     allow exact X 2b=2 0;;
 
     given (<X lesslysame 3>) again -> {
-        pront(Strangs.Combobulate<"while-ish X: %exact", X>);;
+        Pront(Strangs.Combobulate<"while-ish X: %exact", X>);;
         X 2b=2 X + 1;;
     }
 
     given (<allow exact I 2b=2 0;; I lessly 3;; I 2b=2 I + 1;;>) -> {
-        pront(Strangs.Combobulate<"for-ish I: %exact", I>);;
+        Pront(Strangs.Combobulate<"for-ish I: %exact", I>);;
     }
 
     give up;;
@@ -544,7 +544,7 @@ outy seq Foremost<> --> <<nada>> {
     allow enumeration<strang> Names 2b=2 <"Ada", "Linus", "Grace">;;
 
     given (<Name within Names>) -> {
-        pront(Name);;
+        Pront(Name);;
     }
 
     give up;;
@@ -562,7 +562,7 @@ Build the smallest coherent vertical slice:
 * AST
 * diagnostics
 * interpreter or direct VM execution path sufficient to run examples
-* built-ins: `pront`, `girth`
+* built-ins: `Pront`, `Girth`
 * control flow: `maybe`, `furthermore`, `otherwise`, both `given` loop forms
 * sequences with `Foremost`
 * basic types: `exact`, `vag`, `truther`, `strang`, `nada`, `naw`
@@ -680,7 +680,7 @@ A couple of recommendations I’d make before agents start coding:
 
 For multi-dimensional table, keep v0.1 simple and define it as nested tables, not a special matrix type. That keeps it first-class in practice without forcing complicated type machinery on day one.
 
-For girth, make it work on strang, table, enumeration, and maybe lexis. That will make examples and docs much nicer.
+For Girth, make it work on strang, table, enumeration, and maybe lexis. That will make examples and docs much nicer.
 
 For the first implementation, I’d actually have javec compile to an internal IR or serialized AST and let javevm execute that. You can still call it .jbin, keep the joke intact, and avoid overcommitting too early to a lower-level bytecode design.
 

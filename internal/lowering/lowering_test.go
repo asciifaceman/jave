@@ -12,7 +12,7 @@ import (
 
 func TestLower_HelloWorldForemost(t *testing.T) {
 	src := `outy seq Foremost<> --> <<nada>> {
-    pront("hello, jave");;
+    Pront("hello, jave");;
     give up;;
 }`
 	toks, lexDiags := lexer.Lex(src)
@@ -45,11 +45,11 @@ func TestLower_ConditionsExample(t *testing.T) {
     allow vag Foo 2b=2 0.6;;
 
     maybe (<Foo bigly 0.5>) -> {
-        pront("Over half");;
+        Pront("Over half");;
     } furthermore (<Foo lessly 0.5>) -> {
-        pront("Under half");;
+        Pront("Under half");;
     } otherwise -> {
-        pront("Exactly half");;
+        Pront("Exactly half");;
     }
 
     give up;;
@@ -137,12 +137,12 @@ func TestLower_LoopsExampleAllModes(t *testing.T) {
 
 func TestLower_ForewardAndForemost(t *testing.T) {
 	src := `outy seq Foreward<> --> <<nada>> {
-    pront("warming carryon");;
+    Pront("warming carryon");;
     give up;;
 }
 
 outy seq Foremost<> --> <<nada>> {
-    pront("running foremost");;
+    Pront("running foremost");;
     give up;;
 }`
 	toks, lexDiags := lexer.Lex(src)

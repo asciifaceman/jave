@@ -60,7 +60,7 @@ func TestLoadProgramWithImports_TransitiveForewardOrder(t *testing.T) {
 	rootPath := filepath.Join(base, "main.jave")
 
 	if err := os.WriteFile(innerPath, []byte(`outy seq Foreward<> --> <<nada>> {
-    pront("inner foreward");;
+    Pront("inner foreward");;
     give up;;
 }`), 0o644); err != nil {
 		t.Fatalf("write inner: %v", err)
@@ -68,7 +68,7 @@ func TestLoadProgramWithImports_TransitiveForewardOrder(t *testing.T) {
 
 	if err := os.WriteFile(depPath, []byte(`install Inner from ./inner;;
 outy seq Foreward<> --> <<nada>> {
-    pront("dep foreward");;
+    Pront("dep foreward");;
     give up;;
 }`), 0o644); err != nil {
 		t.Fatalf("write dep: %v", err)
@@ -76,7 +76,7 @@ outy seq Foreward<> --> <<nada>> {
 
 	if err := os.WriteFile(rootPath, []byte(`install Warmup from ./dep;;
 outy seq Foremost<> --> <<nada>> {
-    pront("root foremost");;
+    Pront("root foremost");;
     give up;;
 }`), 0o644); err != nil {
 		t.Fatalf("write root: %v", err)
@@ -132,7 +132,7 @@ func TestLoadProgramWithImports_HighschoolCarryon(t *testing.T) {
 	}
 	englishPath := filepath.Join(englishDir, "main.jave")
 	if err := os.WriteFile(englishPath, []byte(`outy seq Foreward<> --> <<nada>> {
-    pront("highschool english foreward");;
+    Pront("highschool english foreward");;
     give up;;
 }`), 0o644); err != nil {
 		t.Fatalf("write english carryon: %v", err)
@@ -145,7 +145,7 @@ func TestLoadProgramWithImports_HighschoolCarryon(t *testing.T) {
 	rootPath := filepath.Join(appDir, "main.jave")
 	if err := os.WriteFile(rootPath, []byte(`install Strangs from highschool/English;;
 outy seq Foremost<> --> <<nada>> {
-    pront("root foremost");;
+    Pront("root foremost");;
     give up;;
 }`), 0o644); err != nil {
 		t.Fatalf("write root: %v", err)
@@ -223,9 +223,9 @@ outy seq PosiVag<vag Value> --> <<vag>> {
 	rootPath := filepath.Join(appDir, "main.jave")
 	if err := os.WriteFile(rootPath, []byte(`install Algebra from highschool/Algebra;;
 outy seq Foremost<> --> <<nada>> {
-	pront(Algebra.PosiExact<0 - 12>);;
-    pront(Algebra.PosiExact<7>);;
-	pront(Algebra.PosiVag<0.5 - 1.25>);;
+	Pront(Algebra.PosiExact<0 - 12>);;
+    Pront(Algebra.PosiExact<7>);;
+	Pront(Algebra.PosiVag<0.5 - 1.25>);;
     give up;;
 }`), 0o644); err != nil {
 		t.Fatalf("write root: %v", err)
@@ -304,8 +304,8 @@ func TestLoadProgramWithImports_ModuleMemberNameCollisionAcrossAliases(t *testin
 install Geometry from highschool/Geometry;;
 
 outy seq Foremost<> --> <<nada>> {
-    pront(Algebra.Normalize<0 - 8>);;
-    pront(Geometry.Normalize<8>);;
+    Pront(Algebra.Normalize<0 - 8>);;
+    Pront(Geometry.Normalize<8>);;
     give up;;
 }`), 0o644); err != nil {
 		t.Fatalf("write root: %v", err)
@@ -378,8 +378,8 @@ outy seq Nearlydont<vag Value> --> <<truther>> {
 	if err := os.WriteFile(rootPath, []byte(`install Algebra from highschool/Algebra;;
 
 outy seq Foremost<> --> <<nada>> {
-    pront(Algebra.Nearlydont<0.0000004>);;
-    pront(Algebra.Nearlydont<0.01>);;
+    Pront(Algebra.Nearlydont<0.0000004>);;
+    Pront(Algebra.Nearlydont<0.01>);;
     give up;;
 }`), 0o644); err != nil {
 		t.Fatalf("write root: %v", err)
@@ -433,7 +433,7 @@ func TestLoadProgramWithImports_HighschoolEnglishCombobulateReal(t *testing.T) {
 	englishSrc := `outy seq Combobulate<strang Template, ...strang Args> --> <<strang>> {
 	allow strang Out 2b=2 Template;;
 	given (<Arg within Args>) -> {
-		Out 2b=2 slotify(Out, Arg);;
+		Out 2b=2 Slotify(Out, Arg);;
 	}
 	give Out up;;
 }`
@@ -449,10 +449,10 @@ func TestLoadProgramWithImports_HighschoolEnglishCombobulateReal(t *testing.T) {
 	if err := os.WriteFile(rootPath, []byte(`install Strangs from highschool/English;;
 
 outy seq Foremost<> --> <<nada>> {
-    pront(Strangs.Combobulate<"Count=%exact", 3>);;
-    pront(Strangs.Combobulate<"Name=%strang State=%strang", "Ada", "ready">);;
-    pront(Strangs.Combobulate<"A=%exact B=%exact C=%strang", 1, 2, "go">);;
-	prontulate<"v=%exact %exact %exact %exact %exact %exact %exact %exact", 1, 2, 3, 4, 5, 6, 7, 8>;;
+    Pront(Strangs.Combobulate<"Count=%exact", 3>);;
+    Pront(Strangs.Combobulate<"Name=%strang State=%strang", "Ada", "ready">);;
+    Pront(Strangs.Combobulate<"A=%exact B=%exact C=%strang", 1, 2, "go">);;
+	Prontulate<"v=%exact %exact %exact %exact %exact %exact %exact %exact", 1, 2, 3, 4, 5, 6, 7, 8>;;
     give up;;
 }`), 0o644); err != nil {
 		t.Fatalf("write root: %v", err)

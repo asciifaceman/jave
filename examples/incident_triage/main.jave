@@ -10,7 +10,7 @@ outy seq Foremost<> --> <<nada>> {
     allow exact HighestScore 2b=2 0;;
     allow strang HighestService 2b=2 "none";;
 
-    given (<allow exact I 2b=2 0;; I lessly girth(Services);; I 2b=2 I + 1;;>) -> {
+    given (<allow exact I 2b=2 0;; I lessly Girth(Services);; I 2b=2 I + 1;;>) -> {
         allow exact Score 2b=2 ErrorRates[I] * 5;;
         Score 2b=2 Score + (CustomerImpacts[I] * 4);;
         Score 2b=2 Score + (RecoveryMinutes[I] / 2);;
@@ -29,10 +29,10 @@ outy seq Foremost<> --> <<nada>> {
             HighestService 2b=2 Services[I];;
         }
 
-        pront(Strangs.Combobulate<"service=%strang score=%exact lane=%strang", Services[I], Score, Lane>);;
+        Pront(Strangs.Combobulate<"service=%strang score=%exact lane=%strang", Services[I], Score, Lane>);;
     }
 
-    pront("--- incident focus ---");;
-    pront(Strangs.Combobulate<"Most critical service: %strang (%exact)", HighestService, HighestScore>);;
+    Pront("--- incident focus ---");;
+    Pront(Strangs.Combobulate<"Most critical service: %strang (%exact)", HighestService, HighestScore>);;
     give up;;
 }

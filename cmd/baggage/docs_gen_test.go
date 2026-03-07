@@ -57,10 +57,10 @@ outy seq PosiExact<exact Value> --> <<exact>> {
 		t.Fatalf("mkdir manifests: %v", err)
 	}
 	manifest := `kind: builtin
-name: pront
-signature: pront(Value)
+name: Pront
+signature: Pront(Value)
 about: Builtin print.`
-	if err := os.WriteFile(filepath.Join(manifestDir, "pront.yaml"), []byte(manifest), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(manifestDir, "Pront.yaml"), []byte(manifest), 0o644); err != nil {
 		t.Fatalf("write manifest: %v", err)
 	}
 
@@ -100,7 +100,7 @@ about: Builtin print.`
 	if err != nil {
 		t.Fatalf("read builtins page: %v", err)
 	}
-	if !strings.Contains(string(builtinsText), "pront") {
+	if !strings.Contains(string(builtinsText), "Pront") {
 		t.Fatalf("expected manifest builtin in %s", builtinsPage)
 	}
 }

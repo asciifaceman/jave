@@ -1,0 +1,5 @@
+kind: builtin
+name: FeudAt
+signature: FeudAt(Index)
+title: Read CLI argument by index
+about: Returns the runtime program argument at zero-based Index. Fails with deterministic runtime diagnostics on out-of-range access.

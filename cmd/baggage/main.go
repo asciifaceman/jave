@@ -251,7 +251,7 @@ func scaffoldNewProject(project string, force bool) error {
 
 	manifestName := filepath.Base(project)
 	manifest := fmt.Sprintf("carryon %q\nlang %q\nentry %q\n", manifestName, "v0.1", "main.jave")
-	mainProgram := "outy seq Foremost<> --> <<nada>> {\n    pront(\"hello, jave\");;\n    give up;;\n}\n"
+	mainProgram := "outy seq Foremost<> --> <<nada>> {\n    Pront(\"hello, jave\");;\n    give up;;\n}\n"
 
 	if err := os.WriteFile(mainPath, []byte(mainProgram), fs.FileMode(0o644)); err != nil {
 		return err

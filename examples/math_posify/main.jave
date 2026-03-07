@@ -5,8 +5,8 @@ outy seq Foremost<> --> <<nada>> {
     allow exact Momentum 2b=2 9;;
     allow vag Delta 2b=2 0.5 - 1.25;;
 
-    pront(Algebra.PosiExact<DebtDrift>);;
-    pront(Algebra.PosiExact<Momentum>);;
-    pront(Algebra.PosiVag<Delta>);;
+    Pront(Algebra.PosiExact<DebtDrift>);;
+    Pront(Algebra.PosiExact<Momentum>);;
+    Pront(Algebra.PosiVag<Delta>);;
     give up;;
 }

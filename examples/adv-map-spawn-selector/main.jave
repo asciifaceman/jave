@@ -1,0 +1,38 @@
+install Strangs from highschool/English;;
+install Algebra from highschool/Algebra;;
+
+outy seq Foremost<> --> <<nada>> {
+    allow table<table<exact>> Heat 2b=2 [
+        [7, 5, 4, 5, 8],
+        [6, 3, 2, 4, 7],
+        [8, 6, 3, 3, 5],
+        [9, 7, 5, 4, 4]
+    ];;
+
+    allow exact BestRow 2b=2 0;;
+    allow exact BestScore 2b=2 0;;
+
+    given (<allow exact Row 2b=2 0;; Row lessly Girth(Heat);; Row 2b=2 Row + 1;;>) -> {
+        allow exact RowRisk 2b=2 0;;
+        allow exact RowPeak 2b=2 0;;
+
+        given (<allow exact Col 2b=2 0;; Col lessly Girth(Heat[Row]);; Col 2b=2 Col + 1;;>) -> {
+            RowRisk 2b=2 RowRisk + Heat[Row][Col];;
+            RowPeak 2b=2 Algebra.MostExact<RowPeak, Heat[Row][Col]>;;
+        }
+
+        allow exact SmoothnessPenalty 2b=2 RowPeak * 2;;
+        allow exact SpawnScore 2b=2 RowRisk + SmoothnessPenalty;;
+
+        maybe (<Row samewise 0 orelse SpawnScore lessly BestScore>) -> {
+            BestRow 2b=2 Row;;
+            BestScore 2b=2 SpawnScore;;
+        }
+
+        Prontulate<"row=%exact risk=%exact peak=%exact score=%exact", Row, RowRisk, RowPeak, SpawnScore>;;
+    }
+
+    Pront("--- spawn suggestion ---");;
+    Prontulate<"recommended row=%exact score=%exact", BestRow, BestScore>;;
+    give up;;
+}

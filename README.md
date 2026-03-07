@@ -107,14 +107,20 @@ Plugin docs:
 
 ```jave
 outy seq Foremost<> --> <<nada>> {
-    pront("hello, jave");;
+    Pront("hello, jave");;
     give up;;
 }
 ```
 
 More runnable programs:
 - [examples/](examples)
-- [examples/service_capacity_planning/main.jave](examples/service_capacity_planning/main.jave)
+- [examples/incident_triage/main.jave](examples/incident_triage/main.jave)
+- [examples/adv-log-anomaly-triage/main.jave](examples/adv-log-anomaly-triage/main.jave)
+- [examples/adv-game-lobby-balancer/main.jave](examples/adv-game-lobby-balancer/main.jave)
+- [examples/adv-map-spawn-selector/main.jave](examples/adv-map-spawn-selector/main.jave)
+- [examples/adv-cli-runtime-contract/main.jave](examples/adv-cli-runtime-contract/main.jave)
+- [examples/adv-dossier-journal/main.jave](examples/adv-dossier-journal/main.jave)
+- [examples/adv-embellishments-incident-board/main.jave](examples/adv-embellishments-incident-board/main.jave)
 
 ## Architecture
 

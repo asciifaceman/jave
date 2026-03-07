@@ -1,0 +1,38 @@
+outy seq Foremost<> --> <<nada>> {
+    allow exact Count 2b=2 FeudGirth();;
+
+    maybe (<Count lessly 1>) -> {
+        ProntOops("usage: adv-cli-runtime-contract <mode> [value]");;
+        Exeunt(64);;
+    }
+
+    allow strang Mode 2b=2 FeudAt(0);;
+
+    maybe (<Mode samewise "echo">) -> {
+        maybe (<Count lessly 2>) -> {
+            ProntOops("echo mode requires a value argument");;
+            Exeunt(64);;
+        }
+
+        allow strang Value 2b=2 FeudAt(1);;
+        Prontulate<"echo=%strang", Value>;;
+        give up;;
+    } furthermore (<Mode samewise "check">) -> {
+        maybe (<Count lessly 2>) -> {
+            ProntOops("check mode requires status argument: ok|fail");;
+            Exeunt(64);;
+        }
+
+        allow strang Status 2b=2 FeudAt(1);;
+        maybe (<Status samewise "ok">) -> {
+            Pront("check passed");;
+            give up;;
+        }
+
+        ProntOops("check failed by input status");;
+        Exeunt(65);;
+    }
+
+    ProntOops("unknown mode; expected echo or check");;
+    Exeunt(64);;
+}

@@ -14,7 +14,7 @@ The extension recognizes:
 - **Keywords**: All Jave v0.1 keywords (control flow, declarations, types)
 - **Operators**: Word-based operators (`bigly`, `samewise`, `plusalso`, etc.) and arithmetic symbols
 - **Types**: Primitive types (`exact`, `vag`, `truther`, `strang`, `nada`, `naw`) and collection types
-- **Builtins**: Standard sequences/helpers (`pront`, `girth`), modules (`Strangs`, `Pronts`), and text assembly (`Strangs.Combobulate`, `Pronts.Prontulate`)
+- **Builtins**: Standard sequences/helpers (`Pront`, `Prontulate`, `Girth`, `Slotify`), modules (`Strangs`, `Embellishments`), and text assembly (`Strangs.Combobulate`)
 - **Literals**: Strings with escape sequences and interpolation directives, numbers, booleans
 - **Punctuation**: Statement terminators (`;;`), arrows (`-->`, `->`), assignment (`2b=2`)
 - **Comments**: Line (`//`) and block (`/* */`) comments
@@ -121,7 +121,7 @@ This ensures that keywords are recognized before generic identifiers.
    - Keywords: `outy`, `seq`, `allow`, `maybe`, `give`, `up`
    - Types: `exact`, `vag`, `truther`, `strang`, `nada`
    - Operators: `2b=2`, `bigly`, `samewise`, `plusalso`
-    - Builtins: `pront`, `girth`, `Strangs`, `Pronts`, `Combobulate`, `Prontulate`
+    - Builtins: `Pront`, `Prontulate`, `Girth`, `Slotify`, `Strangs`, `Embellishments`, `Combobulate`
    - Punctuation: `;;`, `-->`, `->`
    - Literals: strings, numbers, `yee`/`nee`
 
@@ -130,10 +130,10 @@ This ensures that keywords are recognized before generic identifiers.
 **Conditionals:**
 ```jave
 maybe (<X bigly 5>) -> {
-    pront("large");;
+    Pront("large");;
 }
 ```
-Expected: `maybe`, `bigly`, `pront` all highlighted differently
+Expected: `maybe`, `bigly`, `Pront` all highlighted differently
 
 **Loops:**
 ```jave
@@ -155,7 +155,7 @@ Strangs.Combobulate<"Value: %exact", X>
 ```
 Expected: `Strangs`, `Combobulate`, `%exact` highlighted
 
-`Strangs.Combobulate` and `Pronts.Prontulate` are valid v0.1 syntax and should highlight correctly.
+`Strangs.Combobulate` and v0.2 PascalCase builtins should highlight correctly.
 
 ## Known Limitations
 
@@ -220,8 +220,8 @@ To customize Jave syntax colors in your VS Code theme:
 - `keyword.operator.assignment.jave` - 2b=2
 - `storage.type.primitive.jave` - exact, vag, truther, strang
 - `entity.name.function.entrypoint.jave` - Foreward, Foremost
-- `support.function.builtin.jave` - pront, girth
-- `support.class.builtin.jave` - Strangs, Pronts
+- `support.function.builtin.jave` - Pront, Girth
+- `support.class.builtin.jave` - Strangs, Embellishments
 
 ## Debugging the Grammar
 

@@ -1,0 +1,5 @@
+kind: builtin
+name: ProntOops
+signature: ProntOops(Message)
+title: Pront one line to stderr
+about: Writes a single value to stderr using Jave display conversion and a trailing newline.

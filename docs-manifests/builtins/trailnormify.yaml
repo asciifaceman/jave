@@ -1,0 +1,5 @@
+kind: builtin
+name: TrailNormify
+signature: TrailNormify(Trail)
+title: Normalize a path trail
+about: Cleans redundant separators and dot segments for deterministic trail formatting on the host platform.

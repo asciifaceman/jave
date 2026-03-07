@@ -24,6 +24,16 @@ Decision note (2026-03-07, import/distribution direction):
 - Avoid custom hosting infrastructure requirements for community carryons.
 - Preserve distinction between bundled stdlib distribution and external dependency acquisition.
 
+Decision note (2026-03-07, Nafta steering confirmation):
+- Path and working directory utilities are approved for v0.2.
+- Deterministic program exit contract is approved for v0.2.
+- Community carryon import/distribution support is moved to tail-end v0.2 sequencing after runtime/platform baselines.
+
+Decision note (2026-03-07, naming consistency addendum):
+- Canonical v0.2 exported sequence names are PascalCase for `outy seq` declarations.
+- Canonical v0.2 builtin/runtime names are PascalCase.
+- Legacy lowercase builtin spellings and legacy `Pronts.*` forms are considered non-canonical for v0.2-facing docs/examples.
+
 ## Priority: Required Candidates
 
 1. Runtime I/O Foundation (Approved)
@@ -49,12 +59,12 @@ Decision note (2026-03-07, import/distribution direction):
 - Explicit non-zero exit signaling from program code paths
 - Improved call-stack context for runtime failures
 
-5. Path and Working Directory Utilities (Proposed)
+5. Path and Working Directory Utilities (Approved)
 - Canonical path join/normalize helpers across Windows/Linux/macOS
 - Current working directory query helper
 - Predictable relative-vs-absolute path behavior in diagnostics
 
-6. Deterministic Program Exit Contract (Proposed)
+6. Deterministic Program Exit Contract (Approved)
 - Runtime-level mapping of failure classes to stable exit codes
 - Explicit contract for compiler/runtime/toolchain exit code meanings
 - Docs and tests for automation-facing behavior
@@ -85,12 +95,20 @@ Decision note (2026-03-07, import/distribution direction):
 - Support output-mode flags for generator formatting behavior
 - Documentation generation entrypoint is delivered through `baggage` (with compiler/runtime support as needed)
 
-12. Community Carryon Import and Distribution Model (Proposed, High Priority)
+12. Community Carryon Import and Distribution Model (Proposed, Tail-End v0.2)
 - Support non-stdlib imports using VCS/GitHub-style source references.
 - Resolve and cache carryons locally without requiring Orcal-hosted package infrastructure.
 - Define deterministic import resolution precedence: stdlib (toolchain-bundled) vs community carryons (external source).
 - Provide lock/manifest expectations through `baggage` for reproducible builds.
 - Keep custom package manager service out of scope for v0.2 baseline.
+
+## Implementation Sequence Guidance (Steering-Aligned)
+
+1. Runtime I/O foundation + deterministic exit contract
+2. Path/cwd and filesystem baseline operations
+3. Environment/logging/timing/networking baseline scope
+4. Richer stdlib utilities and formatting surfaces
+5. Community carryon import/distribution tail-end delivery
 
 ## Priority: Optional Candidates
 
@@ -122,4 +140,4 @@ Before ratification, each candidate should include:
 - API and naming proposal with at least one rejected alternative.
 - Diagnostics and error behavior expectations.
 - Cross-platform notes (Windows/Linux/macOS) when file/process behavior is involved.
-- At least one acceptance scenario in `examples/` or equivalent test coverage.
+- At least one acceptance scenario in `examples/` as features are implemented (or equivalent test coverage).

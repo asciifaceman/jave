@@ -6,8 +6,8 @@ about: Evaluates branch conditions top-to-bottom and executes the first matching
 examples:
   - |
     maybe (<X bigly 5>) -> {
-        pront("large");;
+        Pront("large");;
     } otherwise -> {
-        pront("small-or-equal");;
+        Pront("small-or-equal");;
     }
 status: stable

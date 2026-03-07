@@ -2,7 +2,7 @@ install Strangs from highschool/English;;
 
 outy seq Foremost<> --> <<nada>> {
     allow exact Count 2b=2 2;;
-    prontulate<"Imported systems online. Count=%exact", Count>;;
-    pront(Strangs.Combobulate<"Direct pront via Strangs too: %exact", Count>);;
+    Prontulate<"Imported systems online. Count=%exact", Count>;;
+    Pront(Strangs.Combobulate<"Direct Pront via Strangs too: %exact", Count>);;
     give up;;
 }

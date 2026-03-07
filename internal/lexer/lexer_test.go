@@ -29,7 +29,7 @@ func TestLex_AssignAndStatementEnd(t *testing.T) {
 
 func TestLex_HelloWorldShape(t *testing.T) {
 	src := `outy seq Foremost<> --> <<nada>> {
-    pront("hello, jave");;
+    Pront("hello, jave");;
     give up;;
 }`
 	tokens, diags := lexer.Lex(src)
@@ -49,7 +49,7 @@ func TestLex_HelloWorldShape(t *testing.T) {
 }
 
 func TestLex_UnterminatedStringReportsDiagnostic(t *testing.T) {
-	src := `pront("hello);;`
+	src := `Pront("hello);;`
 	_, diags := lexer.Lex(src)
 	if len(diags) == 0 {
 		t.Fatal("expected diagnostics, got none")
