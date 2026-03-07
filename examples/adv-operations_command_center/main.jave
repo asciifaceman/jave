@@ -1,5 +1,4 @@
 install Strangs from highschool/English;;
-install Pronts from highschool/Communications;;
 
 outy seq RiskScore<exact TrafficDelta, exact ErrorRate, exact LatencyP95, exact OpenIncidents, truther ExternalDependency> --> <<exact>> {
     allow exact Score 2b=2 (TrafficDelta * 2);;
@@ -29,7 +28,7 @@ outy seq SeverityLane<exact Score, truther HasPII, truther ExternalDependency> -
 }
 
 outy seq EmitServiceReport<strang Service, exact Score, strang Lane, exact Owners, vag BudgetBurn, exact EdgeCount> --> <<nada>> {
-    Pronts.Prontulate<"service=%strang score=%exact lane=%strang owners=%exact edges=%exact burn=%vag", Service, Score, Lane, Owners, EdgeCount, BudgetBurn>;;
+    prontulate<"service=%strang score=%exact lane=%strang owners=%exact edges=%exact burn=%vag", Service, Score, Lane, Owners, EdgeCount, BudgetBurn>;;
     give up;;
 }
 
@@ -103,7 +102,7 @@ outy seq Foremost<> --> <<nada>> {
 
     allow enumeration<strang> ExecutiveQueue 2b=2 <"Catherine", "Nafta", "Slavala", "Cheddar">;;
     given (<Sponsor within ExecutiveQueue>) -> {
-        Pronts.Prontulate<"executive-brief queued for %strang", Sponsor>;;
+        prontulate<"executive-brief queued for %strang", Sponsor>;;
     }
 
     maybe (<ExecEscalations bigly 0 plusalso AverageRisk biglysame 40>) -> {

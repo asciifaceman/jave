@@ -23,9 +23,21 @@ type parser struct {
 
 func (p *parser) parseProgram() *ast.Program {
 	program := &ast.Program{}
+	var pendingDoc *ast.Docstring
 	for !p.at(token.EOF) {
 		switch p.current().Kind {
+		case token.Docstring:
+			tok := p.advance()
+			if pendingDoc != nil {
+				p.warnAt(pendingDoc.Pos, "DOC-ATTACH: docstring was not attached to a sequence")
+			}
+			doc := parseDocstring(tok)
+			pendingDoc = &doc
 		case token.Install:
+			if pendingDoc != nil {
+				p.warnAt(pendingDoc.Pos, "DOC-ATTACH: docstring was not attached to a sequence")
+				pendingDoc = nil
+			}
 			imp := p.parseImport()
 			if imp != nil {
 				program.Imports = append(program.Imports, *imp)
@@ -33,12 +45,23 @@ func (p *parser) parseProgram() *ast.Program {
 		case token.Outy, token.Inny:
 			seq := p.parseSequence()
 			if seq != nil {
+				if pendingDoc != nil {
+					seq.Doc = pendingDoc
+					pendingDoc = nil
+				}
 				program.Sequences = append(program.Sequences, *seq)
 			}
 		default:
+			if pendingDoc != nil {
+				p.warnAt(pendingDoc.Pos, "DOC-ATTACH: docstring was not attached to a sequence")
+				pendingDoc = nil
+			}
 			p.errorHere("expected top-level 'install' or sequence declaration")
 			p.synchronizeTopLevel()
 		}
+	}
+	if pendingDoc != nil {
+		p.warnAt(pendingDoc.Pos, "DOC-ATTACH: docstring was not attached to a sequence")
 	}
 	return program
 }
@@ -130,6 +153,14 @@ func (p *parser) parseSequenceParams() ([]ast.SequenceParam, bool) {
 	}
 
 	for {
+		variadic := false
+		if p.at(token.Dot) && p.peek(1).Kind == token.Dot && p.peek(2).Kind == token.Dot {
+			p.advance()
+			p.advance()
+			p.advance()
+			variadic = true
+		}
+
 		typeName, ok := p.parseParamTypeName()
 		if !ok {
 			return nil, false
@@ -138,7 +169,19 @@ func (p *parser) parseSequenceParams() ([]ast.SequenceParam, bool) {
 		if !ok {
 			return nil, false
 		}
-		params = append(params, ast.SequenceParam{TypeName: typeName, Name: nameTok.Lexeme})
+		params = append(params, ast.SequenceParam{TypeName: typeName, Name: nameTok.Lexeme, Variadic: variadic})
+
+		if variadic {
+			if p.match(token.Comma) {
+				p.errorHere("variadic parameter must be last in sequence signature")
+				return nil, false
+			}
+			if p.match(token.RAngle) {
+				return params, true
+			}
+			p.errorHere("expected '>' after variadic sequence parameter")
+			return nil, false
+		}
 
 		if p.match(token.Comma) {
 			continue
@@ -807,6 +850,77 @@ func (p *parser) errorHere(message string) {
 			Column: tok.Pos.Column,
 		},
 	})
+}
+
+func (p *parser) warnAt(pos token.Position, message string) {
+	p.diags = append(p.diags, diagnostics.Diagnostic{
+		Severity: diagnostics.SeverityWarning,
+		Message:  message,
+		Pos: diagnostics.Position{
+			Line:   pos.Line,
+			Column: pos.Column,
+		},
+	})
+}
+
+func parseDocstring(tok token.Token) ast.Docstring {
+	sections := parseDocSections(tok.Lexeme)
+	return ast.Docstring{Pos: tok.Pos, Raw: tok.Lexeme, Sections: sections}
+}
+
+func parseDocSections(raw string) []ast.DocSection {
+	lines := strings.Split(raw, "\n")
+	sections := make([]ast.DocSection, 0)
+	currentLabel := ""
+	currentBody := strings.Builder{}
+
+	flush := func() {
+		if currentLabel == "" {
+			return
+		}
+		sections = append(sections, ast.DocSection{
+			Label: currentLabel,
+			Body:  strings.TrimRight(currentBody.String(), "\n"),
+		})
+		currentLabel = ""
+		currentBody.Reset()
+	}
+
+	for _, rawLine := range lines {
+		line := strings.TrimRight(rawLine, "\r")
+		if label, ok := headingLabel(line); ok {
+			flush()
+			currentLabel = label
+			continue
+		}
+		if currentLabel == "" {
+			if strings.TrimSpace(line) == "" {
+				continue
+			}
+			currentLabel = "About"
+		}
+		currentBody.WriteString(line)
+		currentBody.WriteByte('\n')
+	}
+	flush()
+	return sections
+}
+
+func headingLabel(line string) (string, bool) {
+	if line == "" {
+		return "", false
+	}
+	if line[0] == ' ' || line[0] == '\t' {
+		return "", false
+	}
+	if !strings.HasSuffix(line, ":") {
+		return "", false
+	}
+	label := strings.TrimSpace(strings.TrimSuffix(line, ":"))
+	if label == "" {
+		return "", false
+	}
+	return label, true
 }
 
 func (p *parser) matchWord(word string) bool {

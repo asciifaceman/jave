@@ -8,6 +8,9 @@ STATIC_DIR="${SITE_DIR}/static"
 DOCS_STATIC_DIR="${SITE_DIR}/docs/static"
 RECORDS_FEED_FILE="${SITE_DIR}/records/feed.md"
 
+echo "[pages] generating reference docs via baggage"
+go run ./cmd/baggage docs --project-root "${ROOT_DIR}" --out-dir "${SITE_DIR}/reference" --manifest-dir "${ROOT_DIR}/docs-manifests"
+
 rm -rf "${CONTENT_DIR}"
 mkdir -p "${CONTENT_DIR}" "${STATIC_DIR}" "${DOCS_STATIC_DIR}" "${SITE_DIR}/records"
 

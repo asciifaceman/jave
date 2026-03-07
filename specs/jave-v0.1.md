@@ -98,9 +98,9 @@ Logical operators:
 ## Output
 
 - `pront(...)` is built-in output.
+- `prontulate<...>` is built-in formatted output.
 - `Strangs.Combobulate<...>` is canonical text assembly.
-- `Pronts.Prontulate<...>` is a helper wrapper around combobulate + pront.
-- `Prontulate` must be called with explicit namespace (`Pronts.Prontulate`) in v0.1.
+- `prontulate<...>` formats by way of `Strangs.Combobulate` behavior.
 
 ## Text Assembly
 

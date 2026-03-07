@@ -1,0 +1,22 @@
+doc<
+Title:
+	Formats template text with sequential directive replacement.
+About:
+	Combobulate is the canonical standard-library text assembly sequence.
+	It replaces template directives in order with the provided argument values.
+Param:
+	Template: Base strang containing directive slots such as %exact and %strang.
+Param:
+	Args: Variadic replacement values consumed left-to-right.
+Return:
+	Fully combobulated strang output.
+Example:
+	allow strang Message 2b=2 Strangs.Combobulate<"Count=%exact", 3>;;
+>
+outy seq Combobulate<strang Template, ...strang Args> --> <<strang>> {
+	allow strang Out 2b=2 Template;;
+	given (<Arg within Args>) -> {
+		Out 2b=2 slotify(Out, Arg);;
+	}
+	give Out up;;
+}

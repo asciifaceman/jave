@@ -2,10 +2,13 @@ package runtime_test
 
 import (
 	"bytes"
+	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/asciifaceman/jave/internal/ast"
 	"github.com/asciifaceman/jave/internal/diagnostics"
 	"github.com/asciifaceman/jave/internal/lexer"
 	"github.com/asciifaceman/jave/internal/lowering"
@@ -77,7 +80,7 @@ func TestExecute_LexisMissingKeyErrors(t *testing.T) {
 
 func TestExecute_ProntulateBuiltin(t *testing.T) {
 	src := `outy seq Foremost<> --> <<nada>> {
-    Prontulate<"Count=%exact", 2>;;
+	prontulate<"Count=%exact", 2>;;
     give up;;
 }`
 	buf := &bytes.Buffer{}
@@ -85,6 +88,23 @@ func TestExecute_ProntulateBuiltin(t *testing.T) {
 		t.Fatalf("execute failed: %v", err)
 	}
 	if got := strings.TrimSpace(buf.String()); got != "Count=2" {
+		t.Fatalf("unexpected output: %q", got)
+	}
+}
+
+func TestExecute_SlotifyBuiltin(t *testing.T) {
+	src := `outy seq Foremost<> --> <<nada>> {
+    pront(slotify("A=%exact B=%strang", 7));;
+    pront(slotify(slotify("A=%exact B=%strang", 7), "yee"));;
+    give up;;
+}`
+	buf := &bytes.Buffer{}
+	if err := runSource(src, buf); err != nil {
+		t.Fatalf("execute failed: %v", err)
+	}
+	got := strings.TrimSpace(buf.String())
+	want := "A=7 B=%strang\nA=7 B=yee"
+	if got != want {
 		t.Fatalf("unexpected output: %q", got)
 	}
 }
@@ -319,6 +339,92 @@ func TestExecute_CollectionsExample(t *testing.T) {
 	}
 }
 
+func TestExecute_MathAlgebraOpsExample(t *testing.T) {
+	src := `outy seq MostExact<exact Left, exact Right> --> <<exact>> {
+	maybe (<Left biglysame Right>) -> {
+		give Left up;;
+	}
+	give Right up;;
+}
+
+outy seq LeastExact<exact Left, exact Right> --> <<exact>> {
+	maybe (<Left lesslysame Right>) -> {
+		give Left up;;
+	}
+	give Right up;;
+}
+
+outy seq MostVag<vag Left, vag Right> --> <<vag>> {
+	maybe (<Left biglysame Right>) -> {
+		give Left up;;
+	}
+	give Right up;;
+}
+
+outy seq LeastVag<vag Left, vag Right> --> <<vag>> {
+	maybe (<Left lesslysame Right>) -> {
+		give Left up;;
+	}
+	give Right up;;
+}
+
+outy seq PosidirExact<exact Value> --> <<exact>> {
+	maybe (<Value bigly 0>) -> {
+		give 1 up;;
+	} furthermore (<Value lessly 0>) -> {
+		give 0 - 1 up;;
+	}
+	give 0 up;;
+}
+
+outy seq PosidirVag<vag Value> --> <<exact>> {
+	maybe (<Value bigly 0>) -> {
+		give 1 up;;
+	} furthermore (<Value lessly 0>) -> {
+		give 0 - 1 up;;
+	}
+	give 0 up;;
+}
+
+outy seq Nearlydont<vag Value> --> <<truther>> {
+	allow vag Epsilon 2b=2 0.000001;;
+	maybe (<Value lessly 0>) -> {
+		give (0 - Value) lesslysame Epsilon up;;
+	}
+	give Value lesslysame Epsilon up;;
+}
+
+outy seq Stretch<vag Start, vag End, vag Progress> --> <<vag>> {
+	give Start + ((End - Start) * Progress) up;;
+}
+
+outy seq Foremost<> --> <<nada>> {
+	pront(MostExact<3, 9>);;
+	pront(LeastExact<3, 9>);;
+	pront(MostVag<1.25, 1.2>);;
+	pront(LeastVag<1.25, 1.2>);;
+
+	pront(PosidirExact<0 - 5>);;
+	pront(PosidirExact<0>);;
+	pront(PosidirVag<2.5>);;
+
+	pront(Nearlydont<0.0000004>);;
+	pront(Nearlydont<0.01>);;
+
+	pront(Stretch<10.0, 20.0, 0.25>);;
+	give up;;
+}`
+	buf := &bytes.Buffer{}
+	if err := runSource(src, buf); err != nil {
+		t.Fatalf("execute failed: %v", err)
+	}
+	got := strings.TrimSpace(buf.String())
+	want := "9\n3\n1.25\n1.2\n-1\n0\n1\nyee\nnee\n12.5"
+	if got != want {
+		t.Fatalf("unexpected output:\n%s\nwant:\n%s", got, want)
+	}
+}
+
 func runSource(src string, out *bytes.Buffer) error {
 	toks, lexDiags := lexer.Lex(src)
 	if len(lexDiags) != 0 {
@@ -327,6 +433,9 @@ func runSource(src string, out *bytes.Buffer) error {
 	prog, parseDiags := parser.Parse(toks)
 	if len(parseDiags) != 0 {
 		return parseErr(parseDiags)
+	}
+	if err := appendImportedSequences(prog); err != nil {
+		return err
 	}
 	semaDiags := sema.Analyze(prog)
 	for _, d := range semaDiags {
@@ -339,6 +448,54 @@ func runSource(src string, out *bytes.Buffer) error {
 		return lowerErr(lowerDiags)
 	}
 	return runtime.Execute(irProg, out)
+}
+
+func appendImportedSequences(prog *ast.Program) error {
+	for _, imp := range prog.Imports {
+		module, err := loadModuleProgram(imp.From)
+		if err != nil {
+			return err
+		}
+		for _, seq := range module.Sequences {
+			seq.SourceModule = imp.Name
+			prog.Sequences = append(prog.Sequences, seq)
+		}
+	}
+	return nil
+}
+
+func loadModuleProgram(from string) (*ast.Program, error) {
+	modulePath, err := resolveModuleMainFile(from)
+	if err != nil {
+		return nil, err
+	}
+	srcBytes, err := os.ReadFile(modulePath)
+	if err != nil {
+		return nil, fmt.Errorf("read module %s: %w", modulePath, err)
+	}
+	toks, lexDiags := lexer.Lex(string(srcBytes))
+	if len(lexDiags) != 0 {
+		return nil, fmt.Errorf("lexer diagnostics while loading module %s", from)
+	}
+	module, parseDiags := parser.Parse(toks)
+	if len(parseDiags) != 0 {
+		return nil, fmt.Errorf("parser diagnostics while loading module %s", from)
+	}
+	return module, nil
+}
+
+func resolveModuleMainFile(from string) (string, error) {
+	relModulePath := filepath.Join(filepath.FromSlash(from), "main.jave")
+	candidates := []string{
+		relModulePath,
+		filepath.Join("..", "..", relModulePath),
+	}
+	for _, candidate := range candidates {
+		if _, err := os.Stat(candidate); err == nil {
+			return candidate, nil
+		}
+	}
+	return "", fmt.Errorf("module source for %s not found", from)
 }
 
 func lexErr(v any) error   { return &testErr{msg: "lexer diagnostics"} }

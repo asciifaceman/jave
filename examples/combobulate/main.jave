@@ -1,9 +1,8 @@
 install Strangs from highschool/English;;
-install Pronts from highschool/Communications;;
 
 outy seq Foremost<> --> <<nada>> {
     allow strang Name 2b=2 "Jave";;
     pront(Strangs.Combobulate<"Hello, %strang", Name>);;
-    Pronts.Prontulate<"Still hello, %strang", Name>;;
+    prontulate<"Still hello, %strang", Name>;;
     give up;;
 }

@@ -59,6 +59,47 @@ func TestLex_UnterminatedStringReportsDiagnostic(t *testing.T) {
 	}
 }
 
+func TestLex_SkipsLineAndBlockComments(t *testing.T) {
+	src := `>>| line comment
+=[
+block comment
+]=
+outy seq Foremost<> --> <<nada>> {
+    give up;;
+}`
+	tokens, diags := lexer.Lex(src)
+	if len(diags) != 0 {
+		t.Fatalf("expected no diagnostics, got %d", len(diags))
+	}
+	kinds := kindsOf(tokens)
+	if kinds[0] != token.Outy {
+		t.Fatalf("expected first non-comment token to be Outy, got %s", kinds[0])
+	}
+}
+
+func TestLex_DocstringToken(t *testing.T) {
+	src := `doc<
+Title:
+    Demo
+>
+outy seq Foremost<> --> <<nada>> {
+    give up;;
+}`
+	tokens, diags := lexer.Lex(src)
+	if len(diags) != 0 {
+		t.Fatalf("expected no diagnostics, got %d", len(diags))
+	}
+	if len(tokens) < 2 {
+		t.Fatalf("unexpected token count: %d", len(tokens))
+	}
+	if tokens[0].Kind != token.Docstring {
+		t.Fatalf("expected first token to be Docstring, got %s", tokens[0].Kind)
+	}
+	if tokens[1].Kind != token.Outy {
+		t.Fatalf("expected second token to be Outy, got %s", tokens[1].Kind)
+	}
+}
+
 func kindsOf(tokens []token.Token) []token.Kind {
 	out := make([]token.Kind, 0, len(tokens))
 	for _, tok := range tokens {

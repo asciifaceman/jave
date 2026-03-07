@@ -1,3 +1,15 @@
+doc<
+Title:
+    Absolute value for exact numbers.
+About:
+    Returns a non-negative exact by reflecting negative inputs across zero.
+Param:
+    Value: Exact input to normalize.
+Return:
+    Non-negative exact magnitude.
+Example:
+    allow exact A 2b=2 Algebra.PosiExact<0 - 9>;;
+>
 outy seq PosiExact<exact Value> --> <<exact>> {
     maybe (<Value lessly 0>) -> {
         give 0 - Value up;;
@@ -5,9 +17,168 @@ outy seq PosiExact<exact Value> --> <<exact>> {
     give Value up;;
 }
 
+doc<
+Title:
+    Absolute value for vag numbers.
+About:
+    Returns a non-negative vag by reflecting negative inputs across zero.
+Param:
+    Value: Vag input to normalize.
+Return:
+    Non-negative vag magnitude.
+Example:
+    allow vag A 2b=2 Algebra.PosiVag<0 - 2.5>;;
+>
 outy seq PosiVag<vag Value> --> <<vag>> {
     maybe (<Value lessly 0>) -> {
         give 0 - Value up;;
     }
     give Value up;;
+}
+
+doc<
+Title:
+    Maximum of two exact values.
+About:
+    Chooses the larger exact argument and returns it.
+Param:
+    Left: First exact candidate.
+Param:
+    Right: Second exact candidate.
+Return:
+    Larger exact value.
+>
+outy seq MostExact<exact Left, exact Right> --> <<exact>> {
+    maybe (<Left biglysame Right>) -> {
+        give Left up;;
+    }
+    give Right up;;
+}
+
+doc<
+Title:
+    Minimum of two exact values.
+About:
+    Chooses the smaller exact argument and returns it.
+Param:
+    Left: First exact candidate.
+Param:
+    Right: Second exact candidate.
+Return:
+    Smaller exact value.
+>
+outy seq LeastExact<exact Left, exact Right> --> <<exact>> {
+    maybe (<Left lesslysame Right>) -> {
+        give Left up;;
+    }
+    give Right up;;
+}
+
+doc<
+Title:
+    Maximum of two vag values.
+About:
+    Chooses the larger vag argument and returns it.
+Param:
+    Left: First vag candidate.
+Param:
+    Right: Second vag candidate.
+Return:
+    Larger vag value.
+>
+outy seq MostVag<vag Left, vag Right> --> <<vag>> {
+    maybe (<Left biglysame Right>) -> {
+        give Left up;;
+    }
+    give Right up;;
+}
+
+doc<
+Title:
+    Minimum of two vag values.
+About:
+    Chooses the smaller vag argument and returns it.
+Param:
+    Left: First vag candidate.
+Param:
+    Right: Second vag candidate.
+Return:
+    Smaller vag value.
+>
+outy seq LeastVag<vag Left, vag Right> --> <<vag>> {
+    maybe (<Left lesslysame Right>) -> {
+        give Left up;;
+    }
+    give Right up;;
+}
+
+doc<
+Title:
+    Direction of an exact value.
+About:
+    Converts an exact into sign direction semantics: -1, 0, or 1.
+Param:
+    Value: Exact value to classify.
+Return:
+    Exact direction marker in {-1, 0, 1}.
+>
+outy seq PosidirExact<exact Value> --> <<exact>> {
+    maybe (<Value bigly 0>) -> {
+        give 1 up;;
+    } furthermore (<Value lessly 0>) -> {
+        give 0 - 1 up;;
+    }
+    give 0 up;;
+}
+
+doc<
+Title:
+    Direction of a vag value.
+About:
+    Converts a vag into sign direction semantics: -1, 0, or 1.
+Param:
+    Value: Vag value to classify.
+Return:
+    Exact direction marker in {-1, 0, 1}.
+>
+outy seq PosidirVag<vag Value> --> <<exact>> {
+    maybe (<Value bigly 0>) -> {
+        give 1 up;;
+    } furthermore (<Value lessly 0>) -> {
+        give 0 - 1 up;;
+    }
+    give 0 up;;
+}
+
+doc<
+Title:
+    Near-zero check for vag values.
+About:
+    Uses a fixed epsilon threshold to determine whether a vag is nearly zero.
+Param:
+    Value: Vag value under review.
+Return:
+    truther indicating near-zero posture.
+>
+outy seq Nearlydont<vag Value> --> <<truther>> {
+    allow vag Epsilon 2b=2 0.000001;;
+    give PosiVag<Value> lesslysame Epsilon up;;
+}
+
+doc<
+Title:
+    Linear interpolation across two vag endpoints.
+About:
+    Computes Start + ((End - Start) * Progress).
+Param:
+    Start: Lower or initial endpoint.
+Param:
+    End: Upper or target endpoint.
+Param:
+    Progress: Interpolation ratio, typically 0.0 through 1.0.
+Return:
+    Interpolated vag value.
+>
+outy seq Stretch<vag Start, vag End, vag Progress> --> <<vag>> {
+    give Start + ((End - Start) * Progress) up;;
 }

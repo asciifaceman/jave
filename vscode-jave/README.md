@@ -5,10 +5,11 @@ Syntax highlighting extension for the Jave programming language.
 ## Features
 
 - Syntax highlighting for `.jave` and `.jv` files
-- Keyword recognition (Proposal, Memo, Foreward, Foremost, Carryon, etc.)
+- Keyword recognition for current v0.1 syntax (`outy`, `seq`, `given`, `maybe`, etc.)
 - Comment highlighting (line and block)
+- Docstring highlighting (`doc< ... >`)
 - String literal highlighting with escape sequences
-- Builtin function highlighting
+- Builtin and carryon symbol highlighting (`pront`, `prontulate`, `girth`, `slotify`, `Strangs.Combobulate`)
 - Bracket matching and auto-closing pairs
 
 ## Installation (Local Development)
@@ -171,16 +172,23 @@ You can also add these settings to your VS Code workspace for additional configu
 
 **Functions:**
 - `pront(...)` - Output function
+- `prontulate<...>` - Builtin formatted output
 - `girth(...)` - Size/length function
+- `slotify(...)` - Replace first formatting directive in template text
 
 **Standard Library Modules:**
 - `Strangs` - String utilities module (canonical)
 - `Srangs` - Legacy alias for Strangs (warns)
-- `Pronts` - Print utilities module
+- `Pronts` - Legacy communications alias (no longer required for formatted output)
 
 **Module Methods:**
 - `Strangs.Combobulate<template, ...>` - String assembly with interpolation
-- `Pronts.Prontulate<...>` - Wrapper for combobulate + pront
+- `Pronts.Prontulate<...>` - Legacy wrapper surface
+
+**Comments and Docstrings:**
+- `>>|` - Line comment
+- `=[ ... ]=` - Block comment
+- `doc< ... >` - Structured docstring block (multiline)
 
 ### Literals
 
@@ -282,7 +290,7 @@ given (<Name within Names>) -> {
 ## Examples
 
 ```jave
-// Hello World
+>>| Hello World
 outy seq Foremost<> --> <<nada>> {
     pront("hello, jave");;
     give up;;
@@ -290,7 +298,7 @@ outy seq Foremost<> --> <<nada>> {
 ```
 
 ```jave
-// With variables and conditionals
+>>| With variables and conditionals
 outy seq Foremost<> --> <<nada>> {
     allow vag Score 2b=2 0.85;;
     
@@ -305,14 +313,13 @@ outy seq Foremost<> --> <<nada>> {
 ```
 
 ```jave
-// With imports and string assembly
+>>| With imports and string assembly
 install Strangs from highschool/English;;
-install Pronts from highschool/Communications;;
 
 outy seq Foremost<> --> <<nada>> {
     allow exact Count 2b=2 42;;
     allow strang Message 2b=2 Strangs.Combobulate<"Answer: %exact", Count>;;
-    Pronts.Prontulate<Message>;;
+    prontulate<"Answer: %exact", Count>;;
     give up;;
 }
 ```
@@ -341,6 +348,21 @@ To modify the syntax highlighting:
 1. Edit `syntaxes/jave.tmLanguage.json` - TextMate grammar definitions
 2. Edit `language-configuration.json` - Bracket matching and comment configuration
 3. Reload VS Code to test changes
+
+## IntelliSense Roadmap
+
+Current extension scope is syntax + language configuration only. For type hints, hovers, and richer completion, build a Jave language server and keep this syntax extension as the lexical layer.
+
+Recommended next steps:
+
+1. Add an LSP server package (Go) that reuses existing lexer/parser/sema for diagnostics.
+2. Implement `textDocument/hover` using attached `doc<...>` sections (`Title`, `About`, `Param`, `Return`) and YAML manifests for builtins/language features.
+3. Implement `textDocument/completion` from scope-aware identifiers + known stdlib carryon exports.
+4. Implement `textDocument/signatureHelp` from sequence params (including variadics) and docstring parameter descriptions.
+5. Implement semantic tokens for declaration/reference role coloring beyond TextMate regex highlighting.
+6. Add quick docs indexing for generated `site/reference` pages to support “open docs” commands from symbol hover.
+
+Because docstrings are now first-class in the AST, they can directly feed hover/signature help without duplicate annotation formats.
 
 ## Troubleshooting
 

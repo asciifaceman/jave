@@ -1,0 +1,11 @@
+kind: language-feature
+name: given
+signature: given (<...>) -> { ... }
+title: Loop family keyword
+about: Supports while-ish, for-ish, and within iteration forms.
+examples:
+  - |
+    given (<allow exact I 2b=2 0;; I lessly 3;; I 2b=2 I + 1;;>) -> {
+        pront(I);;
+    }
+status: stable

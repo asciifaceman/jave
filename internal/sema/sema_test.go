@@ -147,6 +147,7 @@ func TestAnalyze_SequenceCallArityMismatch(t *testing.T) {
 	src := `outy seq Add<exact A, exact B> --> <<exact>> {
     give A + B up;;
 }
+
 outy seq Foremost<> --> <<nada>> {
     allow exact Sum 2b=2 Add<2>;;
     pront(Sum);;
@@ -165,9 +166,31 @@ outy seq Foremost<> --> <<nada>> {
 	}
 }
 
+func TestAnalyze_VariadicSequenceCallTooFewArgs(t *testing.T) {
+	src := `outy seq Combobulate<strang Template, ...strang Args> --> <<strang>> {
+    give Template up;;
+}
+outy seq Foremost<> --> <<nada>> {
+    allow strang S 2b=2 Combobulate<>;;
+    pront(S);;
+    give up;;
+}`
+
+	diags := analyzeSrcDetailed(t, src)
+	found := false
+	for _, d := range diags {
+		if d.Severity == diagnostics.SeverityError && strings.Contains(d.Message, "arity mismatch") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("expected sequence call arity mismatch diagnostic for variadic fixed params")
+	}
+}
+
 func TestAnalyze_ProntulateBuiltinIdentifier(t *testing.T) {
 	src := `outy seq Foremost<> --> <<nada>> {
-    Prontulate<"Count=%exact", 2>;;
+	prontulate<"Count=%exact", 2>;;
     give up;;
 }`
 
@@ -213,6 +236,43 @@ func TestAnalyze_ModuleMemberCallArityMismatch_PosiExact(t *testing.T) {
 	}
 }
 
+func TestAnalyze_ModuleMemberVariadicCallTooFewArgs(t *testing.T) {
+	program := &ast.Program{
+		Imports: []ast.ImportDecl{{Name: "Strangs", From: "highschool/English"}},
+		Sequences: []ast.SequenceDecl{
+			{
+				SourceModule: "Strangs",
+				Name:         "Combobulate",
+				Params: []ast.SequenceParam{
+					{TypeName: "strang", Name: "Template"},
+					{TypeName: "strang", Name: "Args", Variadic: true},
+				},
+				ReturnType: "strang",
+				Body:       []ast.Stmt{ast.GiveStmt{Value: ast.StringExpr{Value: "x"}}},
+			},
+			{
+				Name:       "Foremost",
+				ReturnType: "nada",
+				Body: []ast.Stmt{
+					ast.ExprStmt{Expr: ast.CallExpr{Callee: ast.MemberExpr{Target: ast.IdentifierExpr{Name: "Strangs"}, Name: "Combobulate"}, Args: []ast.Expr{}}},
+					ast.GiveStmt{},
+				},
+			},
+		},
+	}
+
+	diags := sema.Analyze(program)
+	found := false
+	for _, d := range diags {
+		if d.Severity == diagnostics.SeverityError && strings.Contains(d.Message, "sequence call arity mismatch for Strangs.Combobulate") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("expected module member variadic arity mismatch diagnostic")
+	}
+}
+
 func TestAnalyze_ModuleMemberMissingDiagnostic(t *testing.T) {
 	program := &ast.Program{
 		Imports: []ast.ImportDecl{{Name: "Algebra", From: "highschool/Algebra"}},
@@ -244,6 +304,124 @@ func TestAnalyze_ModuleMemberMissingDiagnostic(t *testing.T) {
 	}
 	if !found {
 		t.Fatal("expected undefined module sequence diagnostic")
+	}
+}
+
+func TestAnalyze_SameSequenceNameAcrossModulesAllowed(t *testing.T) {
+	program := &ast.Program{
+		Imports: []ast.ImportDecl{
+			{Name: "Algebra", From: "highschool/Algebra"},
+			{Name: "Geometry", From: "highschool/Geometry"},
+		},
+		Sequences: []ast.SequenceDecl{
+			{
+				SourceModule: "Algebra",
+				Name:         "Normalize",
+				Params:       []ast.SequenceParam{{TypeName: "exact", Name: "Value"}},
+				ReturnType:   "exact",
+				Body:         []ast.Stmt{ast.GiveStmt{Value: ast.NumberExpr{Value: "1"}}},
+			},
+			{
+				SourceModule: "Geometry",
+				Name:         "Normalize",
+				Params:       []ast.SequenceParam{{TypeName: "exact", Name: "Value"}},
+				ReturnType:   "exact",
+				Body:         []ast.Stmt{ast.GiveStmt{Value: ast.NumberExpr{Value: "1"}}},
+			},
+			{
+				Name:       "Foremost",
+				ReturnType: "nada",
+				Body: []ast.Stmt{
+					ast.ExprStmt{Expr: ast.CallExpr{Callee: ast.MemberExpr{Target: ast.IdentifierExpr{Name: "Algebra"}, Name: "Normalize"}, Args: []ast.Expr{ast.NumberExpr{Value: "1"}}}},
+					ast.ExprStmt{Expr: ast.CallExpr{Callee: ast.MemberExpr{Target: ast.IdentifierExpr{Name: "Geometry"}, Name: "Normalize"}, Args: []ast.Expr{ast.NumberExpr{Value: "2"}}}},
+					ast.GiveStmt{},
+				},
+			},
+		},
+	}
+
+	diags := sema.Analyze(program)
+	for _, d := range diags {
+		if d.Severity == diagnostics.SeverityError {
+			t.Fatalf("unexpected semantic error: %s", d.Message)
+		}
+	}
+}
+
+func TestAnalyze_ImportedSequenceIsNotGlobalIdentifier(t *testing.T) {
+	program := &ast.Program{
+		Imports: []ast.ImportDecl{{Name: "Algebra", From: "highschool/Algebra"}},
+		Sequences: []ast.SequenceDecl{
+			{
+				SourceModule: "Algebra",
+				Name:         "Normalize",
+				Params:       []ast.SequenceParam{{TypeName: "exact", Name: "Value"}},
+				ReturnType:   "exact",
+				Body:         []ast.Stmt{ast.GiveStmt{Value: ast.NumberExpr{Value: "1"}}},
+			},
+			{
+				Name:       "Foremost",
+				ReturnType: "nada",
+				Body: []ast.Stmt{
+					ast.ExprStmt{Expr: ast.CallExpr{Callee: ast.IdentifierExpr{Name: "Normalize"}, Args: []ast.Expr{ast.NumberExpr{Value: "1"}}}},
+					ast.GiveStmt{},
+				},
+			},
+		},
+	}
+
+	diags := sema.Analyze(program)
+	found := false
+	for _, d := range diags {
+		if d.Severity == diagnostics.SeverityError && strings.Contains(d.Message, "undefined identifier: Normalize") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("expected undefined identifier diagnostic for unqualified imported member call")
+	}
+}
+
+func TestAnalyze_ModuleLocalUnqualifiedCallAllowed(t *testing.T) {
+	program := &ast.Program{
+		Imports: []ast.ImportDecl{{Name: "Algebra", From: "highschool/Algebra"}},
+		Sequences: []ast.SequenceDecl{
+			{
+				SourceModule: "Algebra",
+				Name:         "PosiVag",
+				Params:       []ast.SequenceParam{{TypeName: "vag", Name: "Value"}},
+				ReturnType:   "vag",
+				Body:         []ast.Stmt{ast.GiveStmt{Value: ast.NumberExpr{Value: "1.0"}}},
+			},
+			{
+				SourceModule: "Algebra",
+				Name:         "Nearlydont",
+				Params:       []ast.SequenceParam{{TypeName: "vag", Name: "Value"}},
+				ReturnType:   "truther",
+				Body: []ast.Stmt{
+					ast.GiveStmt{Value: ast.BinaryExpr{
+						Left:  ast.CallExpr{Callee: ast.IdentifierExpr{Name: "PosiVag"}, Args: []ast.Expr{ast.IdentifierExpr{Name: "Value"}}},
+						Op:    "lesslysame",
+						Right: ast.NumberExpr{Value: "1.0"},
+					}},
+				},
+			},
+			{
+				Name:       "Foremost",
+				ReturnType: "nada",
+				Body: []ast.Stmt{
+					ast.ExprStmt{Expr: ast.CallExpr{Callee: ast.MemberExpr{Target: ast.IdentifierExpr{Name: "Algebra"}, Name: "Nearlydont"}, Args: []ast.Expr{ast.NumberExpr{Value: "0.5"}}}},
+					ast.GiveStmt{},
+				},
+			},
+		},
+	}
+
+	diags := sema.Analyze(program)
+	for _, d := range diags {
+		if d.Severity == diagnostics.SeverityError {
+			t.Fatalf("unexpected semantic error: %s", d.Message)
+		}
 	}
 }
 

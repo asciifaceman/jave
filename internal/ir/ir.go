@@ -7,16 +7,23 @@ import (
 
 // ProgramIR is a lowered representation ready for runtime execution.
 type ProgramIR struct {
-	Forewards       []SequenceIR
-	Foremost        SequenceIR
-	Sequences       map[string]SequenceIR
-	ModuleSequences map[string]map[string]SequenceIR
+	Forewards               []SequenceIR
+	Foremost                SequenceIR
+	Sequences               map[string]SequenceIR
+	ModuleSequences         map[string]map[string]SequenceIR
+	SequenceOverloads       map[string]map[int]SequenceIR
+	ModuleSequenceOverloads map[string]map[string]map[int]SequenceIR
+	SequenceVariadics       map[string]SequenceIR
+	ModuleSequenceVariadics map[string]map[string]SequenceIR
 }
 
 // SequenceIR contains executable instructions for one sequence.
 type SequenceIR struct {
 	Name         string
+	Module       string
 	Params       []string
+	Variadic     bool
+	FixedParams  int
 	ReturnType   string
 	Instructions []Instruction
 }

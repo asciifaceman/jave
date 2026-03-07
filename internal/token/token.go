@@ -11,6 +11,7 @@ const (
 	Integer    Kind = "Integer"
 	Float      Kind = "Float"
 	String     Kind = "String"
+	Docstring  Kind = "Docstring"
 
 	Outy        Kind = "Outy"
 	Inny        Kind = "Inny"

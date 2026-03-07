@@ -7,8 +7,16 @@ on:
     paths:
       - governance/**
       - docs/**
+      - docs-manifests/**
       - specs/**
       - examples/**
+      - highschool/**
+      - cmd/baggage/**
+      - internal/ast/**
+      - internal/lexer/**
+      - internal/parser/**
+      - go.mod
+      - go.sum
       - site/**
       - tools/build-pages-content.sh
       - .github/workflows/github-pages.yml
@@ -16,8 +24,16 @@ on:
     paths:
       - governance/**
       - docs/**
+      - docs-manifests/**
       - specs/**
       - examples/**
+      - highschool/**
+      - cmd/baggage/**
+      - internal/ast/**
+      - internal/lexer/**
+      - internal/parser/**
+      - go.mod
+      - go.sum
       - site/**
       - tools/build-pages-content.sh
       - .github/workflows/github-pages.yml

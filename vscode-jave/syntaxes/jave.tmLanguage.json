@@ -3,6 +3,7 @@
   "name": "Jave",
   "scopeName": "source.jave",
   "patterns": [
+    { "include": "#docstrings" },
     { "include": "#comments" },
     { "include": "#keywords" },
     { "include": "#entrypoints" },
@@ -13,16 +14,31 @@
     { "include": "#punctuation" }
   ],
   "repository": {
+    "docstrings": {
+      "patterns": [
+        {
+          "name": "comment.block.documentation.jave",
+          "begin": "\\bdoc<\\s*$",
+          "end": "^\\s*>\\s*$",
+          "patterns": [
+            {
+              "name": "entity.name.section.docstring.jave",
+              "match": "^(?!\\s)([A-Za-z][A-Za-z0-9_]*)\\s*:\\s*$"
+            }
+          ]
+        }
+      ]
+    },
     "comments": {
       "patterns": [
         {
-          "name": "comment.line.double-slash.jave",
-          "match": "//.*$"
+          "name": "comment.line.double-angle.jave",
+          "match": ">>\\|.*$"
         },
         {
           "name": "comment.block.jave",
-          "begin": "/\\*",
-          "end": "\\*/"
+          "begin": "=\\[",
+          "end": "\\]="
         }
       ]
     },
@@ -133,7 +149,7 @@
       "patterns": [
         {
           "name": "support.function.builtin.jave",
-          "match": "\\b(pront|girth)\\b"
+          "match": "\\b(pront|prontulate|girth|slotify)\\b"
         },
         {
           "name": "support.class.builtin.jave",
@@ -141,7 +157,7 @@
         },
         {
           "name": "support.function.method.jave",
-          "match": "\\b(Combobulate|Prontulate|Girth)\\b"
+          "match": "\\b(Combobulate)\\b"
         },
         {
           "name": "support.constant.path.jave",
@@ -194,6 +210,10 @@
         {
           "name": "punctuation.accessor.jave",
           "match": "\\."
+        },
+        {
+          "name": "punctuation.definition.variadic.jave",
+          "match": "\\.\\.\\."
         },
         {
           "name": "punctuation.separator.colon.jave",

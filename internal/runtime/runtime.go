@@ -12,7 +12,7 @@ import (
 
 // Execute runs a lowered IR program.
 func Execute(program *ir.ProgramIR, out io.Writer) error {
-	r := &runner{out: out, program: program, frames: []map[string]any{{}}}
+	r := &runner{out: out, program: program, frames: []map[string]any{{}}, modules: []string{""}}
 	return r.execute(program)
 }
 
@@ -20,6 +20,7 @@ type runner struct {
 	out     io.Writer
 	program *ir.ProgramIR
 	frames  []map[string]any
+	modules []string
 }
 
 func (r *runner) execute(program *ir.ProgramIR) error {
@@ -196,6 +197,13 @@ func (r *runner) resolveVar(name string) (any, bool) {
 	return nil, false
 }
 
+func (r *runner) currentModule() string {
+	if len(r.modules) == 0 {
+		return ""
+	}
+	return r.modules[len(r.modules)-1]
+}
+
 func (r *runner) eval(expr ast.Expr) (any, error) {
 	switch e := expr.(type) {
 	case ast.IdentifierExpr:
@@ -332,12 +340,25 @@ func (r *runner) evalCall(e ast.CallExpr) (any, error) {
 			default:
 				return nil, fmt.Errorf("girth unsupported for value")
 			}
-		case "Prontulate":
-			comb, err := r.evalCall(ast.CallExpr{
-				Callee: ast.MemberExpr{Target: ast.IdentifierExpr{Name: "Strangs"}, Name: "Combobulate"},
-				Args:   e.Args,
-				Style:  e.Style,
-			})
+		case "slotify":
+			if len(e.Args) != 2 {
+				return nil, fmt.Errorf("slotify expects two arguments")
+			}
+			tmplAny, err := r.eval(e.Args[0])
+			if err != nil {
+				return nil, err
+			}
+			tmpl, ok := tmplAny.(string)
+			if !ok {
+				return nil, fmt.Errorf("slotify template must be string")
+			}
+			v, err := r.eval(e.Args[1])
+			if err != nil {
+				return nil, err
+			}
+			return replaceFirstDirective(tmpl, toDisplay(v)), nil
+		case "prontulate":
+			comb, err := r.formatCallTemplate(e.Args, "prontulate")
 			if err != nil {
 				return nil, err
 			}
@@ -348,10 +369,65 @@ func (r *runner) evalCall(e ast.CallExpr) (any, error) {
 		if seq, exists := r.program.Sequences[ident.Name]; exists {
 			return r.invokeSequence(seq, e.Args, ident.Name)
 		}
+
+		if overloads, exists := r.program.SequenceOverloads[ident.Name]; exists {
+			if seq, arityExists := overloads[len(e.Args)]; arityExists {
+				return r.invokeSequence(seq, e.Args, ident.Name)
+			}
+		}
+		if seq, exists := r.program.SequenceVariadics[ident.Name]; exists {
+			if len(e.Args) >= seq.FixedParams {
+				return r.invokeSequence(seq, e.Args, ident.Name)
+			}
+		}
+
+		if moduleName := r.currentModule(); moduleName != "" {
+			if moduleSet, exists := r.program.ModuleSequenceOverloads[moduleName]; exists {
+				if nameSet, nameExists := moduleSet[ident.Name]; nameExists {
+					if seq, seqExists := nameSet[len(e.Args)]; seqExists {
+						return r.invokeSequence(seq, e.Args, moduleName+"."+ident.Name)
+					}
+				}
+			}
+			if moduleSet, exists := r.program.ModuleSequenceVariadics[moduleName]; exists {
+				if seq, exists := moduleSet[ident.Name]; exists && len(e.Args) >= seq.FixedParams {
+					return r.invokeSequence(seq, e.Args, moduleName+"."+ident.Name)
+				}
+			}
+
+			if moduleSet, exists := r.program.ModuleSequences[moduleName]; exists {
+				if seq, seqExists := moduleSet[ident.Name]; seqExists {
+					return r.invokeSequence(seq, e.Args, moduleName+"."+ident.Name)
+				}
+			}
+		}
 	}
 
 	if member, ok := e.Callee.(ast.MemberExpr); ok {
 		if target, ok := member.Target.(ast.IdentifierExpr); ok {
+			if moduleSet, exists := r.program.ModuleSequenceOverloads[target.Name]; exists {
+				if nameSet, nameExists := moduleSet[member.Name]; nameExists {
+					if seq, arityExists := nameSet[len(e.Args)]; arityExists {
+						return r.invokeSequence(seq, e.Args, target.Name+"."+member.Name)
+					}
+					if varSet, hasVar := r.program.ModuleSequenceVariadics[target.Name]; hasVar {
+						if seq, varExists := varSet[member.Name]; varExists && len(e.Args) >= seq.FixedParams {
+							return r.invokeSequence(seq, e.Args, target.Name+"."+member.Name)
+						}
+					}
+					return nil, fmt.Errorf("sequence call arity mismatch for %s.%s", target.Name, member.Name)
+				}
+			}
+
+			if varSet, hasVar := r.program.ModuleSequenceVariadics[target.Name]; hasVar {
+				if seq, varExists := varSet[member.Name]; varExists {
+					if len(e.Args) < seq.FixedParams {
+						return nil, fmt.Errorf("sequence call arity mismatch for %s.%s", target.Name, member.Name)
+					}
+					return r.invokeSequence(seq, e.Args, target.Name+"."+member.Name)
+				}
+			}
+
 			if moduleSet, exists := r.program.ModuleSequences[target.Name]; exists {
 				seq, seqExists := moduleSet[member.Name]
 				if !seqExists {
@@ -359,49 +435,42 @@ func (r *runner) evalCall(e ast.CallExpr) (any, error) {
 				}
 				return r.invokeSequence(seq, e.Args, target.Name+"."+member.Name)
 			}
+			return nil, fmt.Errorf("undefined module sequence: %s.%s", target.Name, member.Name)
 		}
 
-		if target, ok := member.Target.(ast.IdentifierExpr); ok && (target.Name == "Strangs" || target.Name == "Srangs") && member.Name == "Combobulate" {
-			if len(e.Args) == 0 {
-				return "", nil
-			}
-			tmplAny, err := r.eval(e.Args[0])
-			if err != nil {
-				return nil, err
-			}
-			tmpl, ok := tmplAny.(string)
-			if !ok {
-				return nil, fmt.Errorf("combobulate template must be string")
-			}
-			for i := 1; i < len(e.Args); i++ {
-				arg, err := r.eval(e.Args[i])
-				if err != nil {
-					return nil, err
-				}
-				tmpl = replaceFirstDirective(tmpl, toDisplay(arg))
-			}
-			return tmpl, nil
-		}
-
-		if target, ok := member.Target.(ast.IdentifierExpr); ok && target.Name == "Pronts" && member.Name == "Prontulate" {
-			comb, err := r.evalCall(ast.CallExpr{
-				Callee: ast.MemberExpr{Target: ast.IdentifierExpr{Name: "Strangs"}, Name: "Combobulate"},
-				Args:   e.Args,
-				Style:  e.Style,
-			})
-			if err != nil {
-				return nil, err
-			}
-			_, _ = fmt.Fprintln(r.out, toDisplay(comb))
-			return nil, nil
-		}
 	}
 
 	return nil, fmt.Errorf("unsupported call expression")
 }
 
+func (r *runner) formatCallTemplate(args []ast.Expr, caller string) (string, error) {
+	if len(args) == 0 {
+		return "", fmt.Errorf("%s expects at least one argument", caller)
+	}
+	tmplAny, err := r.eval(args[0])
+	if err != nil {
+		return "", err
+	}
+	tmpl, ok := tmplAny.(string)
+	if !ok {
+		return "", fmt.Errorf("%s template must be string", caller)
+	}
+	for i := 1; i < len(args); i++ {
+		v, err := r.eval(args[i])
+		if err != nil {
+			return "", err
+		}
+		tmpl = replaceFirstDirective(tmpl, toDisplay(v))
+	}
+	return tmpl, nil
+}
+
 func (r *runner) invokeSequence(seq ir.SequenceIR, argExprs []ast.Expr, displayName string) (any, error) {
-	if len(argExprs) != len(seq.Params) {
+	if seq.Variadic {
+		if len(argExprs) < seq.FixedParams {
+			return nil, fmt.Errorf("sequence call arity mismatch for %s", displayName)
+		}
+	} else if len(argExprs) != len(seq.Params) {
 		return nil, fmt.Errorf("sequence call arity mismatch for %s", displayName)
 	}
 	args := make([]any, 0, len(argExprs))
@@ -414,12 +483,26 @@ func (r *runner) invokeSequence(seq ir.SequenceIR, argExprs []ast.Expr, displayN
 	}
 
 	frame := map[string]any{}
-	for i, name := range seq.Params {
-		frame[name] = args[i]
+	if seq.Variadic {
+		for i := 0; i < seq.FixedParams; i++ {
+			frame[seq.Params[i]] = args[i]
+		}
+		varName := seq.Params[len(seq.Params)-1]
+		rest := make([]any, 0, len(args)-seq.FixedParams)
+		for i := seq.FixedParams; i < len(args); i++ {
+			rest = append(rest, args[i])
+		}
+		frame[varName] = rest
+	} else {
+		for i, name := range seq.Params {
+			frame[name] = args[i]
+		}
 	}
 	r.frames = append(r.frames, frame)
+	r.modules = append(r.modules, seq.Module)
 	returned, value, err := r.executeInstructions(seq.Instructions)
 	r.frames = r.frames[:len(r.frames)-1]
+	r.modules = r.modules[:len(r.modules)-1]
 	if err != nil {
 		return nil, err
 	}
@@ -530,6 +613,7 @@ func toFloat64(v any) (float64, bool) {
 	case int64:
 		// TODO(v0.2+): extend exact runtime representation to include additional widths/sign modes.
 		// Candidate families: exactly8/exactly32 and unsigned forms such as exactlyposi8/exactlyposi32.
+		// Floating family alignment should include width variants such as vagly32.
 		return float64(x), true
 	case float64:
 		return x, true

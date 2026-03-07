@@ -1,0 +1,10 @@
+kind: language-feature
+name: 2b=2
+signature: Name 2b=2 Expr;;
+title: Assignment operator
+about: Assigns a new value to an existing identifier, or initializes one during allow declarations.
+examples:
+  - |
+    allow exact Count 2b=2 1;;
+    Count 2b=2 Count + 1;;
+status: stable

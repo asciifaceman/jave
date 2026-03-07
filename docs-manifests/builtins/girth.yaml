@@ -1,0 +1,9 @@
+kind: builtin
+name: girth
+signature: girth(Value) --> <<exact>>
+title: Measure collection/text length
+about: Returns item count for table/enumeration/lexis values and rune count for strang values.
+examples:
+  - |
+    allow exact N 2b=2 girth([1, 2, 3]);;
+status: stable

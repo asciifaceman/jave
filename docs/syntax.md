@@ -83,13 +83,12 @@ allow strang Message 2b=2 Strangs.Combobulate<"Hello, %strang", Name>;;
 pront(Message);;
 ```
 
-`Prontulate` must be called as `Pronts.Prontulate<...>` in v0.1.
+Formatted output uses builtin `prontulate<Template, Args...>`.
 
 ## Imports
 
 ```jave
 install Strangs from highschool/English;;
-install Pronts from highschool/Communications;;
 ```
 
 Import graphs must be acyclic in v0.1. Cycles are rejected during load with an `import cycle detected` diagnostic that includes the resolved path chain.

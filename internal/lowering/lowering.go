@@ -1,6 +1,8 @@
 package lowering
 
 import (
+	"fmt"
+
 	"github.com/asciifaceman/jave/internal/ast"
 	"github.com/asciifaceman/jave/internal/diagnostics"
 	"github.com/asciifaceman/jave/internal/ir"
@@ -39,47 +41,51 @@ func (l *lowerer) lower(program *ast.Program) *ir.ProgramIR {
 			ReturnType:   foremost.ReturnType,
 			Instructions: make([]ir.Instruction, 0, len(foremost.Body)),
 		},
-		Sequences:       map[string]ir.SequenceIR{},
-		ModuleSequences: map[string]map[string]ir.SequenceIR{},
+		Sequences:               map[string]ir.SequenceIR{},
+		ModuleSequences:         map[string]map[string]ir.SequenceIR{},
+		SequenceOverloads:       map[string]map[int]ir.SequenceIR{},
+		ModuleSequenceOverloads: map[string]map[string]map[int]ir.SequenceIR{},
+		SequenceVariadics:       map[string]ir.SequenceIR{},
+		ModuleSequenceVariadics: map[string]map[string]ir.SequenceIR{},
 	}
 	if len(forewards) > 0 {
 		out.Forewards = make([]ir.SequenceIR, 0, len(forewards))
 		for _, f := range forewards {
 			lowered := ir.SequenceIR{
 				Name:         f.Name,
+				Module:       f.SourceModule,
 				Params:       namesFromParams(f.Params),
+				Variadic:     isVariadicParams(f.Params),
+				FixedParams:  fixedParamCount(f.Params),
 				ReturnType:   f.ReturnType,
 				Instructions: l.lowerStatements(f.Body),
 			}
 			out.Forewards = append(out.Forewards, lowered)
-			out.Sequences[f.Name] = lowered
+			registerOverload(out, lowered)
+			out.Sequences[uniqueSequenceKey(lowered)] = lowered
 		}
 	}
 
 	out.Foremost.Instructions = l.lowerStatements(foremost.Body)
-	out.Sequences[out.Foremost.Name] = out.Foremost
+	registerOverload(out, out.Foremost)
+	out.Sequences[uniqueSequenceKey(out.Foremost)] = out.Foremost
 
 	for _, seq := range program.Sequences {
-		if _, exists := out.Sequences[seq.Name]; exists {
-			if seq.SourceModule != "" {
-				moduleSet := out.ModuleSequences[seq.SourceModule]
-				if moduleSet == nil {
-					moduleSet = map[string]ir.SequenceIR{}
-					out.ModuleSequences[seq.SourceModule] = moduleSet
-				}
-				if _, exists := moduleSet[seq.Name]; !exists {
-					moduleSet[seq.Name] = out.Sequences[seq.Name]
-				}
-			}
+		sequenceKey := uniqueSequenceKey(ir.SequenceIR{Name: seq.Name, Module: seq.SourceModule, Params: namesFromParams(seq.Params)})
+		if _, exists := out.Sequences[sequenceKey]; exists {
 			continue
 		}
 		lowered := ir.SequenceIR{
 			Name:         seq.Name,
+			Module:       seq.SourceModule,
 			Params:       namesFromParams(seq.Params),
+			Variadic:     isVariadicParams(seq.Params),
+			FixedParams:  fixedParamCount(seq.Params),
 			ReturnType:   seq.ReturnType,
 			Instructions: l.lowerStatements(seq.Body),
 		}
-		out.Sequences[seq.Name] = lowered
+		registerOverload(out, lowered)
+		out.Sequences[sequenceKey] = lowered
 		if seq.SourceModule != "" {
 			moduleSet := out.ModuleSequences[seq.SourceModule]
 			if moduleSet == nil {
@@ -93,6 +99,80 @@ func (l *lowerer) lower(program *ast.Program) *ir.ProgramIR {
 	}
 
 	return out
+}
+
+func uniqueSequenceKey(seq ir.SequenceIR) string {
+	variant := "F"
+	if seq.Variadic {
+		variant = "V"
+	}
+	if seq.Module != "" {
+		return fmt.Sprintf("%s.%s#%d%s", seq.Module, seq.Name, len(seq.Params), variant)
+	}
+	return fmt.Sprintf("%s#%d%s", seq.Name, len(seq.Params), variant)
+}
+
+func registerOverload(out *ir.ProgramIR, seq ir.SequenceIR) {
+	if seq.Variadic {
+		if seq.Module == "" {
+			if _, exists := out.SequenceVariadics[seq.Name]; !exists {
+				out.SequenceVariadics[seq.Name] = seq
+			}
+			return
+		}
+		moduleSet := out.ModuleSequenceVariadics[seq.Module]
+		if moduleSet == nil {
+			moduleSet = map[string]ir.SequenceIR{}
+			out.ModuleSequenceVariadics[seq.Module] = moduleSet
+		}
+		if _, exists := moduleSet[seq.Name]; !exists {
+			moduleSet[seq.Name] = seq
+		}
+		return
+	}
+
+	arity := len(seq.Params)
+	if seq.Module == "" {
+		set := out.SequenceOverloads[seq.Name]
+		if set == nil {
+			set = map[int]ir.SequenceIR{}
+			out.SequenceOverloads[seq.Name] = set
+		}
+		if _, exists := set[arity]; !exists {
+			set[arity] = seq
+		}
+		return
+	}
+	moduleSet := out.ModuleSequenceOverloads[seq.Module]
+	if moduleSet == nil {
+		moduleSet = map[string]map[int]ir.SequenceIR{}
+		out.ModuleSequenceOverloads[seq.Module] = moduleSet
+	}
+	nameSet := moduleSet[seq.Name]
+	if nameSet == nil {
+		nameSet = map[int]ir.SequenceIR{}
+		moduleSet[seq.Name] = nameSet
+	}
+	if _, exists := nameSet[arity]; !exists {
+		nameSet[arity] = seq
+	}
+}
+
+func isVariadicParams(params []ast.SequenceParam) bool {
+	if len(params) == 0 {
+		return false
+	}
+	return params[len(params)-1].Variadic
+}
+
+func fixedParamCount(params []ast.SequenceParam) int {
+	if len(params) == 0 {
+		return 0
+	}
+	if params[len(params)-1].Variadic {
+		return len(params) - 1
+	}
+	return len(params)
 }
 
 func namesFromParams(params []ast.SequenceParam) []string {

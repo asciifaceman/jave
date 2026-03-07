@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/asciifaceman/jave/internal/ast"
+	"github.com/asciifaceman/jave/internal/diagnostics"
 	"github.com/asciifaceman/jave/internal/lexer"
 	"github.com/asciifaceman/jave/internal/parser"
 )
@@ -94,6 +95,139 @@ outy seq Foremost<> --> <<nada>> {
 	}
 	if prog.Sequences[0].Params[0].Name != "A" || prog.Sequences[0].Params[1].Name != "B" {
 		t.Fatalf("unexpected param names: %+v", prog.Sequences[0].Params)
+	}
+}
+
+func TestParse_SequenceParamsVariadicLast(t *testing.T) {
+	src := `outy seq Combobulate<strang Template, ...strang Args> --> <<strang>> {
+    give Template up;;
+}
+
+outy seq Foremost<> --> <<nada>> {
+    pront(Combobulate<"x=%exact", 1>);;
+    give up;;
+}`
+	toks, lexDiags := lexer.Lex(src)
+	if len(lexDiags) != 0 {
+		t.Fatalf("unexpected lexer diagnostics: %d", len(lexDiags))
+	}
+
+	prog, parseDiags := parser.Parse(toks)
+	if len(parseDiags) != 0 {
+		t.Fatalf("unexpected parser diagnostics: %d", len(parseDiags))
+	}
+	if len(prog.Sequences) != 2 {
+		t.Fatalf("expected 2 sequences, got %d", len(prog.Sequences))
+	}
+	params := prog.Sequences[0].Params
+	if len(params) != 2 {
+		t.Fatalf("expected 2 params, got %d", len(params))
+	}
+	if !params[1].Variadic {
+		t.Fatal("expected last parameter to be variadic")
+	}
+}
+
+func TestParse_SequenceParamsVariadicNotLastDiagnostic(t *testing.T) {
+	src := `outy seq Bad<...strang Args, exact Tail> --> <<nada>> {
+    give up;;
+}`
+	toks, lexDiags := lexer.Lex(src)
+	if len(lexDiags) != 0 {
+		t.Fatalf("unexpected lexer diagnostics: %d", len(lexDiags))
+	}
+
+	_, parseDiags := parser.Parse(toks)
+	if len(parseDiags) == 0 {
+		t.Fatal("expected parser diagnostics for non-final variadic parameter")
+	}
+}
+
+func TestParse_DocstringAttachedToSequence(t *testing.T) {
+	src := `doc<
+Title:
+    Positive exact value
+About:
+    Returns non-negative exact value.
+Param:
+    Value: Input exact to normalize.
+>
+outy seq PosiExact<exact Value> --> <<exact>> {
+    give Value up;;
+}`
+	toks, lexDiags := lexer.Lex(src)
+	if len(lexDiags) != 0 {
+		t.Fatalf("unexpected lexer diagnostics: %d", len(lexDiags))
+	}
+
+	prog, parseDiags := parser.Parse(toks)
+	for _, d := range parseDiags {
+		if d.Severity == diagnostics.SeverityError {
+			t.Fatalf("unexpected parser error: %s", d.Message)
+		}
+	}
+	if len(prog.Sequences) != 1 {
+		t.Fatalf("expected 1 sequence, got %d", len(prog.Sequences))
+	}
+	if prog.Sequences[0].Doc == nil {
+		t.Fatal("expected docstring attached to sequence")
+	}
+	if len(prog.Sequences[0].Doc.Sections) < 2 {
+		t.Fatalf("expected parsed sections, got %d", len(prog.Sequences[0].Doc.Sections))
+	}
+}
+
+func TestParse_DocstringOrphanWarning(t *testing.T) {
+	src := `doc<
+Title:
+    Orphaned docs
+>
+install Strangs from highschool/English;;
+
+outy seq Foremost<> --> <<nada>> {
+    give up;;
+}`
+	toks, lexDiags := lexer.Lex(src)
+	if len(lexDiags) != 0 {
+		t.Fatalf("unexpected lexer diagnostics: %d", len(lexDiags))
+	}
+
+	_, parseDiags := parser.Parse(toks)
+	foundWarning := false
+	for _, d := range parseDiags {
+		if d.Severity == diagnostics.SeverityWarning && d.Message == "DOC-ATTACH: docstring was not attached to a sequence" {
+			foundWarning = true
+		}
+	}
+	if !foundWarning {
+		t.Fatal("expected orphan docstring warning")
+	}
+}
+
+func TestParse_DocstringAttachmentAcrossComments(t *testing.T) {
+	src := `doc<
+Title:
+    Says hello
+>
+>>| comment between docstring and sequence
+=[
+block comment
+]=
+outy seq Hello<> --> <<nada>> {
+    give up;;
+}`
+	toks, lexDiags := lexer.Lex(src)
+	if len(lexDiags) != 0 {
+		t.Fatalf("unexpected lexer diagnostics: %d", len(lexDiags))
+	}
+	prog, parseDiags := parser.Parse(toks)
+	for _, d := range parseDiags {
+		if d.Severity == diagnostics.SeverityError {
+			t.Fatalf("unexpected parser error: %s", d.Message)
+		}
+	}
+	if len(prog.Sequences) != 1 || prog.Sequences[0].Doc == nil {
+		t.Fatal("expected docstring attachment to survive comments")
 	}
 }
 

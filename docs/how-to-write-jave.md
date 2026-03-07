@@ -39,7 +39,7 @@ given (<allow exact I 2b=2 0;; I lessly 3;; I 2b=2 I + 1;;>) -> {
 ## 5. Build text with combobulation
 
 Infix plus-style text joining (`"a" + "b"`) is not available in v0.1.
-Use `Strangs.Combobulate<...>` (and optionally `Pronts.Prontulate<...>`) for text assembly.
+Use `Strangs.Combobulate<...>` for direct text assembly, or builtin `prontulate<...>` for formatted print.
 
 ```jave
 install Strangs from highschool/English;;

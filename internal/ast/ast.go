@@ -23,13 +23,28 @@ type SequenceDecl struct {
 	Name         string
 	Params       []SequenceParam
 	ReturnType   string
+	Doc          *Docstring
 	Body         []Stmt
+}
+
+// Docstring is structured documentation metadata attached to declarations.
+type Docstring struct {
+	Pos      token.Position
+	Raw      string
+	Sections []DocSection
+}
+
+// DocSection is a labeled block inside a docstring.
+type DocSection struct {
+	Label string
+	Body  string
 }
 
 // SequenceParam represents one typed parameter in a sequence signature.
 type SequenceParam struct {
 	TypeName string
 	Name     string
+	Variadic bool
 }
 
 // Stmt is a statement node.

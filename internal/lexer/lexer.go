@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"strings"
 	"unicode"
 
 	"github.com/asciifaceman/jave/internal/diagnostics"
@@ -37,6 +38,15 @@ func (l *lexer) lex() ([]token.Token, []diagnostics.Diagnostic) {
 		ch := l.peek()
 
 		switch {
+		case ch == '>' && l.wouldMatch(">>|"):
+			l.skipLineComment()
+			continue
+		case ch == '=' && l.wouldMatch("=["):
+			l.skipBlockComment(start)
+			continue
+		case ch == 'd' && l.wouldMatch("doc<"):
+			l.lexDocstring(start)
+			continue
 		case ch == '2' && l.wouldMatch("2b=2"):
 			l.lexSymbol(start)
 		case isIdentifierStart(ch):
@@ -50,6 +60,67 @@ func (l *lexer) lex() ([]token.Token, []diagnostics.Diagnostic) {
 
 	l.emit(token.EOF, "", l.position())
 	return l.tokens, l.diagnostics
+}
+
+func (l *lexer) skipLineComment() {
+	_ = l.matchString(">>|")
+	for !l.atEnd() && l.peek() != '\n' {
+		l.advance()
+	}
+}
+
+func (l *lexer) skipBlockComment(start token.Position) {
+	_ = l.matchString("=[")
+	for !l.atEnd() {
+		if l.matchString("]=") {
+			return
+		}
+		l.advance()
+	}
+	l.diagnostics = append(l.diagnostics, diagnostics.Diagnostic{
+		Severity: diagnostics.SeverityError,
+		Message:  "unterminated block comment",
+		Pos:      diagnostics.Position{Line: start.Line, Column: start.Column},
+	})
+}
+
+func (l *lexer) lexDocstring(start token.Position) {
+	_ = l.matchString("doc<")
+	if !l.atEnd() && l.peek() != '\n' && l.peek() != '\r' {
+		l.diagnostics = append(l.diagnostics, diagnostics.Diagnostic{
+			Severity: diagnostics.SeverityError,
+			Message:  "docstring must be multiline",
+			Pos:      diagnostics.Position{Line: start.Line, Column: start.Column},
+		})
+	}
+
+	var content strings.Builder
+	for !l.atEnd() {
+		lineStart := l.idx
+		for !l.atEnd() && l.peek() != '\n' {
+			l.advance()
+		}
+		line := string(l.src[lineStart:l.idx])
+		if strings.TrimSpace(line) == ">" {
+			if !l.atEnd() && l.peek() == '\n' {
+				l.advance()
+			}
+			l.emit(token.Docstring, content.String(), start)
+			return
+		}
+		content.WriteString(line)
+		if !l.atEnd() && l.peek() == '\n' {
+			content.WriteRune('\n')
+			l.advance()
+		}
+	}
+
+	l.diagnostics = append(l.diagnostics, diagnostics.Diagnostic{
+		Severity: diagnostics.SeverityError,
+		Message:  "unterminated docstring",
+		Pos:      diagnostics.Position{Line: start.Line, Column: start.Column},
+	})
+	l.emit(token.Docstring, content.String(), start)
 }
 
 func (l *lexer) lexIdentifier(start token.Position) {

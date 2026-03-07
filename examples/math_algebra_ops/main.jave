@@ -1,0 +1,18 @@
+install Algebra from highschool/Algebra;;
+
+outy seq Foremost<> --> <<nada>> {
+    pront(Algebra.MostExact<3, 9>);;
+    pront(Algebra.LeastExact<3, 9>);;
+    pront(Algebra.MostVag<1.25, 1.2>);;
+    pront(Algebra.LeastVag<1.25, 1.2>);;
+
+    pront(Algebra.PosidirExact<0 - 5>);;
+    pront(Algebra.PosidirExact<0>);;
+    pront(Algebra.PosidirVag<2.5>);;
+
+    pront(Algebra.Nearlydont<0.0000004>);;
+    pront(Algebra.Nearlydont<0.01>);;
+
+    pront(Algebra.Stretch<10.0, 20.0, 0.25>);;
+    give up;;
+}

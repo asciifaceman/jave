@@ -1,0 +1,9 @@
+kind: builtin
+name: slotify
+signature: slotify(Template, Value) --> <<strang>>
+title: Replace first directive in template
+about: Replaces the first available formatting directive in a template and returns the updated strang.
+examples:
+  - |
+    allow strang Next 2b=2 slotify("A=%exact B=%strang", 7);;
+status: stable

@@ -66,6 +66,16 @@ func main() {
 			fmt.Fprintf(os.Stderr, "baggage add failed: %v\n", err)
 			os.Exit(1)
 		}
+	case "docs":
+		opts, err := parseDocsArgs(rest)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "baggage: %v\n", err)
+			os.Exit(2)
+		}
+		if err := runDocs(opts); err != nil {
+			fmt.Fprintf(os.Stderr, "baggage docs failed: %v\n", err)
+			os.Exit(1)
+		}
 	default:
 		fmt.Fprintf(os.Stderr, "baggage: unknown command %q\n", cmd)
 		printUsage()
@@ -74,9 +84,10 @@ func main() {
 }
 
 func printUsage() {
-	fmt.Println("usage: baggage <build|run|check|test|new|add|version>")
+	fmt.Println("usage: baggage <build|run|check|test|new|add|docs|version>")
 	fmt.Println("  baggage new <project-name> [--force]")
 	fmt.Println("  baggage add <carryon-path> [--manifest baggage.jave]")
+	fmt.Println("  baggage docs [--project-root dir] [--out-dir site/reference] [--manifest-dir docs-manifests]")
 	fmt.Println("  baggage build [input.jave] [-o output.jbin] [--trace-imports] [--project-root dir] [--sponsor-notice mode] [--sponsor-redacted] [--sponsor-quiet]")
 	fmt.Println("  baggage run [input.jave|program.jbin] [--trace-imports] [--project-root dir] [--sponsor-notice mode] [--sponsor-redacted] [--sponsor-quiet]")
 }

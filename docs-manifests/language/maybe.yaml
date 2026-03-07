@@ -1,0 +1,13 @@
+kind: language-feature
+name: maybe/furthermore/otherwise
+signature: maybe (<Condition>) -> { ... } furthermore (...) -> { ... } otherwise -> { ... }
+title: Conditional control flow chain
+about: Evaluates branch conditions top-to-bottom and executes the first matching branch.
+examples:
+  - |
+    maybe (<X bigly 5>) -> {
+        pront("large");;
+    } otherwise -> {
+        pront("small-or-equal");;
+    }
+status: stable
