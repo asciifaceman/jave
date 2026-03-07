@@ -31,7 +31,7 @@ func Help() {
 	fmt.Println("")
 	fmt.Println("Tool Stubs:")
 	fmt.Println("  mage runBaggage    # run baggage CLI")
-	fmt.Println("  mage runJavevm     # run javevm CLI")
+	fmt.Println("  mage runJavevm     # run javevm for JBIN_FILE or examples/hello_world/main.jbin")
 	fmt.Println("")
 	fmt.Println("Tip: use `mage -l` to see all generated targets.")
 }
@@ -89,7 +89,16 @@ func RunBaggage() error {
 
 // RunJavevm runs the javevm CLI.
 func RunJavevm() error {
-	return sh.RunV("go", "run", "./cmd/javevm")
+	input := "examples/hello_world/main.jbin"
+	if env := os.Getenv("JBIN_FILE"); env != "" {
+		input = env
+	}
+	if _, err := os.Stat(input); err != nil {
+		if err := sh.RunV("go", "run", "./cmd/javec", "examples/hello_world/main.jave"); err != nil {
+			return err
+		}
+	}
+	return sh.RunV("go", "run", "./cmd/javevm", input)
 }
 
 // RunExampleConditions executes the conditions example through javec runtime mode.

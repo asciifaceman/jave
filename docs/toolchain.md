@@ -7,7 +7,10 @@ Jave v0.1 tool names are locked:
 
 ## Current Bootstrap Status
 
-The CLIs are stubs for now and establish command shape.
+Core compiler/runtime pipeline is functional.
+- `javec` compiles `.jave` source and can emit `.jbin` artifacts.
+- `javevm` executes `.jbin` artifacts.
+- `baggage` currently supports `build`, `run`, `check`, and `test` workflows.
 
 ## Build System (Go Side)
 
@@ -34,12 +37,12 @@ mage check
 mage bootstrap
 ```
 
-Run tool stubs:
+Run tool workflows:
 
 ```bash
-mage cmd:javec
-mage cmd:baggage
-mage cmd:javevm
+mage runJavec
+mage runBaggage
+mage runJavevm
 ```
 
 No local Mage install fallback:
@@ -54,10 +57,28 @@ go run github.com/magefile/mage -l
 go build ./cmd/javec ./cmd/baggage ./cmd/javevm
 ```
 
-## Run Stubs
+## Run CLIs
 
 ```bash
 go run ./cmd/javec --version
 go run ./cmd/baggage --version
 go run ./cmd/javevm --version
+```
+
+Compile a source file into a `.jbin` artifact:
+
+```bash
+go run ./cmd/baggage build examples/hello_world/main.jave
+```
+
+Run a source file (compile then execute):
+
+```bash
+go run ./cmd/baggage run examples/conditions/main.jave
+```
+
+Run an existing artifact directly:
+
+```bash
+go run ./cmd/baggage run examples/hello_world/main.jbin
 ```

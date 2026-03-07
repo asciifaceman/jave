@@ -4,7 +4,10 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
+	"github.com/asciifaceman/jave/internal/jbin"
 	"github.com/asciifaceman/jave/internal/lexer"
 	"github.com/asciifaceman/jave/internal/lowering"
 	"github.com/asciifaceman/jave/internal/parser"
@@ -16,6 +19,7 @@ func main() {
 	showVersion := flag.Bool("version", false, "print javec version")
 	showTokens := flag.Bool("tokens", false, "print lexer tokens")
 	runProgram := flag.Bool("run", false, "run Foremost after successful analysis")
+	outPath := flag.String("out", "", "output .jbin file path (defaults to <input>.jbin)")
 	flag.Parse()
 
 	if *showVersion {
@@ -24,8 +28,7 @@ func main() {
 	}
 
 	if flag.NArg() == 0 {
-		fmt.Println("javec: compiler bootstrap stub")
-		fmt.Println("usage: javec [--version] [--tokens] <input.jave>")
+		fmt.Println("usage: javec [--version] [--tokens] [--run] [--out file.jbin] <input.jave>")
 		return
 	}
 
@@ -76,6 +79,17 @@ func main() {
 
 	fmt.Printf("javec: lowering succeeded (%d tokens, %d sequences)\n", len(tokens), len(program.Sequences))
 
+	emitPath := *outPath
+	if emitPath == "" {
+		ext := filepath.Ext(path)
+		emitPath = strings.TrimSuffix(path, ext) + ".jbin"
+	}
+	if err := jbin.WriteFile(emitPath, irProgram); err != nil {
+		fmt.Fprintf(os.Stderr, "javec: unable to write %q: %v\n", emitPath, err)
+		os.Exit(1)
+	}
+	fmt.Printf("javec: emitted %s\n", emitPath)
+
 	if *runProgram {
 		if err := runtime.Execute(irProgram, os.Stdout); err != nil {
 			fmt.Fprintf(os.Stderr, "javec: runtime error: %v\n", err)
@@ -84,5 +98,5 @@ func main() {
 		return
 	}
 
-	fmt.Println("next: jbin emission + javevm execution pipeline")
+	fmt.Println("next: run with javevm <file.jbin>")
 }
