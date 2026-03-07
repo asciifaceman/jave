@@ -136,56 +136,56 @@ jobs:
           fi
 
           APPEND="$(cat <<EOF
-## VS Code Plugin Installation
+          ## VS Code Plugin Installation
 
-This release includes packaged VS Code plugin assets:
+          This release includes packaged VS Code plugin assets:
 
-- `jave-vscode-extension-${TAG_NAME}.tar.gz` (and `.zip` when available)
-- `jave-vscode-install-${TAG_NAME}-windows-amd64.exe`
-- `jave-vscode-install-${TAG_NAME}-linux-amd64`
-- `jave-vscode-install-${TAG_NAME}-darwin-amd64`
+          - `jave-vscode-extension-${TAG_NAME}.tar.gz` (and `.zip` when available)
+          - `jave-vscode-install-${TAG_NAME}-windows-amd64.exe`
+          - `jave-vscode-install-${TAG_NAME}-linux-amd64`
+          - `jave-vscode-install-${TAG_NAME}-darwin-amd64`
 
-Quick install options:
+          Quick install options:
 
-```bash
-# Standalone installer binary from this release
-./jave-vscode-install-${TAG_NAME}-linux-amd64
-```
+          ```bash
+          # Standalone installer binary from this release
+          ./jave-vscode-install-${TAG_NAME}-linux-amd64
+          ```
 
-Windows example:
+          Windows example:
 
-```powershell
-.\jave-vscode-install-${TAG_NAME}-windows-amd64.exe
-```
+          ```powershell
+          .\jave-vscode-install-${TAG_NAME}-windows-amd64.exe
+          ```
 
-or
+          or
 
-```bash
-# From a checkout of this tag/release
-mage installExtension
-```
+          ```bash
+          # From a checkout of this tag/release
+          mage installExtension
+          ```
 
-Manual guides:
-- `vscode-jave/README.md`
-- `docs/vscode-extension-install.md`
+          Manual guides:
+          - `vscode-jave/README.md`
+          - `docs/vscode-extension-install.md`
 
-## Checksums
+          ## Checksums
 
-This release includes `SHA256SUMS.txt` for all attached assets.
+          This release includes `SHA256SUMS.txt` for all attached assets.
 
-Verify on Linux/macOS:
+          Verify on Linux/macOS:
 
-```bash
-sha256sum -c SHA256SUMS.txt
-```
+          ```bash
+          sha256sum -c SHA256SUMS.txt
+          ```
 
-Verify on Windows PowerShell:
+          Verify on Windows PowerShell:
 
-```powershell
-Get-FileHash .\javec-${TAG_NAME}-windows-amd64.exe -Algorithm SHA256
-```
-EOF
-)"
+          ```powershell
+          Get-FileHash .\javec-${TAG_NAME}-windows-amd64.exe -Algorithm SHA256
+          ```
+          EOF
+          )"
 
           if [ -n "${BODY}" ]; then
             NEW_BODY="${BODY}\n\n${APPEND}"
