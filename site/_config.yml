@@ -1,0 +1,13 @@
+title: Orcal Language Platform
+email: noreply@orcal.internal
+description: Official Orcal communications surface for the Jave language program.
+baseurl: ""
+url: ""
+theme: minima
+markdown: kramdown
+permalink: pretty
+header_pages:
+  - governance.md
+  - lore.md
+  - language.md
+  - roadmap.md

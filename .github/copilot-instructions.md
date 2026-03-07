@@ -40,3 +40,7 @@ Use this workspace as a language implementation project for `jave`.
 ## Governance Records
 - When creating or editing materials in `governance/`, apply `.github/instructions/09-Governance-Directory.instructions.md`.
 - Keep governance materials externally readable and separate from internal contributor workflow instructions.
+
+## GitHub Pages Lore Surface
+- For player-facing GitHub Pages content, apply `.github/instructions/11-GitHub-Pages-Lore-Surface.instructions.md`.
+- Keep the Pages narrative in-world as Orcal communications and aligned with ratified governance/spec behavior.

@@ -1,5 +1,7 @@
 # v0.2 User Stories (Draft)
 
+Status note: Stories 1-4 map directly to Cheddar-approved major v0.2 candidates.
+
 ## Story 1: Batch Operations Engineer
 
 As a batch operations engineer,
@@ -10,6 +12,7 @@ Mapped candidates:
 - Argument access
 - Flag parsing utilities
 - stderr/stdout separation
+- Runtime I/O Foundation
 
 ## Story 2: Data Pipeline Maintainer
 
@@ -21,6 +24,7 @@ Mapped candidates:
 - File read/write APIs
 - File metadata checks
 - Path and I/O diagnostics
+- File System Operations
 
 ## Story 3: Service Reliability Developer
 
@@ -32,6 +36,7 @@ Mapped candidates:
 - stderr channel support
 - Runtime error structure
 - Explicit exit semantics
+- Runtime Error and Exit Semantics
 
 ## Story 4: Internal Platform Team
 
@@ -43,3 +48,24 @@ Mapped candidates:
 - String and numeric utility expansion
 - Collection helper expansion
 - Time/date primitives
+- Richer Standard Library Surface
+
+## Story 5: Cross-Platform Automation Owner
+
+As an automation owner,
+I want stable exit codes and deterministic failure classifications,
+So that CI pipelines can distinguish user errors, runtime failures, and internal faults.
+
+Mapped candidates:
+- Deterministic Program Exit Contract
+- Runtime Error and Exit Semantics
+
+## Story 6: Tooling Integrator
+
+As a tooling integrator,
+I want canonical path helpers and working-directory visibility,
+So that cross-platform scripts do not drift between Windows, Linux, and macOS behavior.
+
+Mapped candidates:
+- Path and Working Directory Utilities
+- File System Operations
