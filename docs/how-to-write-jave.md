@@ -38,12 +38,15 @@ given (<allow exact I 2b=2 0;; I lessly 3;; I 2b=2 I + 1;;>) -> {
 
 ## 5. Build text with combobulation
 
-String concatenation is not available in v0.1.
+Infix plus-style text joining (`"a" + "b"`) is not available in v0.1.
+Use `Strangs.Combobulate<...>` (and optionally `Pronts.Prontulate<...>`) for text assembly.
 
 ```jave
 install Strangs from highschool/English;;
 pront(Strangs.Combobulate<"Hello, %strang", Name>);;
 ```
+
+`Strangs.Combobulate` is a core v0.1 feature, not a post-v0.1 addition.
 
 ## 6. Work with collections
 

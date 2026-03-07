@@ -104,7 +104,7 @@ Logical operators:
 
 ## Text Assembly
 
-Infix string concatenation is not legal in v0.1.
+Infix plus-style text joining is not legal in v0.1.
 
 Canonical form:
 

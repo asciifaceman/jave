@@ -4,6 +4,10 @@
 [![Release](https://img.shields.io/badge/Release-v0.1.0-2ea44f)](https://github.com/asciifaceman/jave/releases)
 [![License](https://img.shields.io/badge/License-JFOUL%20v0.1-555)](LICENSE)
 
+<p align="center">
+    <img src="docs/static/logo-trnsprnt.png" alt="Jave logo" width="220" />
+</p>
+
 Jave is a deliberately committee-damaged programming language.
 
 It is a joke language with real behavior: the syntax is cursed on purpose, but programs produce deterministic, testable outcomes.

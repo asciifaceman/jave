@@ -102,7 +102,9 @@ After installation:
    - Keywords: `outy`, `seq`, `maybe`, `give`, `up`
    - Types: `exact`, `vag`, `truther`, `strang`
    - Operators: `2b=2`, `bigly`, `samewise`
-   - Builtins: `pront`, `girth`, `Strangs`
+   - Builtins: `pront`, `girth`, `Strangs`, `Pronts`, `Combobulate`, `Prontulate`
+
+`Strangs.Combobulate<...>` and `Pronts.Prontulate<...>` are part of Jave v0.1 and should be recognized/highlighted.
 
 ### Troubleshooting
 

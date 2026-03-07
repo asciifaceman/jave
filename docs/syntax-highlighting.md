@@ -14,7 +14,7 @@ The extension recognizes:
 - **Keywords**: All Jave v0.1 keywords (control flow, declarations, types)
 - **Operators**: Word-based operators (`bigly`, `samewise`, `plusalso`, etc.) and arithmetic symbols
 - **Types**: Primitive types (`exact`, `vag`, `truther`, `strang`, `nada`, `naw`) and collection types
-- **Builtins**: Standard functions (`pront`, `girth`) and modules (`Strangs`, `Pronts`)
+- **Builtins**: Standard sequences/helpers (`pront`, `girth`), modules (`Strangs`, `Pronts`), and text assembly (`Strangs.Combobulate`, `Pronts.Prontulate`)
 - **Literals**: Strings with escape sequences and interpolation directives, numbers, booleans
 - **Punctuation**: Statement terminators (`;;`), arrows (`-->`, `->`), assignment (`2b=2`)
 - **Comments**: Line (`//`) and block (`/* */`) comments
@@ -28,8 +28,8 @@ The grammar assigns semantic scopes following VS Code conventions:
 | `keyword.control.*` | Control flow keywords (blue) |
 | `keyword.operator.*` | Operators (purple/pink) |
 | `storage.type.*` | Type names (cyan/green) |
-| `entity.name.function.*` | Entry points and function names (yellow) |
-| `support.function.*` | Builtin functions (light blue) |
+| `entity.name.function.*` | Entry points and sequence names (yellow) |
+| `support.function.*` | Builtin sequences/helpers (light blue) |
 | `support.class.*` | Modules/namespaces (cyan) |
 | `constant.language.*` | Boolean/null literals (orange) |
 | `constant.numeric.*` | Numbers (green) |
@@ -91,11 +91,11 @@ The TextMate grammar is organized into these repositories:
 
 - `comments` - Line and block comment patterns
 - `keywords` - Control flow, declarations, visibility, imports
-- `entrypoints` - Special function names (Foreward, Foremost)
+- `entrypoints` - Special sequence names (Foreward, Foremost)
 - `types` - Primitive and collection type names
 - `operators` - Word and symbol operators, assignment
 - `literals` - Strings, numbers, booleans, null, collections
-- `builtins` - Functions, modules, methods, import paths
+- `builtins` - Builtin sequences/helpers, modules, methods, import paths
 - `punctuation` - Statement terminators, arrows, brackets, dots
 
 ### Pattern Precedence
@@ -121,7 +121,7 @@ This ensures that keywords are recognized before generic identifiers.
    - Keywords: `outy`, `seq`, `allow`, `maybe`, `give`, `up`
    - Types: `exact`, `vag`, `truther`, `strang`, `nada`
    - Operators: `2b=2`, `bigly`, `samewise`, `plusalso`
-   - Builtins: `pront`, `girth`, `Strangs`, `Combobulate`
+    - Builtins: `pront`, `girth`, `Strangs`, `Pronts`, `Combobulate`, `Prontulate`
    - Punctuation: `;;`, `-->`, `->`
    - Literals: strings, numbers, `yee`/`nee`
 
@@ -155,12 +155,14 @@ Strangs.Combobulate<"Value: %exact", X>
 ```
 Expected: `Strangs`, `Combobulate`, `%exact` highlighted
 
+`Strangs.Combobulate` and `Pronts.Prontulate` are valid v0.1 syntax and should highlight correctly.
+
 ## Known Limitations
 
 ### What Works
 
 - All Jave v0.1 keywords and operators
-- Standard library modules and functions
+- Standard library modules and builtin sequences/helpers
 - String escape sequences and interpolation directives
 - Collection literals (table, enumeration, lexis)
 - Comments (line and block)
