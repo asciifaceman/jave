@@ -1,0 +1,28 @@
+---
+---
+@import "minima";
+
+.record-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  margin: 1rem 0;
+}
+
+.record-grid > div {
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  background: #f8fafc;
+}
+
+.record-grid h3 {
+  margin-top: 0;
+}
+
+.doc-meta {
+  border-left: 4px solid #2ea44f;
+  background: #f6fff8;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 1rem;
+}

@@ -8,6 +8,6 @@ markdown: kramdown
 permalink: pretty
 header_pages:
   - governance.md
-  - lore.md
+  - records.md
   - language.md
   - roadmap.md
