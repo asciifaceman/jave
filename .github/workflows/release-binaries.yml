@@ -1,0 +1,197 @@
+name: Release Binaries
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.goos }} artifacts
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            goos: linux
+            ext: ""
+          - runner: windows-latest
+            goos: windows
+            ext: ".exe"
+          - runner: macos-latest
+            goos: darwin
+            ext: ""
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build binaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+
+          TAG_NAME="${{ github.event.release.tag_name }}"
+          if [ -z "${TAG_NAME}" ]; then
+            TAG_NAME="${GITHUB_REF_NAME}"
+          fi
+          GOARCH="amd64"
+
+          for bin in javec baggage javevm; do
+            OUT="dist/${bin}-${TAG_NAME}-${{ matrix.goos }}-${GOARCH}${{ matrix.ext }}"
+            GOOS="${{ matrix.goos }}" GOARCH="${GOARCH}" go build -trimpath -ldflags="-s -w" -o "${OUT}" "./cmd/${bin}"
+          done
+
+          INSTALLER_OUT="dist/jave-vscode-install-${TAG_NAME}-${{ matrix.goos }}-${GOARCH}${{ matrix.ext }}"
+          GOOS="${{ matrix.goos }}" GOARCH="${GOARCH}" go build -trimpath -ldflags="-s -w" -o "${INSTALLER_OUT}" "./tools/install-extension"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries-${{ matrix.goos }}
+          path: dist/*
+
+  attach:
+    name: Attach binaries to release
+    if: github.event_name == 'release'
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository for packaging
+        uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Package VS Code extension bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TAG_NAME="${{ github.event.release.tag_name }}"
+          PACKAGE_NAME="jave-vscode-extension-${TAG_NAME}"
+          PACKAGE_ROOT="package/${PACKAGE_NAME}"
+
+          mkdir -p "${PACKAGE_ROOT}"
+          cp -R vscode-jave "${PACKAGE_ROOT}/"
+          cp install-vscode-extension.ps1 "${PACKAGE_ROOT}/"
+          cp install-vscode-extension.sh "${PACKAGE_ROOT}/"
+          cp docs/vscode-extension-install.md "${PACKAGE_ROOT}/"
+
+          tar -C package -czf "dist/${PACKAGE_NAME}.tar.gz" "${PACKAGE_NAME}"
+
+          if command -v zip >/dev/null 2>&1; then
+            (
+              cd package
+              zip -r "../dist/${PACKAGE_NAME}.zip" "${PACKAGE_NAME}"
+            )
+          fi
+
+      - name: Generate SHA256 checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            cd dist
+            find . -maxdepth 1 -type f ! -name 'SHA256SUMS.txt' -printf '%f\n' | sort | xargs sha256sum > SHA256SUMS.txt
+          )
+
+      - name: Upload assets to GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          ls -la dist
+          gh release upload "${TAG_NAME}" dist/* --clobber
+
+      - name: Ensure release notes include VS Code plugin install instructions
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ github.event.release.tag_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          BODY="$(gh release view "${TAG_NAME}" --repo "${REPO}" --json body --jq .body)"
+          HEADER="## VS Code Plugin Installation"
+
+          if printf '%s' "${BODY}" | grep -Fq "${HEADER}"; then
+            echo "Release notes already include plugin instructions."
+            exit 0
+          fi
+
+          APPEND="$(cat <<EOF
+## VS Code Plugin Installation
+
+This release includes packaged VS Code plugin assets:
+
+- `jave-vscode-extension-${TAG_NAME}.tar.gz` (and `.zip` when available)
+- `jave-vscode-install-${TAG_NAME}-windows-amd64.exe`
+- `jave-vscode-install-${TAG_NAME}-linux-amd64`
+- `jave-vscode-install-${TAG_NAME}-darwin-amd64`
+
+Quick install options:
+
+```bash
+# Standalone installer binary from this release
+./jave-vscode-install-${TAG_NAME}-linux-amd64
+```
+
+Windows example:
+
+```powershell
+.\jave-vscode-install-${TAG_NAME}-windows-amd64.exe
+```
+
+or
+
+```bash
+# From a checkout of this tag/release
+mage installExtension
+```
+
+Manual guides:
+- `vscode-jave/README.md`
+- `docs/vscode-extension-install.md`
+
+## Checksums
+
+This release includes `SHA256SUMS.txt` for all attached assets.
+
+Verify on Linux/macOS:
+
+```bash
+sha256sum -c SHA256SUMS.txt
+```
+
+Verify on Windows PowerShell:
+
+```powershell
+Get-FileHash .\javec-${TAG_NAME}-windows-amd64.exe -Algorithm SHA256
+```
+EOF
+)"
+
+          if [ -n "${BODY}" ]; then
+            NEW_BODY="${BODY}\n\n${APPEND}"
+          else
+            NEW_BODY="${APPEND}"
+          fi
+
+          printf "%b" "${NEW_BODY}" > release_notes.md
+          gh release edit "${TAG_NAME}" --repo "${REPO}" --notes-file release_notes.md

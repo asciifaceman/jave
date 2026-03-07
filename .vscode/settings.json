@@ -1,0 +1,53 @@
+{
+  // File associations for Jave language files
+  "files.associations": {
+    "*.jave": "jave",
+    "*.jv": "jave"
+  },
+
+  // Editor settings for Jave files
+  "[jave]": {
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "editor.formatOnSave": false,
+    "editor.wordWrap": "off",
+    "editor.semanticHighlighting.enabled": false
+  },
+
+  // Go language settings for compiler development
+  "[go]": {
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+
+  // Exclude build artifacts and binaries from file explorer
+  "files.exclude": {
+    "**/*.jbin": true,
+    "**/.git": false
+  },
+
+  // Search settings
+  "search.exclude": {
+    "**/*.jbin": true,
+    "**/vendor": true
+  },
+
+  // Recommended extensions for Jave development
+  "extensions.recommendations": [
+    "golang.go"
+  ],
+
+  // Terminal settings
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  
+  // File watchers
+  "files.watcherExclude": {
+    "**/*.jbin": true,
+    "**/vendor/**": true
+  }
+}

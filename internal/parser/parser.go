@@ -84,8 +84,8 @@ func (p *parser) parseSequence() *ast.SequenceDecl {
 	if _, ok := p.expect(token.LAngle, "expected '<' to start sequence type arguments"); !ok {
 		return nil
 	}
-	if !p.consumeBalancedAngles() {
-		p.errorHere("unterminated sequence type arguments")
+	params, ok := p.parseSequenceParams()
+	if !ok {
 		return nil
 	}
 
@@ -117,9 +117,57 @@ func (p *parser) parseSequence() *ast.SequenceDecl {
 		Pos:        visTok.Pos,
 		Visibility: vis,
 		Name:       nameTok.Lexeme,
+		Params:     params,
 		ReturnType: retTok.Lexeme,
 		Body:       body,
 	}
+}
+
+func (p *parser) parseSequenceParams() ([]ast.SequenceParam, bool) {
+	params := make([]ast.SequenceParam, 0)
+	if p.match(token.RAngle) {
+		return params, true
+	}
+
+	for {
+		typeName, ok := p.parseParamTypeName()
+		if !ok {
+			return nil, false
+		}
+		nameTok, ok := p.expect(token.Identifier, "expected parameter name")
+		if !ok {
+			return nil, false
+		}
+		params = append(params, ast.SequenceParam{TypeName: typeName, Name: nameTok.Lexeme})
+
+		if p.match(token.Comma) {
+			continue
+		}
+		if p.match(token.RAngle) {
+			return params, true
+		}
+		p.errorHere("expected ',' or '>' after sequence parameter")
+		return nil, false
+	}
+}
+
+func (p *parser) parseParamTypeName() (string, bool) {
+	base, ok := p.expectOneOf(
+		[]token.Kind{token.Identifier, token.TypeExact, token.TypeVag, token.TypeTruther, token.TypeStrang, token.TypeNada, token.TypeNaw, token.Given},
+		"expected parameter type",
+	)
+	if !ok {
+		return "", false
+	}
+	name := base.Lexeme
+	if !p.at(token.LAngle) {
+		return name, true
+	}
+	suffix, ok := p.consumeTypeSuffix()
+	if !ok {
+		return "", false
+	}
+	return name + suffix, true
 }
 
 func (p *parser) parseStatement() ast.Stmt {

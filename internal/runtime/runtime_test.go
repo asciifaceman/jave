@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/asciifaceman/jave/internal/diagnostics"
 	"github.com/asciifaceman/jave/internal/lexer"
 	"github.com/asciifaceman/jave/internal/lowering"
 	"github.com/asciifaceman/jave/internal/parser"
@@ -105,6 +106,156 @@ func TestExecute_LoopsExample(t *testing.T) {
 	}
 }
 
+func TestExecute_ForewardRunsBeforeForemost(t *testing.T) {
+	srcBytes, err := os.ReadFile("../../examples/foreward_foremost/main.jave")
+	if err != nil {
+		t.Fatalf("read foreward example: %v", err)
+	}
+	buf := &bytes.Buffer{}
+	if err := runSource(string(srcBytes), buf); err != nil {
+		t.Fatalf("execute failed: %v", err)
+	}
+	if got := strings.TrimSpace(buf.String()); got != "warming carryon\nrunning foremost" {
+		t.Fatalf("unexpected output: %q", got)
+	}
+}
+
+func TestExecute_ImportsExample(t *testing.T) {
+	srcBytes, err := os.ReadFile("../../examples/imports/main.jave")
+	if err != nil {
+		t.Fatalf("read imports example: %v", err)
+	}
+	buf := &bytes.Buffer{}
+	if err := runSource(string(srcBytes), buf); err != nil {
+		t.Fatalf("execute failed: %v", err)
+	}
+	got := strings.TrimSpace(buf.String())
+	if !strings.Contains(got, "Imported systems online. Count=2") {
+		t.Fatalf("expected prontulate output, got: %q", got)
+	}
+	if !strings.Contains(got, "Direct pront via Strangs too: 2") {
+		t.Fatalf("expected combobulate output, got: %q", got)
+	}
+}
+
+func TestExecute_SrangsLegacyAlias(t *testing.T) {
+	src := `install Srangs from highschool/English;;
+outy seq Foremost<> --> <<nada>> {
+    pront(Srangs.Combobulate<"Legacy alias says: %exact", 7>);;
+    give up;;
+}`
+	buf := &bytes.Buffer{}
+	if err := runSource(src, buf); err != nil {
+		t.Fatalf("execute failed: %v", err)
+	}
+	if got := strings.TrimSpace(buf.String()); got != "Legacy alias says: 7" {
+		t.Fatalf("unexpected output: %q", got)
+	}
+}
+
+func TestExecute_SequenceParamsAndCalls(t *testing.T) {
+	src := `outy seq Add<exact A, exact B> --> <<exact>> {
+    give A + B up;;
+}
+
+outy seq Scale<exact Base, exact Multiplier> --> <<exact>> {
+    give Base * Multiplier up;;
+}
+
+outy seq Foremost<> --> <<nada>> {
+    allow exact Sum 2b=2 Add<7, 5>;;
+    allow exact Product 2b=2 Scale<Sum, 3>;;
+    pront(Product);;
+    give up;;
+}`
+
+	buf := &bytes.Buffer{}
+	if err := runSource(src, buf); err != nil {
+		t.Fatalf("execute failed: %v", err)
+	}
+	if got := strings.TrimSpace(buf.String()); got != "36" {
+		t.Fatalf("unexpected output: %q", got)
+	}
+}
+
+func TestExecute_PortfolioReviewExample(t *testing.T) {
+	srcBytes, err := os.ReadFile("../../examples/portfolio_review/main.jave")
+	if err != nil {
+		t.Fatalf("read portfolio review example: %v", err)
+	}
+	buf := &bytes.Buffer{}
+	if err := runSource(string(srcBytes), buf); err != nil {
+		t.Fatalf("execute failed: %v", err)
+	}
+	got := strings.TrimSpace(buf.String())
+	if !strings.Contains(got, "Initiative=Payments") {
+		t.Fatalf("expected initiative output, got: %q", got)
+	}
+	if !strings.Contains(got, "Best initiative: Mobile (63)") {
+		t.Fatalf("expected best initiative summary, got: %q", got)
+	}
+	if !strings.Contains(got, "Average signal: 32.8") {
+		t.Fatalf("expected average summary, got: %q", got)
+	}
+}
+
+func TestExecute_IncidentTriageExample(t *testing.T) {
+	srcBytes, err := os.ReadFile("../../examples/incident_triage/main.jave")
+	if err != nil {
+		t.Fatalf("read incident triage example: %v", err)
+	}
+	buf := &bytes.Buffer{}
+	if err := runSource(string(srcBytes), buf); err != nil {
+		t.Fatalf("execute failed: %v", err)
+	}
+	got := strings.TrimSpace(buf.String())
+	if !strings.Contains(got, "service=Auth score=92 lane=EXEC-WARROOM") {
+		t.Fatalf("expected auth escalation output, got: %q", got)
+	}
+	if !strings.Contains(got, "Most critical service: Auth (92)") {
+		t.Fatalf("expected critical service summary, got: %q", got)
+	}
+}
+
+func TestExecute_BudgetPlanningExample(t *testing.T) {
+	srcBytes, err := os.ReadFile("../../examples/budget_planning/main.jave")
+	if err != nil {
+		t.Fatalf("read budget planning example: %v", err)
+	}
+	buf := &bytes.Buffer{}
+	if err := runSource(string(srcBytes), buf); err != nil {
+		t.Fatalf("execute failed: %v", err)
+	}
+	got := strings.TrimSpace(buf.String())
+	if !strings.Contains(got, "Department=Platform annual=570") {
+		t.Fatalf("expected department annual output, got: %q", got)
+	}
+	if !strings.Contains(got, "Annual portfolio budget=1797") {
+		t.Fatalf("expected annual budget summary, got: %q", got)
+	}
+}
+
+func TestExecute_ServiceCapacityPlanningExample(t *testing.T) {
+	srcBytes, err := os.ReadFile("../../examples/service_capacity_planning/main.jave")
+	if err != nil {
+		t.Fatalf("read service capacity example: %v", err)
+	}
+	buf := &bytes.Buffer{}
+	if err := runSource(string(srcBytes), buf); err != nil {
+		t.Fatalf("execute failed: %v", err)
+	}
+	got := strings.TrimSpace(buf.String())
+	if !strings.Contains(got, "service=Checkout signal=114 lane=EXEC-SPONSOR") {
+		t.Fatalf("expected checkout line, got: %q", got)
+	}
+	if !strings.Contains(got, "Top priority service: Checkout (114)") {
+		t.Fatalf("expected top priority summary, got: %q", got)
+	}
+	if !strings.Contains(got, "Average portfolio signal: 72.8") {
+		t.Fatalf("expected average summary, got: %q", got)
+	}
+}
+
 func runSource(src string, out *bytes.Buffer) error {
 	toks, lexDiags := lexer.Lex(src)
 	if len(lexDiags) != 0 {
@@ -115,8 +266,10 @@ func runSource(src string, out *bytes.Buffer) error {
 		return parseErr(parseDiags)
 	}
 	semaDiags := sema.Analyze(prog)
-	if len(semaDiags) != 0 {
-		return semaErr(semaDiags)
+	for _, d := range semaDiags {
+		if d.Severity == diagnostics.SeverityError {
+			return semaErr(semaDiags)
+		}
 	}
 	irProg, lowerDiags := lowering.Lower(prog)
 	if len(lowerDiags) != 0 {

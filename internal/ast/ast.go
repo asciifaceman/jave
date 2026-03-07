@@ -20,8 +20,15 @@ type SequenceDecl struct {
 	Pos        token.Position
 	Visibility string
 	Name       string
+	Params     []SequenceParam
 	ReturnType string
 	Body       []Stmt
+}
+
+// SequenceParam represents one typed parameter in a sequence signature.
+type SequenceParam struct {
+	TypeName string
+	Name     string
 }
 
 // Stmt is a statement node.

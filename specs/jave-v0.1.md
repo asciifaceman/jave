@@ -134,6 +134,7 @@ Rules:
 - `highschool/...` path is reserved for standard library carryons.
 - `Strangs` is canonical.
 - `Srangs` legacy alias is supported with warning.
+- Import cycles are rejected with an `import cycle detected` diagnostic that includes the resolved cycle path.
 
 ## Collections
 
@@ -244,6 +245,12 @@ given (<Name within Names>) -> {
 - Package unit: `carryon`
 - Runtime: `JaveVM`
 - Compiled artifact extension: `.jbin`
+
+## Sponsor Notice Policy
+
+- `javec` emits deterministic sponsor/ecosystem notices by default.
+- Supported controls: `--sponsor-notice full|redacted|off`, `--sponsor-redacted`, `--sponsor-quiet`.
+- Alias flags are convenience forms and may not conflict with explicit non-default mode values.
 
 ## Diagnostics Tone
 

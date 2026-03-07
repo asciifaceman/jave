@@ -67,6 +67,36 @@ func TestParse_VarDeclAndGiveValue(t *testing.T) {
 	}
 }
 
+func TestParse_SequenceParams(t *testing.T) {
+	src := `outy seq Add<exact A, exact B> --> <<exact>> {
+    give A + B up;;
+}
+
+outy seq Foremost<> --> <<nada>> {
+    allow exact Sum 2b=2 Add<2, 3>;;
+    pront(Sum);;
+    give up;;
+}`
+	toks, lexDiags := lexer.Lex(src)
+	if len(lexDiags) != 0 {
+		t.Fatalf("unexpected lexer diagnostics: %d", len(lexDiags))
+	}
+
+	prog, parseDiags := parser.Parse(toks)
+	if len(parseDiags) != 0 {
+		t.Fatalf("unexpected parser diagnostics: %d", len(parseDiags))
+	}
+	if len(prog.Sequences) != 2 {
+		t.Fatalf("expected 2 sequences, got %d", len(prog.Sequences))
+	}
+	if got := len(prog.Sequences[0].Params); got != 2 {
+		t.Fatalf("expected 2 params on Add, got %d", got)
+	}
+	if prog.Sequences[0].Params[0].Name != "A" || prog.Sequences[0].Params[1].Name != "B" {
+		t.Fatalf("unexpected param names: %+v", prog.Sequences[0].Params)
+	}
+}
+
 func TestParse_MissingStatementEndDiagnostic(t *testing.T) {
 	src := `outy seq Foremost<> --> <<nada>> {
     pront("oops")
@@ -142,5 +172,93 @@ func TestParse_MultiDimensionalTablesExample(t *testing.T) {
 	}
 	if len(prog.Sequences) != 1 {
 		t.Fatalf("expected 1 sequence, got %d", len(prog.Sequences))
+	}
+}
+
+func TestParse_PortfolioReviewExample(t *testing.T) {
+	srcBytes, err := os.ReadFile("../../examples/portfolio_review/main.jave")
+	if err != nil {
+		t.Fatalf("read example: %v", err)
+	}
+	toks, lexDiags := lexer.Lex(string(srcBytes))
+	if len(lexDiags) != 0 {
+		t.Fatalf("unexpected lexer diagnostics: %d", len(lexDiags))
+	}
+
+	prog, parseDiags := parser.Parse(toks)
+	if len(parseDiags) != 0 {
+		t.Fatalf("unexpected parser diagnostics: %d", len(parseDiags))
+	}
+	if len(prog.Imports) != 1 {
+		t.Fatalf("expected 1 import, got %d", len(prog.Imports))
+	}
+	if len(prog.Sequences) != 1 {
+		t.Fatalf("expected 1 sequence, got %d", len(prog.Sequences))
+	}
+}
+
+func TestParse_IncidentTriageExample(t *testing.T) {
+	srcBytes, err := os.ReadFile("../../examples/incident_triage/main.jave")
+	if err != nil {
+		t.Fatalf("read example: %v", err)
+	}
+	toks, lexDiags := lexer.Lex(string(srcBytes))
+	if len(lexDiags) != 0 {
+		t.Fatalf("unexpected lexer diagnostics: %d", len(lexDiags))
+	}
+
+	prog, parseDiags := parser.Parse(toks)
+	if len(parseDiags) != 0 {
+		t.Fatalf("unexpected parser diagnostics: %d", len(parseDiags))
+	}
+	if len(prog.Imports) != 1 {
+		t.Fatalf("expected 1 import, got %d", len(prog.Imports))
+	}
+	if len(prog.Sequences) != 1 {
+		t.Fatalf("expected 1 sequence, got %d", len(prog.Sequences))
+	}
+}
+
+func TestParse_BudgetPlanningExample(t *testing.T) {
+	srcBytes, err := os.ReadFile("../../examples/budget_planning/main.jave")
+	if err != nil {
+		t.Fatalf("read example: %v", err)
+	}
+	toks, lexDiags := lexer.Lex(string(srcBytes))
+	if len(lexDiags) != 0 {
+		t.Fatalf("unexpected lexer diagnostics: %d", len(lexDiags))
+	}
+
+	prog, parseDiags := parser.Parse(toks)
+	if len(parseDiags) != 0 {
+		t.Fatalf("unexpected parser diagnostics: %d", len(parseDiags))
+	}
+	if len(prog.Imports) != 1 {
+		t.Fatalf("expected 1 import, got %d", len(prog.Imports))
+	}
+	if len(prog.Sequences) != 1 {
+		t.Fatalf("expected 1 sequence, got %d", len(prog.Sequences))
+	}
+}
+
+func TestParse_ServiceCapacityPlanningExample(t *testing.T) {
+	srcBytes, err := os.ReadFile("../../examples/service_capacity_planning/main.jave")
+	if err != nil {
+		t.Fatalf("read example: %v", err)
+	}
+	toks, lexDiags := lexer.Lex(string(srcBytes))
+	if len(lexDiags) != 0 {
+		t.Fatalf("unexpected lexer diagnostics: %d", len(lexDiags))
+	}
+
+	prog, parseDiags := parser.Parse(toks)
+	if len(parseDiags) != 0 {
+		t.Fatalf("unexpected parser diagnostics: %d", len(parseDiags))
+	}
+	if len(prog.Imports) != 1 {
+		t.Fatalf("expected 1 import, got %d", len(prog.Imports))
+	}
+	if len(prog.Sequences) != 3 {
+		t.Fatalf("expected 3 sequences, got %d", len(prog.Sequences))
 	}
 }

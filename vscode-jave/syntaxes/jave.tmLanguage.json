@@ -1,0 +1,205 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Jave",
+  "scopeName": "source.jave",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#keywords" },
+    { "include": "#entrypoints" },
+    { "include": "#types" },
+    { "include": "#operators" },
+    { "include": "#literals" },
+    { "include": "#builtins" },
+    { "include": "#punctuation" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.jave",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.jave",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.conditional.jave",
+          "match": "\\b(maybe|furthermore|otherwise)\\b"
+        },
+        {
+          "name": "keyword.control.loop.jave",
+          "match": "\\b(given|again|within)\\b"
+        },
+        {
+          "name": "keyword.control.flow.jave",
+          "match": "\\b(give|up)\\b"
+        },
+        {
+          "name": "keyword.declaration.jave",
+          "match": "\\b(allow|seq|sequence)\\b"
+        },
+        {
+          "name": "keyword.other.visibility.jave",
+          "match": "\\b(outy|inny)\\b"
+        },
+        {
+          "name": "keyword.control.import.jave",
+          "match": "\\b(install|from)\\b"
+        },
+        {
+          "name": "storage.type.collection.jave",
+          "match": "\\b(table|enumeration|lexis)\\b"
+        }
+      ]
+    },
+    "entrypoints": {
+      "patterns": [
+        {
+          "name": "entity.name.function.entrypoint.jave",
+          "match": "\\b(Foreward|Foremost)\\b"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "storage.type.primitive.jave",
+          "match": "\\b(exact|vag|truther|strang|nada|naw)\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.comparison.word.jave",
+          "match": "\\b(samewise|notsamewise|bigly|lessly|biglysame|lesslysame)\\b"
+        },
+        {
+          "name": "keyword.operator.logical.word.jave",
+          "match": "\\b(plusalso|orelse|notno)\\b"
+        },
+        {
+          "name": "keyword.operator.arithmetic.jave",
+          "match": "(\\+|-|\\*|/|%)"
+        },
+        {
+          "name": "keyword.operator.assignment.jave",
+          "match": "2b=2"
+        }
+      ]
+    },
+    "literals": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.jave",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.jave",
+              "match": "\\\\[nrt\"\\\\]"
+            },
+            {
+              "name": "constant.other.placeholder.jave",
+              "match": "%(exact|vag|truther|strang|tru|glyph|rat|maybe|v)\\b"
+            }
+          ]
+        },
+        {
+          "name": "constant.numeric.float.jave",
+          "match": "\\b[0-9]+\\.[0-9]+\\b"
+        },
+        {
+          "name": "constant.numeric.integer.jave",
+          "match": "\\b[0-9]+\\b"
+        },
+        {
+          "name": "constant.language.boolean.jave",
+          "match": "\\b(yee|nee)\\b"
+        },
+        {
+          "name": "constant.language.null.jave",
+          "match": "\\bnaw\\b"
+        }
+      ]
+    },
+    "builtins": {
+      "patterns": [
+        {
+          "name": "support.function.builtin.jave",
+          "match": "\\b(pront|girth)\\b"
+        },
+        {
+          "name": "support.class.builtin.jave",
+          "match": "\\b(Strangs|Srangs|Pronts)\\b"
+        },
+        {
+          "name": "support.function.method.jave",
+          "match": "\\b(Combobulate|Prontulate|Girth)\\b"
+        },
+        {
+          "name": "support.constant.path.jave",
+          "match": "\\b(highschool|Highschool|HighSchool)\\b"
+        }
+      ]
+    },
+    "punctuation": {
+      "patterns": [
+        {
+          "name": "punctuation.terminator.statement.jave",
+          "match": ";;"
+        },
+        {
+          "name": "punctuation.separator.jave",
+          "match": "[,;]"
+        },
+        {
+          "name": "punctuation.section.braces.jave",
+          "match": "[{}]"
+        },
+        {
+          "name": "punctuation.section.brackets.jave",
+          "match": "[\\[\\]]"
+        },
+        {
+          "name": "punctuation.section.parens.jave",
+          "match": "[()]"
+        },
+        {
+          "name": "punctuation.section.angles.jave",
+          "match": "(<|>)"
+        },
+        {
+          "name": "punctuation.definition.doubleangleopen.jave",
+          "match": "<<" 
+        },
+        {
+          "name": "punctuation.definition.doubleangleclose.jave",
+          "match": ">>"
+        },
+        {
+          "name": "punctuation.definition.arrow.return.jave",
+          "match": "-->"
+        },
+        {
+          "name": "punctuation.definition.arrow.thin.jave",
+          "match": "->"
+        },
+        {
+          "name": "punctuation.accessor.jave",
+          "match": "\\."
+        },
+        {
+          "name": "punctuation.separator.colon.jave",
+          "match": ":"
+        }
+      ]
+    }
+  }
+}

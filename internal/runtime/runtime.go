@@ -12,158 +12,194 @@ import (
 
 // Execute runs a lowered IR program.
 func Execute(program *ir.ProgramIR, out io.Writer) error {
-	r := &runner{out: out, vars: map[string]any{}}
+	r := &runner{out: out, program: program, frames: []map[string]any{{}}}
 	return r.execute(program)
 }
 
 type runner struct {
-	out  io.Writer
-	vars map[string]any
+	out     io.Writer
+	program *ir.ProgramIR
+	frames  []map[string]any
 }
 
 func (r *runner) execute(program *ir.ProgramIR) error {
-	_, err := r.executeInstructions(program.Foremost.Instructions)
+	for _, foreward := range program.Forewards {
+		_, _, err := r.executeInstructions(foreward.Instructions)
+		if err != nil {
+			return err
+		}
+	}
+	_, _, err := r.executeInstructions(program.Foremost.Instructions)
 	return err
 }
 
-func (r *runner) executeInstructions(instructions []ir.Instruction) (bool, error) {
+func (r *runner) executeInstructions(instructions []ir.Instruction) (bool, any, error) {
 	for _, instr := range instructions {
 		switch in := instr.(type) {
 		case ir.VarDeclInstr:
 			val, err := r.eval(in.Value)
 			if err != nil {
-				return false, err
+				return false, nil, err
 			}
-			r.vars[in.Name] = val
+			r.currentFrame()[in.Name] = val
 		case ir.AssignInstr:
 			val, err := r.eval(in.Value)
 			if err != nil {
-				return false, err
+				return false, nil, err
 			}
-			r.vars[in.Name] = val
+			r.assignVar(in.Name, val)
 		case ir.ExprInstr:
 			if _, err := r.eval(in.Expr); err != nil {
-				return false, err
+				return false, nil, err
 			}
 		case ir.IfInstr:
 			executed := false
 			for _, b := range in.Branches {
 				condAny, err := r.eval(b.Condition)
 				if err != nil {
-					return false, err
+					return false, nil, err
 				}
 				cond, ok := condAny.(bool)
 				if !ok {
-					return false, fmt.Errorf("if condition must evaluate to truther")
+					return false, nil, fmt.Errorf("if condition must evaluate to truther")
 				}
 				if !cond {
 					continue
 				}
 				executed = true
-				returned, err := r.executeInstructions(b.Body)
+				returned, value, err := r.executeInstructions(b.Body)
 				if err != nil {
-					return false, err
+					return false, nil, err
 				}
 				if returned {
-					return true, nil
+					return true, value, nil
 				}
 				break
 			}
 			if !executed && len(in.ElseBody) > 0 {
-				returned, err := r.executeInstructions(in.ElseBody)
+				returned, value, err := r.executeInstructions(in.ElseBody)
 				if err != nil {
-					return false, err
+					return false, nil, err
 				}
 				if returned {
-					return true, nil
+					return true, value, nil
 				}
 			}
 		case ir.WhileInstr:
 			for {
 				condAny, err := r.eval(in.Condition)
 				if err != nil {
-					return false, err
+					return false, nil, err
 				}
 				cond, ok := condAny.(bool)
 				if !ok {
-					return false, fmt.Errorf("given while condition must evaluate to truther")
+					return false, nil, fmt.Errorf("given while condition must evaluate to truther")
 				}
 				if !cond {
 					break
 				}
-				returned, err := r.executeInstructions(in.Body)
+				returned, value, err := r.executeInstructions(in.Body)
 				if err != nil {
-					return false, err
+					return false, nil, err
 				}
 				if returned {
-					return true, nil
+					return true, value, nil
 				}
 			}
 		case ir.ForInstr:
-			if _, err := r.executeInstructions(in.Init); err != nil {
-				return false, err
+			if _, _, err := r.executeInstructions(in.Init); err != nil {
+				return false, nil, err
 			}
 			for {
 				condAny, err := r.eval(in.Condition)
 				if err != nil {
-					return false, err
+					return false, nil, err
 				}
 				cond, ok := condAny.(bool)
 				if !ok {
-					return false, fmt.Errorf("given for condition must evaluate to truther")
+					return false, nil, fmt.Errorf("given for condition must evaluate to truther")
 				}
 				if !cond {
 					break
 				}
-				returned, err := r.executeInstructions(in.Body)
+				returned, value, err := r.executeInstructions(in.Body)
 				if err != nil {
-					return false, err
+					return false, nil, err
 				}
 				if returned {
-					return true, nil
+					return true, value, nil
 				}
-				if _, err := r.executeInstructions(in.Step); err != nil {
-					return false, err
+				if _, _, err := r.executeInstructions(in.Step); err != nil {
+					return false, nil, err
 				}
 			}
 		case ir.WithinInstr:
 			iterAny, err := r.eval(in.Iterable)
 			if err != nil {
-				return false, err
+				return false, nil, err
 			}
 			var items []any
 			switch v := iterAny.(type) {
 			case []any:
 				items = v
 			default:
-				return false, fmt.Errorf("within iterable is not an ordered collection")
+				return false, nil, fmt.Errorf("within iterable is not an ordered collection")
 			}
 			for _, item := range items {
-				r.vars[in.VarName] = item
-				returned, err := r.executeInstructions(in.Body)
+				r.currentFrame()[in.VarName] = item
+				returned, value, err := r.executeInstructions(in.Body)
 				if err != nil {
-					return false, err
+					return false, nil, err
 				}
 				if returned {
-					return true, nil
+					return true, value, nil
 				}
 			}
 		case ir.ReturnInstr:
+			var value any
 			if in.Value != nil {
-				if _, err := r.eval(in.Value); err != nil {
-					return false, err
+				evaled, err := r.eval(in.Value)
+				if err != nil {
+					return false, nil, err
 				}
+				value = evaled
 			}
-			return true, nil
+			return true, value, nil
 		}
 	}
-	return false, nil
+	return false, nil, nil
+}
+
+func (r *runner) currentFrame() map[string]any {
+	if len(r.frames) == 0 {
+		r.frames = append(r.frames, map[string]any{})
+	}
+	return r.frames[len(r.frames)-1]
+}
+
+func (r *runner) assignVar(name string, value any) {
+	for i := len(r.frames) - 1; i >= 0; i-- {
+		if _, ok := r.frames[i][name]; ok {
+			r.frames[i][name] = value
+			return
+		}
+	}
+	r.currentFrame()[name] = value
+}
+
+func (r *runner) resolveVar(name string) (any, bool) {
+	for i := len(r.frames) - 1; i >= 0; i-- {
+		if v, ok := r.frames[i][name]; ok {
+			return v, true
+		}
+	}
+	return nil, false
 }
 
 func (r *runner) eval(expr ast.Expr) (any, error) {
 	switch e := expr.(type) {
 	case ast.IdentifierExpr:
-		v, ok := r.vars[e.Name]
+		v, ok := r.resolveVar(e.Name)
 		if !ok {
 			return nil, fmt.Errorf("undefined identifier at runtime: %s", e.Name)
 		}
@@ -287,10 +323,39 @@ func (r *runner) evalCall(e ast.CallExpr) (any, error) {
 				return nil, fmt.Errorf("girth unsupported for value")
 			}
 		}
+
+		if seq, exists := r.program.Sequences[ident.Name]; exists {
+			if len(e.Args) != len(seq.Params) {
+				return nil, fmt.Errorf("sequence call arity mismatch for %s", ident.Name)
+			}
+			args := make([]any, 0, len(e.Args))
+			for _, argExpr := range e.Args {
+				v, err := r.eval(argExpr)
+				if err != nil {
+					return nil, err
+				}
+				args = append(args, v)
+			}
+
+			frame := map[string]any{}
+			for i, name := range seq.Params {
+				frame[name] = args[i]
+			}
+			r.frames = append(r.frames, frame)
+			returned, value, err := r.executeInstructions(seq.Instructions)
+			r.frames = r.frames[:len(r.frames)-1]
+			if err != nil {
+				return nil, err
+			}
+			if returned {
+				return value, nil
+			}
+			return nil, nil
+		}
 	}
 
 	if member, ok := e.Callee.(ast.MemberExpr); ok {
-		if target, ok := member.Target.(ast.IdentifierExpr); ok && target.Name == "Strangs" && member.Name == "Combobulate" {
+		if target, ok := member.Target.(ast.IdentifierExpr); ok && (target.Name == "Strangs" || target.Name == "Srangs") && member.Name == "Combobulate" {
 			if len(e.Args) == 0 {
 				return "", nil
 			}
@@ -310,6 +375,19 @@ func (r *runner) evalCall(e ast.CallExpr) (any, error) {
 				tmpl = replaceFirstDirective(tmpl, toDisplay(arg))
 			}
 			return tmpl, nil
+		}
+
+		if target, ok := member.Target.(ast.IdentifierExpr); ok && target.Name == "Pronts" && member.Name == "Prontulate" {
+			comb, err := r.evalCall(ast.CallExpr{
+				Callee: ast.MemberExpr{Target: ast.IdentifierExpr{Name: "Strangs"}, Name: "Combobulate"},
+				Args:   e.Args,
+				Style:  e.Style,
+			})
+			if err != nil {
+				return nil, err
+			}
+			_, _ = fmt.Fprintln(r.out, toDisplay(comb))
+			return nil, nil
 		}
 	}
 

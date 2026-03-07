@@ -1,0 +1,53 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug javec",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/cmd/javec",
+      "args": [
+        "--trace-imports",
+        "${workspaceFolder}/examples/hello_world/main.jave"
+      ],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Debug baggage run",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/cmd/baggage",
+      "args": [
+        "run",
+        "--trace-imports",
+        "${workspaceFolder}/examples/hello_world/main.jave"
+      ],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Debug javevm",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/cmd/javevm",
+      "args": [
+        "${workspaceFolder}/examples/hello_world/main.jbin"
+      ],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Debug current Jave file",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/cmd/javec",
+      "args": [
+        "--run",
+        "${file}"
+      ],
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}

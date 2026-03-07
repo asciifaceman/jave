@@ -1,0 +1,38 @@
+install Strangs from highschool/English;;
+
+outy seq Foremost<> --> <<nada>> {
+    allow enumeration<strang> Services 2b=2 <"Auth", "Billing", "Search", "Messaging">;;
+    allow table<exact> ErrorRates 2b=2 [7, 4, 6, 2];;
+    allow table<exact> CustomerImpacts 2b=2 [8, 5, 6, 3];;
+    allow table<exact> RecoveryMinutes 2b=2 [50, 20, 30, 12];;
+    allow table<truther> SecurityFlags 2b=2 [yee, nee, nee, yee];;
+
+    allow exact HighestScore 2b=2 0;;
+    allow strang HighestService 2b=2 "none";;
+
+    given (<allow exact I 2b=2 0;; I lessly girth(Services);; I 2b=2 I + 1;;>) -> {
+        allow exact Score 2b=2 ErrorRates[I] * 5;;
+        Score 2b=2 Score + (CustomerImpacts[I] * 4);;
+        Score 2b=2 Score + (RecoveryMinutes[I] / 2);;
+
+        allow strang Lane 2b=2 "P2-STANDARD";;
+        maybe (<SecurityFlags[I] samewise yee plusalso Score biglysame 40>) -> {
+            Lane 2b=2 "EXEC-WARROOM";;
+        } furthermore (<Score biglysame 45>) -> {
+            Lane 2b=2 "P0-IMMEDIATE";;
+        } furthermore (<Score biglysame 28>) -> {
+            Lane 2b=2 "P1-URGENT";;
+        }
+
+        maybe (<I samewise 0 orelse Score bigly HighestScore>) -> {
+            HighestScore 2b=2 Score;;
+            HighestService 2b=2 Services[I];;
+        }
+
+        pront(Strangs.Combobulate<"service=%strang score=%exact lane=%strang", Services[I], Score, Lane>);;
+    }
+
+    pront("--- incident focus ---");;
+    pront(Strangs.Combobulate<"Most critical service: %strang (%exact)", HighestService, HighestScore>);;
+    give up;;
+}

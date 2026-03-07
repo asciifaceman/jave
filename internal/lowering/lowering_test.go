@@ -134,3 +134,38 @@ func TestLower_LoopsExampleAllModes(t *testing.T) {
 		t.Fatal("expected lowered program, got nil")
 	}
 }
+
+func TestLower_ForewardAndForemost(t *testing.T) {
+	src := `outy seq Foreward<> --> <<nada>> {
+    pront("warming carryon");;
+    give up;;
+}
+
+outy seq Foremost<> --> <<nada>> {
+    pront("running foremost");;
+    give up;;
+}`
+	toks, lexDiags := lexer.Lex(src)
+	if len(lexDiags) != 0 {
+		t.Fatalf("unexpected lexer diagnostics: %d", len(lexDiags))
+	}
+	prog, parseDiags := parser.Parse(toks)
+	if len(parseDiags) != 0 {
+		t.Fatalf("unexpected parser diagnostics: %d", len(parseDiags))
+	}
+	semaDiags := sema.Analyze(prog)
+	if len(semaDiags) != 0 {
+		t.Fatalf("unexpected semantic diagnostics: %d", len(semaDiags))
+	}
+
+	irProg, lowerDiags := lowering.Lower(prog)
+	if len(lowerDiags) != 0 {
+		t.Fatalf("unexpected lowering diagnostics: %d", len(lowerDiags))
+	}
+	if len(irProg.Forewards) == 0 {
+		t.Fatal("expected Foreward sequence to be lowered")
+	}
+	if irProg.Forewards[0].Name != "Foreward" {
+		t.Fatalf("unexpected Foreward name: %q", irProg.Forewards[0].Name)
+	}
+}

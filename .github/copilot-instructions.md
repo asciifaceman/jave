@@ -24,3 +24,7 @@ Use this workspace as a language implementation project for `jave`.
 ## GitHub Governance
 - For GitHub issue and pull-request handling, apply `.github/instructions/05-GitHub-Governance.instructions.md`.
 - Use base-branch governance/spec docs as the source of truth during PR review.
+
+## Governance Records
+- When creating or editing materials in `governance/`, apply `.github/instructions/09-Governance-Directory.instructions.md`.
+- Keep governance materials externally readable and separate from internal contributor workflow instructions.

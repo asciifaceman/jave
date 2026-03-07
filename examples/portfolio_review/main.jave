@@ -1,0 +1,41 @@
+install Strangs from highschool/English;;
+
+outy seq Foremost<> --> <<nada>> {
+    allow enumeration<strang> Initiatives 2b=2 <"Payments", "Warehouse", "Mobile", "Security", "Data">;;
+    allow table<exact> RevenueDelta 2b=2 [12, 6, 15, 3, 10];;
+    allow table<exact> RiskEvents 2b=2 [1, 3, 0, 4, 2];;
+    allow table<exact> DeliveryHealth 2b=2 [8, 5, 9, 4, 7];;
+
+    allow exact BestIndex 2b=2 0;;
+    allow exact BestScore 2b=2 0;;
+    allow exact PortfolioTotal 2b=2 0;;
+
+    given (<allow exact I 2b=2 0;; I lessly girth(Initiatives);; I 2b=2 I + 1;;>) -> {
+        allow exact Score 2b=2 RevenueDelta[I] * 3;;
+        Score 2b=2 Score - (RiskEvents[I] * 4);;
+        Score 2b=2 Score + (DeliveryHealth[I] * 2);;
+
+        allow strang Band 2b=2 "RECOVER";;
+        maybe (<Score biglysame 40>) -> {
+            Band 2b=2 "INVEST";;
+        } furthermore (<Score biglysame 22>) -> {
+            Band 2b=2 "HOLD";;
+        }
+
+        PortfolioTotal 2b=2 PortfolioTotal + Score;;
+
+        maybe (<I samewise 0 orelse Score bigly BestScore>) -> {
+            BestScore 2b=2 Score;;
+            BestIndex 2b=2 I;;
+        }
+
+        pront(Strangs.Combobulate<"Initiative=%strang score=%exact band=%strang", Initiatives[I], Score, Band>);;
+    }
+
+    allow exact PortfolioAverage 2b=2 PortfolioTotal / girth(Initiatives);;
+
+    pront("--- portfolio summary ---");;
+    pront(Strangs.Combobulate<"Best initiative: %strang (%exact)", Initiatives[BestIndex], BestScore>);;
+    pront(Strangs.Combobulate<"Average signal: %exact", PortfolioAverage>);;
+    give up;;
+}

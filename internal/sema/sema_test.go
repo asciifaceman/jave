@@ -1,8 +1,10 @@
 package sema_test
 
 import (
+	"strings"
 	"testing"
 
+	"github.com/asciifaceman/jave/internal/diagnostics"
 	"github.com/asciifaceman/jave/internal/lexer"
 	"github.com/asciifaceman/jave/internal/parser"
 	"github.com/asciifaceman/jave/internal/sema"
@@ -65,7 +67,114 @@ func TestAnalyze_DuplicateLocalDeclaration(t *testing.T) {
 	}
 }
 
+func TestAnalyze_SrangsLegacyAliasWarning(t *testing.T) {
+	src := `install Srangs from highschool/English;;
+outy seq Foremost<> --> <<nada>> {
+    pront(Srangs.Combobulate<"Legacy %exact", 1>);;
+    give up;;
+}`
+	diags := analyzeSrcDetailed(t, src)
+	found := false
+	for _, d := range diags {
+		if d.Severity == diagnostics.SeverityWarning && strings.Contains(d.Message, "legacy module alias 'Srangs'") {
+			found = true
+		}
+		if d.Severity == diagnostics.SeverityError {
+			t.Fatalf("unexpected error diagnostic: %s", d.Message)
+		}
+	}
+	if !found {
+		t.Fatal("expected legacy Srangs warning")
+	}
+}
+
+func TestAnalyze_DuplicateImports(t *testing.T) {
+	src := `install Strangs from highschool/English;;
+install Strangs from highschool/English;;
+outy seq Foremost<> --> <<nada>> {
+    give up;;
+}`
+	diags := analyzeSrcDetailed(t, src)
+	found := false
+	for _, d := range diags {
+		if d.Severity == diagnostics.SeverityError && strings.Contains(d.Message, "duplicate import declaration") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("expected duplicate import diagnostic")
+	}
+}
+
+func TestAnalyze_StdlibImportPathValidation(t *testing.T) {
+	src := `install Strangs from corp/English;;
+outy seq Foremost<> --> <<nada>> {
+    give up;;
+}`
+	diags := analyzeSrcDetailed(t, src)
+	found := false
+	for _, d := range diags {
+		if d.Severity == diagnostics.SeverityError && strings.Contains(d.Message, "must use highschool/... path") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("expected stdlib import path diagnostic")
+	}
+}
+
+func TestAnalyze_SequenceParamsAreInScope(t *testing.T) {
+	src := `outy seq Add<exact A, exact B> --> <<exact>> {
+    give A + B up;;
+}
+
+outy seq Foremost<> --> <<nada>> {
+    allow exact Sum 2b=2 Add<2, 3>;;
+    pront(Sum);;
+    give up;;
+}`
+
+	diags := analyzeSrcDetailed(t, src)
+	for _, d := range diags {
+		if d.Severity == diagnostics.SeverityError {
+			t.Fatalf("unexpected semantic error: %s", d.Message)
+		}
+	}
+}
+
+func TestAnalyze_SequenceCallArityMismatch(t *testing.T) {
+	src := `outy seq Add<exact A, exact B> --> <<exact>> {
+    give A + B up;;
+}
+
+outy seq Foremost<> --> <<nada>> {
+    allow exact Sum 2b=2 Add<2>;;
+    pront(Sum);;
+    give up;;
+}`
+
+	diags := analyzeSrcDetailed(t, src)
+	found := false
+	for _, d := range diags {
+		if d.Severity == diagnostics.SeverityError && strings.Contains(d.Message, "arity mismatch") {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("expected sequence call arity mismatch diagnostic")
+	}
+}
+
 func analyzeSrc(t *testing.T, src string) []string {
+	t.Helper()
+	msgs := make([]string, 0)
+	for _, d := range analyzeSrcDetailed(t, src) {
+		msgs = append(msgs, d.Message)
+	}
+	return msgs
+}
+
+func analyzeSrcDetailed(t *testing.T, src string) []diagnostics.Diagnostic {
 	t.Helper()
 	toks, lexDiags := lexer.Lex(src)
 	if len(lexDiags) != 0 {
@@ -75,10 +184,5 @@ func analyzeSrc(t *testing.T, src string) []string {
 	if len(parseDiags) != 0 {
 		t.Fatalf("unexpected parser diagnostics: %d", len(parseDiags))
 	}
-	out := sema.Analyze(prog)
-	msgs := make([]string, 0, len(out))
-	for _, d := range out {
-		msgs = append(msgs, d.Message)
-	}
-	return msgs
+	return sema.Analyze(prog)
 }

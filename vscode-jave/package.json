@@ -1,0 +1,36 @@
+{
+  "name": "jave-language",
+  "displayName": "Jave Language Support",
+  "description": "Syntax highlighting for Jave programming language",
+  "version": "0.1.0",
+  "publisher": "orcal",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "jave",
+        "aliases": [
+          "Jave",
+          "jave"
+        ],
+        "extensions": [
+          ".jave",
+          ".jv"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "jave",
+        "scopeName": "source.jave",
+        "path": "./syntaxes/jave.tmLanguage.json"
+      }
+    ]
+  }
+}

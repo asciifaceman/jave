@@ -65,17 +65,60 @@ go run ./cmd/baggage --version
 go run ./cmd/javevm --version
 ```
 
+Trace import resolution and carryon load order:
+
+```bash
+go run ./cmd/javec --trace-imports --run examples/imports/main.jave
+```
+
+Force a specific project root for highschool carryon resolution:
+
+```bash
+go run ./cmd/javec --project-root . --trace-imports --run examples/imports/main.jave
+```
+
 Compile a source file into a `.jbin` artifact:
 
 ```bash
 go run ./cmd/baggage build examples/hello_world/main.jave
 ```
 
+If no input is provided, `baggage build` and `baggage run` resolve input in this order:
+- `JAVE_FILE` environment variable
+- `entry` from local `baggage.jave` manifest (if present)
+- fallback `examples/hello_world/main.jave`
+
 Run a source file (compile then execute):
 
 ```bash
 go run ./cmd/baggage run examples/conditions/main.jave
 ```
+
+Pass through import tracing from baggage to javec:
+
+```bash
+go run ./cmd/baggage run --trace-imports examples/imports/main.jave
+```
+
+Run with explicit project root (useful outside repo root):
+
+```bash
+go run ./cmd/baggage run --project-root . --trace-imports examples/imports/main.jave
+```
+
+Sponsor notice behavior is deterministic and controlled in `javec` with:
+- `--sponsor-notice full|redacted|off`
+- `--sponsor-redacted` (alias for redacted)
+- `--sponsor-quiet` (alias for off)
+
+Examples:
+
+```bash
+go run ./cmd/javec --sponsor-notice redacted examples/hello_world/main.jave
+go run ./cmd/javec --sponsor-quiet examples/hello_world/main.jave
+```
+
+`baggage build` and `baggage run` pass these sponsor flags through to `javec`.
 
 Scaffold a new project:
 

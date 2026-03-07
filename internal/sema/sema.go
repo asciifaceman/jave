@@ -1,6 +1,8 @@
 package sema
 
 import (
+	"strings"
+
 	"github.com/asciifaceman/jave/internal/ast"
 	"github.com/asciifaceman/jave/internal/diagnostics"
 	"github.com/asciifaceman/jave/internal/token"
@@ -16,14 +18,29 @@ func Analyze(program *ast.Program) []diagnostics.Diagnostic {
 type analyzer struct {
 	diags           []diagnostics.Diagnostic
 	globalSequences map[string]struct{}
+	sequenceArity   map[string]int
 	imports         map[string]struct{}
 }
 
 func (a *analyzer) analyzeProgram(program *ast.Program) {
 	a.globalSequences = map[string]struct{}{}
+	a.sequenceArity = map[string]int{}
 	a.imports = map[string]struct{}{}
 
 	for _, imp := range program.Imports {
+		if _, exists := a.imports[imp.Name]; exists {
+			a.errorAt(imp.Pos, "duplicate import declaration: "+imp.Name)
+			continue
+		}
+
+		if imp.Name == "Srangs" {
+			a.warnAt(imp.Pos, "legacy module alias 'Srangs' remains supported for ecosystem continuity")
+		}
+
+		if (imp.Name == "Strangs" || imp.Name == "Srangs" || imp.Name == "Pronts") && !strings.HasPrefix(imp.From, "highschool/") {
+			a.errorAt(imp.Pos, "standard library import '"+imp.Name+"' must use highschool/... path")
+		}
+
 		a.imports[imp.Name] = struct{}{}
 	}
 
@@ -31,11 +48,14 @@ func (a *analyzer) analyzeProgram(program *ast.Program) {
 	foremostCount := 0
 
 	for _, seq := range program.Sequences {
-		if seen[seq.Name] {
+		if seq.Name != "Foreward" && seen[seq.Name] {
 			a.errorAt(seq.Pos, "duplicate sequence declaration: "+seq.Name)
 		}
-		seen[seq.Name] = true
-		a.globalSequences[seq.Name] = struct{}{}
+		if seq.Name != "Foreward" {
+			seen[seq.Name] = true
+			a.globalSequences[seq.Name] = struct{}{}
+			a.sequenceArity[seq.Name] = len(seq.Params)
+		}
 
 		if seq.Name == "Foremost" {
 			foremostCount++
@@ -51,6 +71,13 @@ func (a *analyzer) analyzeProgram(program *ast.Program) {
 
 	for _, seq := range program.Sequences {
 		seqScope := a.newSequenceScope()
+		for _, param := range seq.Params {
+			if seqScope.hasHere(param.Name) {
+				a.errorAt(seq.Pos, "duplicate sequence parameter: "+param.Name)
+				continue
+			}
+			seqScope.define(param.Name)
+		}
 		a.checkStatements(seq.ReturnType, seq.Body, seqScope)
 	}
 }
@@ -129,6 +156,11 @@ func (a *analyzer) checkExpr(expr ast.Expr, scope *scope) {
 		a.checkExpr(e.Target, scope)
 		a.checkExpr(e.Index, scope)
 	case ast.CallExpr:
+		if callee, ok := e.Callee.(ast.IdentifierExpr); ok {
+			if expected, exists := a.sequenceArity[callee.Name]; exists && expected != len(e.Args) {
+				a.errorAt(exprPos(e), "sequence call arity mismatch for "+callee.Name)
+			}
+		}
 		a.checkExpr(e.Callee, scope)
 		for _, arg := range e.Args {
 			a.checkExpr(arg, scope)
@@ -171,6 +203,34 @@ func (a *analyzer) errorAt(pos token.Position, message string) {
 			Column: pos.Column,
 		},
 	})
+}
+
+func (a *analyzer) warnAt(pos token.Position, message string) {
+	a.diags = append(a.diags, diagnostics.Diagnostic{
+		Severity: diagnostics.SeverityWarning,
+		Message:  message,
+		Pos: diagnostics.Position{
+			Line:   pos.Line,
+			Column: pos.Column,
+		},
+	})
+}
+
+func exprPos(expr ast.Expr) token.Position {
+	pos := token.Position{Line: 1, Column: 1}
+	switch e := expr.(type) {
+	case ast.IdentifierExpr:
+		pos = e.Pos
+	case ast.BinaryExpr:
+		pos = exprPos(e.Left)
+	case ast.MemberExpr:
+		pos = exprPos(e.Target)
+	case ast.IndexExpr:
+		pos = exprPos(e.Target)
+	case ast.CallExpr:
+		pos = exprPos(e.Callee)
+	}
+	return pos
 }
 
 type scope struct {

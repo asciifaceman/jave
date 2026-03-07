@@ -14,7 +14,7 @@ func main() {
 	flag.Parse()
 
 	if *showVersion {
-		fmt.Println("javevm v0.1.0-bootstrap")
+		fmt.Println("javevm v0.1.0")
 		return
 	}
 

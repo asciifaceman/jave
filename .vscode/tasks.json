@@ -1,0 +1,112 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Compile Current Jave File",
+      "type": "shell",
+      "command": "javec --sponsor-quiet -o ${fileDirname}/${fileBasenameNoExtension}.jbin ${file}",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Run Current Jave File",
+      "type": "shell",
+      "command": "baggage run --sponsor-quiet ${file}",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Compile and Run Current Jave File",
+      "type": "shell",
+      "command": "baggage run ${file}",
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "focus": true
+      }
+    },
+    {
+      "label": "Install Jave Extension",
+      "type": "shell",
+      "windows": {
+        "command": "$extensionsDir = \"$env:USERPROFILE/.vscode/extensions\"; New-Item -ItemType Directory -Force -Path $extensionsDir; New-Item -ItemType SymbolicLink -Path \"$extensionsDir/jave-language-0.1.0\" -Target \"${workspaceFolder}/vscode-jave\" -Force"
+      },
+      "linux": {
+        "command": "mkdir -p ~/.vscode/extensions && ln -sf \"${workspaceFolder}/vscode-jave\" ~/.vscode/extensions/jave-language-0.1.0"
+      },
+      "osx": {
+        "command": "mkdir -p ~/.vscode/extensions && ln -sf \"${workspaceFolder}/vscode-jave\" ~/.vscode/extensions/jave-language-0.1.0"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "[Dev] Build Jave Toolchain",
+      "type": "shell",
+      "command": "go build ./cmd/javec ./cmd/baggage ./cmd/javevm",
+      "group": "build",
+      "problemMatcher": ["$go"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "[Dev] Run Jave Tests",
+      "type": "shell",
+      "command": "go test ./... -v",
+      "group": "test",
+      "problemMatcher": ["$go"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "[Dev] Install Toolchain to PATH",
+      "type": "shell",
+      "command": "go install ./cmd/javec ./cmd/baggage ./cmd/javevm",
+      "problemMatcher": ["$go"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "[Dev] Mage Build",
+      "type": "shell",
+      "command": "mage build",
+      "group": "build",
+      "problemMatcher": ["$go"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "[Dev] Mage Test",
+      "type": "shell",
+      "command": "mage test",
+      "group": "test",
+      "problemMatcher": ["$go"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    }
+  ]
+}

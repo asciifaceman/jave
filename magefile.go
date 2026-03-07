@@ -22,6 +22,9 @@ func Help() {
 	fmt.Println("  mage check        # fmt + vet + test")
 	fmt.Println("  mage bootstrap    # go mod tidy + build")
 	fmt.Println("")
+	fmt.Println("Tooling:")
+	fmt.Println("  mage installExtension  # install VS Code extension for Jave syntax")
+	fmt.Println("")
 	fmt.Println("Compiler/Runtime:")
 	fmt.Println("  mage runJavec                 # analyze JAVE_FILE or examples/hello_world/main.jave")
 	fmt.Println("                                # PowerShell: $env:JAVE_FILE='examples/conditions/main.jave' ; mage runJavec")
@@ -114,4 +117,9 @@ func RunExampleMultiTable() error {
 // Version prints a short local workflow version marker.
 func Version() {
 	fmt.Println("mage workflow: jave v0.1 bootstrap")
+}
+
+// InstallExtension installs the VS Code extension for Jave syntax highlighting.
+func InstallExtension() error {
+	return sh.RunV("go", "run", "./tools/install-extension")
 }

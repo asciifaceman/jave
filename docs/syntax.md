@@ -92,6 +92,8 @@ install Strangs from highschool/English;;
 install Pronts from highschool/Communications;;
 ```
 
+Import graphs must be acyclic in v0.1. Cycles are rejected during load with an `import cycle detected` diagnostic that includes the resolved path chain.
+
 ## Operators
 
 Comparison:

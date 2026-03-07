@@ -7,6 +7,22 @@ import (
 	"testing"
 )
 
+func withWorkingDir(t *testing.T, dir string) {
+	t.Helper()
+	old, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Getwd failed: %v", err)
+	}
+	if err := os.Chdir(dir); err != nil {
+		t.Fatalf("Chdir(%q) failed: %v", dir, err)
+	}
+	t.Cleanup(func() {
+		if err := os.Chdir(old); err != nil {
+			t.Fatalf("restore wd failed: %v", err)
+		}
+	})
+}
+
 func TestArtifactPathFor(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -30,64 +46,159 @@ func TestArtifactPathFor(t *testing.T) {
 
 func TestParseBuildArgs(t *testing.T) {
 	t.Run("defaults", func(t *testing.T) {
-		input, out, err := parseBuildArgs(nil)
+		opts, err := parseBuildArgs(nil)
 		if err != nil {
 			t.Fatalf("parseBuildArgs returned error: %v", err)
 		}
-		if input != defaultInput() {
-			t.Fatalf("input = %q, want %q", input, defaultInput())
+		if opts.input != defaultInput() {
+			t.Fatalf("input = %q, want %q", opts.input, defaultInput())
 		}
-		if out != artifactPathFor(defaultInput()) {
-			t.Fatalf("out = %q, want %q", out, artifactPathFor(defaultInput()))
+		if opts.out != artifactPathFor(defaultInput()) {
+			t.Fatalf("out = %q, want %q", opts.out, artifactPathFor(defaultInput()))
+		}
+		if opts.traceImports {
+			t.Fatal("traceImports = true, want false")
 		}
 	})
 
 	t.Run("input and output", func(t *testing.T) {
-		input, out, err := parseBuildArgs([]string{"examples/conditions/main.jave", "--out", "bin/conditions.jbin"})
+		opts, err := parseBuildArgs([]string{"examples/conditions/main.jave", "--out", "bin/conditions.jbin"})
 		if err != nil {
 			t.Fatalf("parseBuildArgs returned error: %v", err)
 		}
-		if input != "examples/conditions/main.jave" {
-			t.Fatalf("input = %q", input)
+		if opts.input != "examples/conditions/main.jave" {
+			t.Fatalf("input = %q", opts.input)
 		}
-		if out != "bin/conditions.jbin" {
-			t.Fatalf("out = %q", out)
+		if opts.out != "bin/conditions.jbin" {
+			t.Fatalf("out = %q", opts.out)
+		}
+	})
+
+	t.Run("trace imports", func(t *testing.T) {
+		opts, err := parseBuildArgs([]string{"--trace-imports", "examples/conditions/main.jave"})
+		if err != nil {
+			t.Fatalf("parseBuildArgs returned error: %v", err)
+		}
+		if !opts.traceImports {
+			t.Fatal("traceImports = false, want true")
+		}
+	})
+
+	t.Run("project root", func(t *testing.T) {
+		opts, err := parseBuildArgs([]string{"--project-root", "C:/tmp/demo", "examples/conditions/main.jave"})
+		if err != nil {
+			t.Fatalf("parseBuildArgs returned error: %v", err)
+		}
+		if opts.projectRoot != "C:/tmp/demo" {
+			t.Fatalf("projectRoot = %q", opts.projectRoot)
+		}
+	})
+
+	t.Run("sponsor notice options", func(t *testing.T) {
+		opts, err := parseBuildArgs([]string{"--sponsor-notice", "redacted", "--sponsor-quiet", "--sponsor-redacted", "examples/conditions/main.jave"})
+		if err != nil {
+			t.Fatalf("parseBuildArgs returned error: %v", err)
+		}
+		if opts.sponsorMode != "redacted" {
+			t.Fatalf("sponsorMode = %q", opts.sponsorMode)
+		}
+		if !opts.sponsorQuiet {
+			t.Fatal("sponsorQuiet = false, want true")
+		}
+		if !opts.sponsorRedacted {
+			t.Fatal("sponsorRedacted = false, want true")
 		}
 	})
 
 	t.Run("missing out value", func(t *testing.T) {
-		_, _, err := parseBuildArgs([]string{"-o"})
+		_, err := parseBuildArgs([]string{"-o"})
 		if err == nil {
 			t.Fatal("expected error for missing -o value")
 		}
 	})
 
 	t.Run("unknown flag", func(t *testing.T) {
-		_, _, err := parseBuildArgs([]string{"--wat"})
+		_, err := parseBuildArgs([]string{"--wat"})
 		if err == nil {
 			t.Fatal("expected error for unknown flag")
+		}
+	})
+
+	t.Run("missing project root value", func(t *testing.T) {
+		_, err := parseBuildArgs([]string{"--project-root"})
+		if err == nil {
+			t.Fatal("expected error for missing --project-root value")
+		}
+	})
+
+	t.Run("missing sponsor-notice value", func(t *testing.T) {
+		_, err := parseBuildArgs([]string{"--sponsor-notice"})
+		if err == nil {
+			t.Fatal("expected error for missing --sponsor-notice value")
 		}
 	})
 }
 
 func TestParseRunArgs(t *testing.T) {
 	t.Run("defaults", func(t *testing.T) {
-		input, err := parseRunArgs(nil)
+		opts, err := parseRunArgs(nil)
 		if err != nil {
 			t.Fatalf("parseRunArgs returned error: %v", err)
 		}
-		if input != defaultInput() {
-			t.Fatalf("input = %q, want %q", input, defaultInput())
+		if opts.input != defaultInput() {
+			t.Fatalf("input = %q, want %q", opts.input, defaultInput())
+		}
+		if opts.traceImports {
+			t.Fatal("traceImports = true, want false")
 		}
 	})
 
 	t.Run("explicit input", func(t *testing.T) {
-		input, err := parseRunArgs([]string{"program.jbin"})
+		opts, err := parseRunArgs([]string{"program.jbin"})
 		if err != nil {
 			t.Fatalf("parseRunArgs returned error: %v", err)
 		}
-		if input != "program.jbin" {
-			t.Fatalf("input = %q", input)
+		if opts.input != "program.jbin" {
+			t.Fatalf("input = %q", opts.input)
+		}
+	})
+
+	t.Run("trace imports", func(t *testing.T) {
+		opts, err := parseRunArgs([]string{"--trace-imports", "examples/conditions/main.jave"})
+		if err != nil {
+			t.Fatalf("parseRunArgs returned error: %v", err)
+		}
+		if !opts.traceImports {
+			t.Fatal("traceImports = false, want true")
+		}
+		if opts.input != "examples/conditions/main.jave" {
+			t.Fatalf("input = %q", opts.input)
+		}
+	})
+
+	t.Run("project root", func(t *testing.T) {
+		opts, err := parseRunArgs([]string{"--project-root", "C:/tmp/demo", "examples/conditions/main.jave"})
+		if err != nil {
+			t.Fatalf("parseRunArgs returned error: %v", err)
+		}
+		if opts.projectRoot != "C:/tmp/demo" {
+			t.Fatalf("projectRoot = %q", opts.projectRoot)
+		}
+	})
+
+	t.Run("sponsor notice options", func(t *testing.T) {
+		opts, err := parseRunArgs([]string{"--sponsor-notice", "off", "--sponsor-redacted", "--sponsor-quiet", "examples/conditions/main.jave"})
+		if err != nil {
+			t.Fatalf("parseRunArgs returned error: %v", err)
+		}
+		if opts.sponsorMode != "off" {
+			t.Fatalf("sponsorMode = %q", opts.sponsorMode)
+		}
+		if !opts.sponsorRedacted {
+			t.Fatal("sponsorRedacted = false, want true")
+		}
+		if !opts.sponsorQuiet {
+			t.Fatal("sponsorQuiet = false, want true")
 		}
 	})
 
@@ -95,6 +206,20 @@ func TestParseRunArgs(t *testing.T) {
 		_, err := parseRunArgs([]string{"a", "b"})
 		if err == nil {
 			t.Fatal("expected error for too many args")
+		}
+	})
+
+	t.Run("missing project root value", func(t *testing.T) {
+		_, err := parseRunArgs([]string{"--project-root"})
+		if err == nil {
+			t.Fatal("expected error for missing --project-root value")
+		}
+	})
+
+	t.Run("missing sponsor-notice value", func(t *testing.T) {
+		_, err := parseRunArgs([]string{"--sponsor-notice"})
+		if err == nil {
+			t.Fatal("expected error for missing --sponsor-notice value")
 		}
 	})
 }
@@ -253,5 +378,64 @@ func TestAddDependencyToManifest(t *testing.T) {
 	}
 	if added {
 		t.Fatal("expected duplicate dependency to be ignored")
+	}
+}
+
+func TestReadManifest(t *testing.T) {
+	manifestPath := filepath.Join(t.TempDir(), "baggage.jave")
+	content := "carryon \"hello-jave\"\nlang \"v0.1\"\nentry \"src/main.jave\"\ndep \"a/carryon\"\ndep \"b/carryon\"\n"
+	if err := os.WriteFile(manifestPath, []byte(content), 0o644); err != nil {
+		t.Fatalf("write manifest: %v", err)
+	}
+
+	manifest, err := readManifest(manifestPath)
+	if err != nil {
+		t.Fatalf("readManifest returned error: %v", err)
+	}
+	if manifest.Carryon != "hello-jave" {
+		t.Fatalf("carryon = %q", manifest.Carryon)
+	}
+	if manifest.Lang != "v0.1" {
+		t.Fatalf("lang = %q", manifest.Lang)
+	}
+	if manifest.Entry != "src/main.jave" {
+		t.Fatalf("entry = %q", manifest.Entry)
+	}
+	if len(manifest.Deps) != 2 {
+		t.Fatalf("deps len = %d", len(manifest.Deps))
+	}
+}
+
+func TestDiscoverDefaultInputFromManifest(t *testing.T) {
+	base := t.TempDir()
+	manifestPath := filepath.Join(base, "baggage.jave")
+	content := "carryon \"hello-jave\"\nlang \"v0.1\"\nentry \"src/main.jave\"\n"
+	if err := os.WriteFile(manifestPath, []byte(content), 0o644); err != nil {
+		t.Fatalf("write manifest: %v", err)
+	}
+
+	withWorkingDir(t, base)
+	input, err := discoverDefaultInput()
+	if err != nil {
+		t.Fatalf("discoverDefaultInput returned error: %v", err)
+	}
+	want := filepath.Clean(filepath.Join("src", "main.jave"))
+	if filepath.Clean(input) != want {
+		t.Fatalf("input = %q, want %q", input, want)
+	}
+}
+
+func TestDiscoverDefaultInputManifestMissingEntry(t *testing.T) {
+	base := t.TempDir()
+	manifestPath := filepath.Join(base, "baggage.jave")
+	content := "carryon \"hello-jave\"\nlang \"v0.1\"\n"
+	if err := os.WriteFile(manifestPath, []byte(content), 0o644); err != nil {
+		t.Fatalf("write manifest: %v", err)
+	}
+
+	withWorkingDir(t, base)
+	_, err := discoverDefaultInput()
+	if err == nil {
+		t.Fatal("expected missing entry error")
 	}
 }

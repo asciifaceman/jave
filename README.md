@@ -1,67 +1,101 @@
 # Jave
 
+[![Go Version](https://img.shields.io/badge/Go-1.26-00ADD8?logo=go&logoColor=white)](https://go.dev/)
+[![Release](https://img.shields.io/badge/Release-v0.1.0-2ea44f)](https://github.com/asciifaceman/jave/releases)
+[![License](https://img.shields.io/badge/License-Project%20Defined-555)](LICENSE)
+
 Jave is a deliberately committee-damaged programming language.
 
-It is a joke language with real behavior: the syntax is cursed on purpose, but programs should still produce correct and predictable results.
+It is a joke language with real behavior: the syntax is cursed on purpose, but programs produce deterministic, testable outcomes.
 
-## Project Status
+## Table Of Contents
 
-This repository is in bootstrap mode for Jave v0.1.
+- [Project Snapshot](#project-snapshot)
+- [Install And Run](#install-and-run)
+- [Release Assets](#release-assets)
+- [VS Code Plugin](#vs-code-plugin)
+- [Hello Jave](#hello-jave)
+- [Architecture](#architecture)
+- [Docs And Governance](#docs-and-governance)
+- [Developer Workflow](#developer-workflow)
+- [Contributing](#contributing)
+
+## Project Snapshot
+
+| Area | Current State |
+| --- | --- |
+| Language Spec | v0.1 locked and implemented |
+| Toolchain | `javec`, `baggage`, `javevm` |
+| Platforms | Windows, Linux, macOS |
+| Editor Support | VS Code syntax highlighting available |
+| Governance | v0.1 records complete, v0.2 candidates drafted |
 
 Current focus:
-- Lock language syntax and semantics.
-- Build a minimal Go 1.26 implementation.
-- Keep behavior consistent on Windows, Linux, and macOS.
-- Deliver syntax highlighting with VS Code as priority and GitHub compatibility as a tracked follow-up.
+- publish polished v0.1 release assets
+- move v0.2 candidates toward ratified design
+- expand runtime I/O and standard library surface
 
-## Quick Start (Current)
+## Install And Run
 
-Today this repo includes docs, examples, and Go CLI stubs for:
-- `javec` (compiler)
-- `baggage` (package/build tool)
-- `javevm` (runtime)
-
-Build the stubs:
+### Install from source
 
 ```bash
-go build ./cmd/javec ./cmd/baggage ./cmd/javevm
+go install github.com/asciifaceman/jave/cmd/javec@latest
+go install github.com/asciifaceman/jave/cmd/baggage@latest
+go install github.com/asciifaceman/jave/cmd/javevm@latest
 ```
 
-Run one:
+### Verify toolchain
 
 ```bash
-go run ./cmd/javec --help
+javec --version
+baggage --version
+javevm --version
 ```
 
-## Go Workflow With Mage
-
-We use Mage to keep local and CI command flows simple.
-
-Install Mage (one-time):
+### Compile and run
 
 ```bash
-go install github.com/magefile/mage@latest
+javec hello.jave
+baggage run hello.jave
 ```
 
-Common tasks:
+## Release Assets
+
+When a tag is published, GitHub Actions attaches release assets for:
+- `linux-amd64`
+- `windows-amd64`
+- `darwin-amd64`
+
+Binary assets include:
+- `javec-<tag>-<os>-amd64[.exe]`
+- `baggage-<tag>-<os>-amd64[.exe]`
+- `javevm-<tag>-<os>-amd64[.exe]`
+- `jave-vscode-install-<tag>-<os>-amd64[.exe]`
+- `jave-vscode-extension-<tag>.tar.gz` and `.zip`
+- `SHA256SUMS.txt`
+
+Release prep details: [docs/releases/v0.1.0-release-prep.md](docs/releases/v0.1.0-release-prep.md)
+
+## VS Code Plugin
+
+Quick install options:
 
 ```bash
-mage -l
-mage build
-mage test
-mage check
-mage cmd:javec
-mage cmd:baggage
-mage cmd:javevm
+mage installExtension
 ```
 
-If Mage is not installed yet, run it via Go:
+or
 
 ```bash
-go run github.com/magefile/mage -l
+go run ./tools/install-extension
 ```
 
-## Hello, Jave
+Plugin docs:
+- [vscode-jave/README.md](vscode-jave/README.md)
+- [docs/vscode-extension-install.md](docs/vscode-extension-install.md)
+
+## Hello Jave
 
 ```jave
 outy seq Foremost<> --> <<nada>> {
@@ -70,25 +104,66 @@ outy seq Foremost<> --> <<nada>> {
 }
 ```
 
-## Read These First
+More runnable programs:
+- [examples/](examples)
+- [examples/service_capacity_planning/main.jave](examples/service_capacity_planning/main.jave)
 
-- `specs/jave-v0.1.md`: Locked v0.1 syntax and semantics.
-- `docs/syntax.md`: Quick reference.
-- `docs/how-to-write-jave.md`: Friendly beginner guide.
-- `docs/agent-milestones.md`: Engineering plan and acceptance criteria.
+## Architecture
 
-## Repo Layout
+Pipeline:
+
+`lexer -> parser -> semantic analysis -> lowering -> jbin -> runtime`
+
+Project layout:
 
 ```text
 cmd/            CLI tools: javec, baggage, javevm
-docs/           Human docs and guides
+internal/       Compiler/runtime implementation
+docs/           Documentation and release prep
 examples/       Runnable language samples
-specs/          Language specs and behavior definitions
-.github/        Agent and instruction configuration
+specs/          Versioned language specs
+governance/     Governance records and release provenance
+vscode-jave/    VS Code syntax highlighting package
+.github/        Workflows, instructions, and project automation
+```
+
+## Docs And Governance
+
+Core docs:
+- [specs/jave-v0.1.md](specs/jave-v0.1.md)
+- [docs/syntax.md](docs/syntax.md)
+- [docs/how-to-write-jave.md](docs/how-to-write-jave.md)
+- [CHANGELOG.md](CHANGELOG.md)
+
+Governance records:
+- [governance/README.md](governance/README.md)
+- [governance/v0.1/README.md](governance/v0.1/README.md)
+- [governance/v0.2/README.md](governance/v0.2/README.md)
+
+## Developer Workflow
+
+Use Mage for common local workflows:
+
+```bash
+go install github.com/magefile/mage@latest
+mage -l
+mage build
+mage test
+mage check
+```
+
+No Mage installed yet:
+
+```bash
+go run github.com/magefile/mage -l
 ```
 
 ## Contributing
 
-Early contributions should prioritize parser/runtime correctness, diagnostics quality, and cross-platform behavior.
+Contribution priorities:
+- parser/runtime correctness
+- diagnostics quality
+- cross-platform consistency
+- governance/spec alignment
 
 Tone can be funny. Behavior must stay trustworthy.

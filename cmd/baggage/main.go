@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -17,7 +18,7 @@ func main() {
 	}
 
 	if args[0] == "--version" || args[0] == "version" {
-		fmt.Println("baggage v0.1.0-bootstrap")
+		fmt.Println("baggage v0.1.0")
 		return
 	}
 
@@ -26,22 +27,22 @@ func main() {
 
 	switch cmd {
 	case "build":
-		input, out, err := parseBuildArgs(rest)
+		opts, err := parseBuildArgs(rest)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "baggage: %v\n", err)
 			os.Exit(2)
 		}
-		if err := runBuild(input, out); err != nil {
+		if err := runBuild(opts); err != nil {
 			fmt.Fprintf(os.Stderr, "baggage build failed: %v\n", err)
 			os.Exit(1)
 		}
 	case "run":
-		input, err := parseRunArgs(rest)
+		opts, err := parseRunArgs(rest)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "baggage: %v\n", err)
 			os.Exit(2)
 		}
-		if err := runProgram(input); err != nil {
+		if err := runProgram(opts); err != nil {
 			fmt.Fprintf(os.Stderr, "baggage run failed: %v\n", err)
 			os.Exit(1)
 		}
@@ -76,8 +77,27 @@ func printUsage() {
 	fmt.Println("usage: baggage <build|run|check|test|new|add|version>")
 	fmt.Println("  baggage new <project-name> [--force]")
 	fmt.Println("  baggage add <carryon-path> [--manifest baggage.jave]")
-	fmt.Println("  baggage build [input.jave] [-o output.jbin]")
-	fmt.Println("  baggage run [input.jave|program.jbin]")
+	fmt.Println("  baggage build [input.jave] [-o output.jbin] [--trace-imports] [--project-root dir] [--sponsor-notice mode] [--sponsor-redacted] [--sponsor-quiet]")
+	fmt.Println("  baggage run [input.jave|program.jbin] [--trace-imports] [--project-root dir] [--sponsor-notice mode] [--sponsor-redacted] [--sponsor-quiet]")
+}
+
+type buildOptions struct {
+	input           string
+	out             string
+	traceImports    bool
+	projectRoot     string
+	sponsorMode     string
+	sponsorQuiet    bool
+	sponsorRedacted bool
+}
+
+type runOptions struct {
+	input           string
+	traceImports    bool
+	projectRoot     string
+	sponsorMode     string
+	sponsorQuiet    bool
+	sponsorRedacted bool
 }
 
 func runAdd(args []string) error {
@@ -231,59 +251,153 @@ func scaffoldNewProject(project string, force bool) error {
 	return nil
 }
 
-func parseBuildArgs(args []string) (input string, out string, err error) {
-	input = defaultInput()
-	out = ""
+func parseBuildArgs(args []string) (buildOptions, error) {
+	opts := buildOptions{}
 
 	for i := 0; i < len(args); i++ {
 		a := args[i]
 		switch a {
 		case "-o", "--out":
 			if i+1 >= len(args) {
-				return "", "", fmt.Errorf("missing value for %s", a)
+				return buildOptions{}, fmt.Errorf("missing value for %s", a)
 			}
 			i++
-			out = args[i]
+			opts.out = args[i]
+		case "--trace-imports":
+			opts.traceImports = true
+		case "--sponsor-notice":
+			if i+1 >= len(args) {
+				return buildOptions{}, fmt.Errorf("missing value for --sponsor-notice")
+			}
+			i++
+			opts.sponsorMode = args[i]
+		case "--sponsor-redacted":
+			opts.sponsorRedacted = true
+		case "--sponsor-quiet":
+			opts.sponsorQuiet = true
+		case "--project-root":
+			if i+1 >= len(args) {
+				return buildOptions{}, fmt.Errorf("missing value for --project-root")
+			}
+			i++
+			opts.projectRoot = args[i]
 		default:
 			if strings.HasPrefix(a, "-") {
-				return "", "", fmt.Errorf("unknown flag %s", a)
+				return buildOptions{}, fmt.Errorf("unknown flag %s", a)
 			}
-			input = a
+			opts.input = a
 		}
 	}
 
-	if out == "" {
-		out = artifactPathFor(input)
-	}
-	return input, out, nil
-}
-
-func parseRunArgs(args []string) (string, error) {
-	if len(args) > 1 {
-		return "", fmt.Errorf("run accepts at most one input argument")
-	}
-	if len(args) == 0 {
-		if env := os.Getenv("JAVE_FILE"); env != "" {
-			return env, nil
+	if opts.input == "" {
+		input, err := discoverDefaultInput()
+		if err != nil {
+			return buildOptions{}, err
 		}
-		return defaultInput(), nil
+		opts.input = input
 	}
-	return args[0], nil
+
+	if opts.out == "" {
+		opts.out = artifactPathFor(opts.input)
+	}
+	if opts.projectRoot == "" {
+		opts.projectRoot = defaultProjectRoot()
+	}
+	if opts.sponsorMode == "" {
+		opts.sponsorMode = "full"
+	}
+	return opts, nil
 }
 
-func runBuild(input, out string) error {
-	return runGo("run", "./cmd/javec", "--out", out, input)
+func parseRunArgs(args []string) (runOptions, error) {
+	opts := runOptions{}
+
+	for i := 0; i < len(args); i++ {
+		a := args[i]
+		switch a {
+		case "--trace-imports":
+			opts.traceImports = true
+		case "--sponsor-notice":
+			if i+1 >= len(args) {
+				return runOptions{}, fmt.Errorf("missing value for --sponsor-notice")
+			}
+			i++
+			opts.sponsorMode = args[i]
+		case "--sponsor-redacted":
+			opts.sponsorRedacted = true
+		case "--sponsor-quiet":
+			opts.sponsorQuiet = true
+		case "--project-root":
+			if i+1 >= len(args) {
+				return runOptions{}, fmt.Errorf("missing value for --project-root")
+			}
+			i++
+			opts.projectRoot = args[i]
+		default:
+			if strings.HasPrefix(a, "-") {
+				return runOptions{}, fmt.Errorf("unknown flag %s", a)
+			}
+			if opts.input != "" {
+				return runOptions{}, fmt.Errorf("run accepts at most one input argument")
+			}
+			opts.input = a
+		}
+	}
+
+	if opts.input == "" {
+		input, err := discoverDefaultInput()
+		if err != nil {
+			return runOptions{}, err
+		}
+		opts.input = input
+	}
+	if opts.projectRoot == "" {
+		opts.projectRoot = defaultProjectRoot()
+	}
+	if opts.sponsorMode == "" {
+		opts.sponsorMode = "full"
+	}
+	return opts, nil
 }
 
-func runProgram(input string) error {
-	if strings.HasSuffix(strings.ToLower(input), ".jbin") {
-		return runGo("run", "./cmd/javevm", input)
+func runBuild(opts buildOptions) error {
+	args := []string{"run", "./cmd/javec"}
+	if opts.traceImports {
+		args = append(args, "--trace-imports")
 	}
-	out := artifactPathFor(input)
-	if err := runBuild(input, out); err != nil {
+	if opts.sponsorQuiet {
+		args = append(args, "--sponsor-quiet")
+	}
+	if opts.sponsorRedacted {
+		args = append(args, "--sponsor-redacted")
+	}
+	if opts.sponsorMode != "" {
+		args = append(args, "--sponsor-notice", opts.sponsorMode)
+	}
+	if opts.projectRoot != "" {
+		args = append(args, "--project-root", opts.projectRoot)
+	}
+	args = append(args, "--out", opts.out, opts.input)
+	return runGo(args...)
+}
+
+func runProgram(opts runOptions) error {
+	if strings.HasSuffix(strings.ToLower(opts.input), ".jbin") {
+		return runGo("run", "./cmd/javevm", opts.input)
+	}
+	out := artifactPathFor(opts.input)
+	if err := runBuild(buildOptions{input: opts.input, out: out, traceImports: opts.traceImports, projectRoot: opts.projectRoot, sponsorMode: opts.sponsorMode, sponsorQuiet: opts.sponsorQuiet, sponsorRedacted: opts.sponsorRedacted}); err != nil {
 		return err
 	}
 	return runGo("run", "./cmd/javevm", out)
+}
+
+func defaultProjectRoot() string {
+	wd, err := os.Getwd()
+	if err != nil {
+		return ""
+	}
+	return wd
 }
 
 func runGo(args ...string) error {
@@ -294,10 +408,94 @@ func runGo(args ...string) error {
 }
 
 func defaultInput() string {
-	if env := os.Getenv("JAVE_FILE"); env != "" {
-		return env
+	input, err := discoverDefaultInput()
+	if err != nil {
+		return "examples/hello_world/main.jave"
 	}
-	return "examples/hello_world/main.jave"
+	return input
+}
+
+func discoverDefaultInput() (string, error) {
+	if env := os.Getenv("JAVE_FILE"); env != "" {
+		return env, nil
+	}
+
+	manifestPath := "baggage.jave"
+	if _, err := os.Stat(manifestPath); err == nil {
+		return inputFromManifest(manifestPath)
+	} else if !os.IsNotExist(err) {
+		return "", err
+	}
+
+	return "examples/hello_world/main.jave", nil
+}
+
+func inputFromManifest(path string) (string, error) {
+	manifest, err := readManifest(path)
+	if err != nil {
+		return "", err
+	}
+	if manifest.Entry == "" {
+		return "", fmt.Errorf("manifest %s is missing entry", path)
+	}
+
+	entry := manifest.Entry
+	if filepath.IsAbs(entry) {
+		return filepath.Clean(entry), nil
+	}
+
+	base := filepath.Dir(path)
+	return filepath.Clean(filepath.Join(base, entry)), nil
+}
+
+type baggageManifest struct {
+	Carryon string
+	Lang    string
+	Entry   string
+	Deps    []string
+}
+
+func readManifest(path string) (baggageManifest, error) {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return baggageManifest{}, err
+	}
+
+	manifest := baggageManifest{}
+	lines := strings.Split(string(b), "\n")
+	for _, raw := range lines {
+		line := strings.TrimSpace(raw)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+
+		parts := strings.SplitN(line, " ", 2)
+		if len(parts) != 2 {
+			return baggageManifest{}, fmt.Errorf("invalid manifest line: %q", line)
+		}
+
+		key := strings.TrimSpace(parts[0])
+		valuePart := strings.TrimSpace(parts[1])
+		value, err := strconv.Unquote(valuePart)
+		if err != nil {
+			return baggageManifest{}, fmt.Errorf("invalid quoted value in line %q: %w", line, err)
+		}
+
+		switch key {
+		case "carryon":
+			manifest.Carryon = value
+		case "lang":
+			manifest.Lang = value
+		case "entry":
+			manifest.Entry = value
+		case "dep":
+			manifest.Deps = append(manifest.Deps, value)
+		default:
+			return baggageManifest{}, fmt.Errorf("unknown manifest key %q", key)
+		}
+	}
+
+	return manifest, nil
 }
 
 func artifactPathFor(input string) string {

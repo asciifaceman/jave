@@ -17,11 +17,14 @@ type lowerer struct {
 }
 
 func (l *lowerer) lower(program *ast.Program) *ir.ProgramIR {
+	forewards := make([]ast.SequenceDecl, 0)
 	var foremost *ast.SequenceDecl
 	for i := range program.Sequences {
+		if program.Sequences[i].Name == "Foreward" {
+			forewards = append(forewards, program.Sequences[i])
+		}
 		if program.Sequences[i].Name == "Foremost" {
 			foremost = &program.Sequences[i]
-			break
 		}
 	}
 	if foremost == nil {
@@ -32,13 +35,52 @@ func (l *lowerer) lower(program *ast.Program) *ir.ProgramIR {
 	out := &ir.ProgramIR{
 		Foremost: ir.SequenceIR{
 			Name:         foremost.Name,
+			Params:       namesFromParams(foremost.Params),
 			ReturnType:   foremost.ReturnType,
 			Instructions: make([]ir.Instruction, 0, len(foremost.Body)),
 		},
+		Sequences: map[string]ir.SequenceIR{},
+	}
+	if len(forewards) > 0 {
+		out.Forewards = make([]ir.SequenceIR, 0, len(forewards))
+		for _, f := range forewards {
+			lowered := ir.SequenceIR{
+				Name:         f.Name,
+				Params:       namesFromParams(f.Params),
+				ReturnType:   f.ReturnType,
+				Instructions: l.lowerStatements(f.Body),
+			}
+			out.Forewards = append(out.Forewards, lowered)
+			out.Sequences[f.Name] = lowered
+		}
 	}
 
 	out.Foremost.Instructions = l.lowerStatements(foremost.Body)
+	out.Sequences[out.Foremost.Name] = out.Foremost
 
+	for _, seq := range program.Sequences {
+		if _, exists := out.Sequences[seq.Name]; exists {
+			continue
+		}
+		out.Sequences[seq.Name] = ir.SequenceIR{
+			Name:         seq.Name,
+			Params:       namesFromParams(seq.Params),
+			ReturnType:   seq.ReturnType,
+			Instructions: l.lowerStatements(seq.Body),
+		}
+	}
+
+	return out
+}
+
+func namesFromParams(params []ast.SequenceParam) []string {
+	if len(params) == 0 {
+		return nil
+	}
+	out := make([]string, 0, len(params))
+	for _, p := range params {
+		out = append(out, p.Name)
+	}
 	return out
 }
 
