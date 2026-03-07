@@ -24,6 +24,7 @@ permalink: /
 - [Governance Updates]({{ '/governance/' | relative_url }})
 - [Records and Correspondence]({{ '/records/' | relative_url }})
 - [Language Tutorials, Spec, and Examples]({{ '/language/' | relative_url }})
+- [Reference Index (Builtins, Carryons, Language Features)]({{ '/reference/' | relative_url }})
 - [Our Team]({{ '/team/' | relative_url }})
 - [v0.2 Program Roadmap]({{ '/roadmap/' | relative_url }})
 

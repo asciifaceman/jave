@@ -32,3 +32,9 @@ They are archived by version and displayed as first-class pages generated from g
 - Records are rendered into `/content/...` display pages during site build.
 - Player-facing pages link to rendered displays, not raw markdown files.
 - Records remain aligned to governance and executable project reality.
+
+## Related Surfaces
+
+- [Governance Updates]({{ '/governance/' | relative_url }})
+- [Language Tutorials and Specs]({{ '/language/' | relative_url }})
+- [Reference Index]({{ '/reference/' | relative_url }})

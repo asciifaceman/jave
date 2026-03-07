@@ -10,5 +10,6 @@ header_pages:
   - governance.md
   - records.md
   - language.md
+  - reference/index.md
   - team.md
   - roadmap.md

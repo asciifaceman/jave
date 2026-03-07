@@ -17,6 +17,14 @@ This section publishes language-facing materials for operators and implementatio
 - [Collections Guide]({{ '/content/docs/collections/' | relative_url }})
 - [Toolchain Guide]({{ '/content/docs/toolchain/' | relative_url }})
 
+## Reference Docs
+
+- [Reference Index]({{ '/reference/' | relative_url }})
+- [Builtin Reference]({{ '/reference/builtins/' | relative_url }})
+- [Language Feature Reference]({{ '/reference/language/' | relative_url }})
+- [highschool/English Carryon Reference]({{ '/reference/carryons/highschool-english/' | relative_url }})
+- [highschool/Algebra Carryon Reference]({{ '/reference/carryons/highschool-algebra/' | relative_url }})
+
 ## Specification
 
 - [Jave v0.1 Specification (Locked)]({{ '/content/specs/jave-v0.1/' | relative_url }})
@@ -41,7 +49,3 @@ This section publishes language-facing materials for operators and implementatio
 		<p>Example displays are built from checked-in `.jave` programs to keep behavior grounded.</p>
 	</div>
 </div>
-
-## Forthcoming: Standard Library Documentation
-
-A standard library documentation surface is planned once docstring standards and documentation generation are ratified for v0.2+.

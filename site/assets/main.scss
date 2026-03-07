@@ -2,9 +2,23 @@
 ---
 @import "minima";
 
+:root {
+  --orcal-ink: #102430;
+  --orcal-sky-1: #f5f8ff;
+  --orcal-sky-2: #edf6ff;
+  --orcal-border: #d0d7de;
+  --orcal-card: #f8fafc;
+  --orcal-accent: #2ea44f;
+}
+
+.site-title,
+.site-nav .page-link {
+  color: var(--orcal-ink);
+}
+
 .hero-note {
   border: 1px solid #c9d8ff;
-  background: linear-gradient(135deg, #f5f8ff 0%, #edf6ff 100%);
+  background: linear-gradient(135deg, var(--orcal-sky-1) 0%, var(--orcal-sky-2) 100%);
   border-radius: 10px;
   padding: 0.75rem 1rem;
   margin: 0.75rem 0 1rem;
@@ -22,10 +36,11 @@
 }
 
 .record-grid > div {
-  border: 1px solid #d0d7de;
+  border: 1px solid var(--orcal-border);
   border-radius: 8px;
   padding: 0.85rem 1rem;
-  background: #f8fafc;
+  background: var(--orcal-card);
+  box-shadow: 0 1px 0 rgba(16, 36, 48, 0.06);
 }
 
 .record-grid h3 {
@@ -33,7 +48,7 @@
 }
 
 .doc-meta {
-  border-left: 4px solid #2ea44f;
+  border-left: 4px solid var(--orcal-accent);
   background: #f6fff8;
   padding: 0.5rem 0.75rem;
   margin-bottom: 1rem;
@@ -48,8 +63,29 @@
   border-radius: 8px;
   background: #f8f9fb;
   padding: 0.45rem 0.65rem;
+  margin-top: 1.25rem;
+  margin-bottom: 0.55rem;
 }
 
 .doc-body--correspondence p {
   line-height: 1.55;
+}
+
+.doc-body--correspondence ul {
+  margin-top: 0.3rem;
+  margin-bottom: 0.85rem;
+}
+
+.doc-body--correspondence p strong {
+  color: var(--orcal-ink);
+}
+
+@media (max-width: 640px) {
+  .hero-note {
+    padding: 0.65rem 0.8rem;
+  }
+
+  .record-grid {
+    gap: 0.8rem;
+  }
 }

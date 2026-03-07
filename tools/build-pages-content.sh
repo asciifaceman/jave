@@ -39,6 +39,34 @@ infer_summary_from_file() {
   printf '%s' "${summary}"
 }
 
+should_publish_markdown() {
+  local rel_path="$1"
+  local src="$2"
+
+  # Governance and specs are always part of the player-facing publication surface.
+  if [[ "${rel_path}" == governance/* || "${rel_path}" == specs/* ]]; then
+    return 0
+  fi
+
+  # Only docs are filtered for internal workflow/agent content.
+  if [[ "${rel_path}" != docs/* ]]; then
+    return 0
+  fi
+
+  case "${rel_path}" in
+    docs/agent-milestones.md|docs/contributing.md|docs/v0.1-freeze-checklist.md|docs/releases/v0.1.0-release-prep.md)
+      return 1
+      ;;
+  esac
+
+  # Guardrail against accidental publication of internal workflow instructions.
+  if grep -Eqi '\.github/instructions/|copilot|agent first-pass|internal contributor workflow|not player-facing|\bARG\b' "${src}"; then
+    return 1
+  fi
+
+  return 0
+}
+
 render_markdown_document() {
   local src="$1"
   local rel_path="$2"
@@ -74,7 +102,7 @@ render_markdown_document() {
     fi
     echo "</div>"
     echo
-    echo "<div class=\"${body_class}\">"
+    echo "<div class=\"${body_class}\" markdown=\"1\">"
     awk 'NR==1 && /^# / {next} {print}' "${src}"
     echo "</div>"
     echo
@@ -112,6 +140,10 @@ render_example_document() {
 
 while IFS= read -r src; do
   rel="${src#${ROOT_DIR}/}"
+  if ! should_publish_markdown "${rel}" "${src}"; then
+    echo "[pages] skipping internal document ${rel}"
+    continue
+  fi
   render_markdown_document "${src}" "${rel}"
 done < <(find "${ROOT_DIR}/governance" "${ROOT_DIR}/docs" "${ROOT_DIR}/specs" -type f -name '*.md' | sort)
 

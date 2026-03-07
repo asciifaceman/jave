@@ -23,8 +23,13 @@ Governance records are published by version and include feature ledgers, user st
 
 ## Correspondence Archive
 
-- [v0.1 Records Feed Section]({{ '/records/feed/' | relative_url }})
-- [v0.2 Records Feed Section]({{ '/records/feed/' | relative_url }})
+- [Records Feed (All Versions)]({{ '/records/feed/' | relative_url }})
+- [Records Landing Page]({{ '/records/' | relative_url }})
+
+## Related Documentation
+
+- [Language Tutorials and Specs]({{ '/language/' | relative_url }})
+- [Reference Index]({{ '/reference/' | relative_url }})
 
 ## Governance Snapshot
 
