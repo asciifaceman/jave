@@ -51,7 +51,7 @@ append_lore_section() {
     local rel_path="${file#${ROOT_DIR}/}"
     local label
     label="$(basename "${file}" .md)"
-    echo "- [${label}](/reference/${rel_path})" >> "${LORE_FEED_FILE}"
+    echo "- [${label}]({{ '/reference/${rel_path}' | relative_url }})" >> "${LORE_FEED_FILE}"
   done
 
   echo >> "${LORE_FEED_FILE}"

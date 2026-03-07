@@ -10,9 +10,9 @@ These include discovery minutes, transition briefs, mailing list snippets, and e
 
 ## Lore Streams
 
-- [Aggregated Lore Feed](/lore/feed/)
-- [v0.1 Lore Folder](/reference/governance/v0.1/lore/)
-- [v0.2 Lore Folder](/reference/governance/v0.2/lore/)
+- [Aggregated Lore Feed]({{ '/lore/feed/' | relative_url }})
+- [v0.1 Lore Folder]({{ '/reference/governance/v0.1/lore/' | relative_url }})
+- [v0.2 Lore Folder]({{ '/reference/governance/v0.2/lore/' | relative_url }})
 
 ## Publication Principles
 

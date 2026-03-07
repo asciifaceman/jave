@@ -1,8 +1,8 @@
 title: Orcal Language Platform
 email: noreply@orcal.internal
 description: Official Orcal communications surface for the Jave language program.
-baseurl: ""
-url: ""
+baseurl: "/jave"
+url: "https://asciifaceman.github.io"
 theme: minima
 markdown: kramdown
 permalink: pretty

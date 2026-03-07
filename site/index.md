@@ -5,7 +5,7 @@ permalink: /
 ---
 
 <p align="center">
-  <img src="/static/logo-trnsprnt.png" alt="Orcal Jave logo" width="260" />
+  <img src="{{ '/static/logo-trnsprnt.png' | relative_url }}" alt="Orcal Jave logo" width="260" />
 </p>
 
 Welcome to the official Orcal public bulletin for the Jave language initiative.
@@ -20,10 +20,10 @@ This surface publishes governance updates, lore records, and implementation-alig
 
 ## Read Next
 
-- [Governance Updates](/governance/)
-- [Lore Feed and Narrative Records](/lore/)
-- [Language Tutorials, Spec, and Examples](/language/)
-- [v0.2 Program Roadmap](/roadmap/)
+- [Governance Updates]({{ '/governance/' | relative_url }})
+- [Lore Feed and Narrative Records]({{ '/lore/' | relative_url }})
+- [Language Tutorials, Spec, and Examples]({{ '/language/' | relative_url }})
+- [v0.2 Program Roadmap]({{ '/roadmap/' | relative_url }})
 
 ## Operational Notice
 
